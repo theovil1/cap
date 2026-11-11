@@ -1,0 +1,61 @@
+Service 00001800-0000-1000-8000-00805f9b34fb  Generic Access Profile
+    Char. 00002a00-0000-1000-8000-00805f9b34fb  handle 2  [read]  Device Name
+        value: 46 53 2d 38 32 37 34 41 44  "FS-8274AD"
+Service 0000180a-0000-1000-8000-00805f9b34fb  Device Information
+    Char. 00002a51-0000-1000-8000-00805f9b34fb  handle 5  [read]  Glucose Feature
+        value: 08 fd f8 ae 4e d0
+    Char. 00002a5d-0000-1000-8000-00805f9b34fb  handle 7  [read]  Sensor Location
+        value: 08 fd f8 ae 4e d0
+    Char. 00002a25-0000-1000-8000-00805f9b34fb  handle 9  [read]  Serial Number String
+        value: 46 53 32 35 30 37 33 31 30 30 31  "FS250731001"
+    Char. 00002a23-0000-1000-8000-00805f9b34fb  handle 11  [read]  System ID
+        value: 32 35 30 37 33 31  "250731"
+    Char. 00002a46-0000-1000-8000-00805f9b34fb  handle 13  [read]  New Alert
+        value: 46 53 2d 55 70 64 61 74 65 5f 31 2e 30  "FS-Update_1.0"
+    Char. 00002a29-0000-1000-8000-00805f9b34fb  handle 15  [read]  Manufacturer Name String
+        value: 46 49 54 53 48 4f 57  "FITSHOW"
+    Char. 00002a24-0000-1000-8000-00805f9b34fb  handle 17  [read]  Model Number String
+        value: 46 53 2d 42 54 2d 54 34  "FS-BT-T4"
+    Char. 00002a26-0000-1000-8000-00805f9b34fb  handle 19  [read]  Firmware Revision String
+        value: 56 32 2e 36 2e 33  "V2.6.3"
+    Char. 00002a27-0000-1000-8000-00805f9b34fb  handle 21  [read]  Hardware Revision String
+        value: 31 2e 30  "1.0"
+    Char. 00002a28-0000-1000-8000-00805f9b34fb  handle 23  [read]  Software Revision String
+        value: 31 2e 34 2e 32  "1.4.2"
+Service 0000ffe0-0000-1000-8000-00805f9b34fb  Vendor specific
+    Char. 0000ffe4-0000-1000-8000-00805f9b34fb  handle 26  [notify]  Vendor specific
+        Descr. 00002902-0000-1000-8000-00805f9b34fb  handle 28  Client Characteristic Configuration
+    Char. 0000ffe1-0000-1000-8000-00805f9b34fb  handle 29  [write-without-response]  Vendor specific
+Service 0000fff0-0000-1000-8000-00805f9b34fb  Vendor specific
+    Char. 0000fff1-0000-1000-8000-00805f9b34fb  handle 32  [notify]  Vendor specific
+        Descr. 00002902-0000-1000-8000-00805f9b34fb  handle 34  Client Characteristic Configuration
+    Char. 0000fff2-0000-1000-8000-00805f9b34fb  handle 35  [write-without-response]  Vendor specific
+Service 0000180d-0000-1000-8000-00805f9b34fb  Heart Rate
+    Char. 00002a37-0000-1000-8000-00805f9b34fb  handle 38  [notify]  Heart Rate Measurement
+        Descr. 00002902-0000-1000-8000-00805f9b34fb  handle 40  Client Characteristic Configuration
+    Char. 0000b001-0000-1000-8000-00805f9b34fb  handle 41  [notify]  Vendor specific
+        Descr. 00002902-0000-1000-8000-00805f9b34fb  handle 43  Client Characteristic Configuration
+    Char. 0000b002-0000-1000-8000-00805f9b34fb  handle 44  [notify]  Vendor specific
+        Descr. 00002902-0000-1000-8000-00805f9b34fb  handle 46  Client Characteristic Configuration
+Service 00001826-0000-1000-8000-00805f9b34fb  Fitness Machine (FTMS)
+    Char. 00002acc-0000-1000-8000-00805f9b34fb  handle 48  [read]  Fitness Machine Feature
+        value: dc 56 00 00 0f 00 00 00  {'features': ['total distance', 'inclination', 'elevation gain', 'step count', 'resistance level', 'expended energy', 'heart rate', 'elapsed time', 'power'], 'machine_hex': '0x000056dc', 'targets_hex': '0x0000000f'}
+    Char. 00002acd-0000-1000-8000-00805f9b34fb  handle 50  [notify]  Treadmill Data
+        Descr. 00002902-0000-1000-8000-00805f9b34fb  handle 52  Client Characteristic Configuration
+    Char. 00002ad3-0000-1000-8000-00805f9b34fb  handle 53  [notify,read]  Training Status
+        Descr. 00002902-0000-1000-8000-00805f9b34fb  handle 55  Client Characteristic Configuration
+        value: 01 01
+    Char. 00002ada-0000-1000-8000-00805f9b34fb  handle 56  [notify]  Fitness Machine Status
+        Descr. 00002902-0000-1000-8000-00805f9b34fb  handle 58  Client Characteristic Configuration
+    Char. 00002ad9-0000-1000-8000-00805f9b34fb  handle 59  [indicate,write]  Fitness Machine Control Point
+        Descr. 00002902-0000-1000-8000-00805f9b34fb  handle 61  Client Characteristic Configuration
+    Char. 00002ad4-0000-1000-8000-00805f9b34fb  handle 62  [read]  Supported Speed Range
+        value: 50 00 b0 04 0a 00  {'min_kmh': 0.8, 'max_kmh': 12.0, 'step_kmh': 0.1}
+    Char. 00002ad5-0000-1000-8000-00805f9b34fb  handle 64  [read]  Supported Inclination Range
+        value: 00 00 96 00 0a 00  {'min_pct': 0.0, 'max_pct': 15.0, 'step_pct': 1.0}
+    Char. 00002ad6-0000-1000-8000-00805f9b34fb  handle 66  [read]  Supported Resistance Level Range
+        value: 00 00 ff 00 01 00
+    Char. 00002ad8-0000-1000-8000-00805f9b34fb  handle 68  [read]  Supported Power Range
+        value: 0a 00 0f 27 0a 00
+    Char. 00002ad7-0000-1000-8000-00805f9b34fb  handle 70  [read]  Supported Heart Rate Range
+        value: 00 00 fa 00 01 00
