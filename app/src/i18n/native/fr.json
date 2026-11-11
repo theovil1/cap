@@ -1,0 +1,4 @@
+{
+  "CFBundleDisplayName": "Cap",
+  "NSBluetoothAlwaysUsageDescription": "Cap utilise le Bluetooth pour lire la vitesse et la distance de ton tapis."
+}

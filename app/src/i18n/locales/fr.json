@@ -1,0 +1,30 @@
+{
+  "treadmill": {
+    "status": {
+      "starting": "Démarrage du Bluetooth…",
+      "bluetoothOff": "Bluetooth désactivé",
+      "unauthorized": "Autorise le Bluetooth dans Réglages",
+      "unsupported": "Bluetooth indisponible sur cet appareil",
+      "scanning": "Recherche du tapis…",
+      "connecting": "Connexion à {{name}}…",
+      "connected": "{{name}} · en direct",
+      "reconnecting": "Connexion perdue, reconnexion…"
+    },
+    "unknownName": "Tapis"
+  },
+  "session": {
+    "today": "Aujourd'hui",
+    "speed": "Vitesse",
+    "incline": "Pente",
+    "duration": "Durée",
+    "counter": "Compteur du tapis",
+    "waiting": "Lance le tapis depuis sa console pour démarrer",
+    "newSession": "Nouvelle séance"
+  },
+  "units": {
+    "km": "km",
+    "kmh": "km/h",
+    "m": "m",
+    "percent": "%"
+  }
+}

@@ -40,7 +40,7 @@ Read them before starting a step. `docs/` is git-ignored except `docs/github/`.
 ## Layout
 
 ```
-app/          Expo app (to come)
+app/          Expo app (SDK 58), see app/README.md
 api/          Rust API (to come)
 infra/        Docker Compose, GraphHopper, Photon (to come)
 tools/        ble-probe: Python BLE probe (bleak)

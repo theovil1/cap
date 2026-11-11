@@ -31,6 +31,7 @@
 
 | Path | Content |
 | --- | --- |
+| [`app`](app) | Expo app (iPhone and iPad) |
 | [`tools/ble-probe`](tools/ble-probe) | Python tools to reverse-engineer a treadmill over Bluetooth, and the Zipro Luma protocol |
 
 ## Roadmap

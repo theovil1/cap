@@ -1,0 +1,6 @@
+node_modules
+.expo
+ios
+android
+package-lock.json
+src/treadmill/__tests__/fixtures

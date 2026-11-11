@@ -1,0 +1,69 @@
+{
+  "expo": {
+    "name": "Cap",
+    "slug": "cap",
+    "version": "0.1.0",
+    "orientation": "default",
+    "icon": "./assets/images/icon.png",
+    "scheme": "cap",
+    "userInterfaceStyle": "automatic",
+    "ios": {
+      "bundleIdentifier": "io.github.theovil1.cap",
+      "supportsTablet": true,
+      "icon": "./assets/expo.icon",
+      "infoPlist": {
+        "UISupportedInterfaceOrientations": ["UIInterfaceOrientationPortrait"],
+        "UISupportedInterfaceOrientations~ipad": [
+          "UIInterfaceOrientationLandscapeLeft",
+          "UIInterfaceOrientationLandscapeRight",
+          "UIInterfaceOrientationPortrait",
+          "UIInterfaceOrientationPortraitUpsideDown"
+        ],
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    },
+    "android": {
+      "package": "io.github.theovil1.cap",
+      "adaptiveIcon": {
+        "backgroundColor": "#FF5A1F",
+        "foregroundImage": "./assets/images/android-icon-foreground.png",
+        "backgroundImage": "./assets/images/android-icon-background.png",
+        "monochromeImage": "./assets/images/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false
+    },
+    "locales": {
+      "en": "./src/i18n/native/en.json",
+      "fr": "./src/i18n/native/fr.json"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#F4F2EE",
+          "image": "./assets/images/splash-icon.png",
+          "imageWidth": 76,
+          "dark": { "backgroundColor": "#0B0C0F" }
+        }
+      ],
+      [
+        "react-native-ble-plx",
+        {
+          "isBackgroundEnabled": true,
+          "modes": ["central"],
+          "bluetoothAlwaysPermission": "Cap uses Bluetooth to read speed and distance from your treadmill."
+        }
+      ],
+      [
+        "expo-localization",
+        { "supportedLocales": { "ios": ["en", "fr"], "android": ["en", "fr"] } }
+      ],
+      "expo-font"
+    ],
+    "experiments": {
+      "typedRoutes": true,
+      "reactCompiler": true
+    }
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "treadmill": {
+    "status": {
+      "starting": "Starting Bluetooth…",
+      "bluetoothOff": "Bluetooth is off",
+      "unauthorized": "Allow Bluetooth in Settings",
+      "unsupported": "Bluetooth is not available on this device",
+      "scanning": "Looking for your treadmill…",
+      "connecting": "Connecting to {{name}}…",
+      "connected": "{{name}} · live",
+      "reconnecting": "Connection lost, reconnecting…"
+    },
+    "unknownName": "Treadmill"
+  },
+  "session": {
+    "today": "Today",
+    "speed": "Speed",
+    "incline": "Incline",
+    "duration": "Duration",
+    "counter": "Treadmill counter",
+    "waiting": "Start the treadmill from its console to begin",
+    "newSession": "New session"
+  },
+  "units": {
+    "km": "km",
+    "kmh": "km/h",
+    "m": "m",
+    "percent": "%"
+  }
+}
