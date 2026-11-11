@@ -51,5 +51,6 @@ docs/github/  README banners and social preview
 
 - Step 0 (treadmill decoding) done: the Luma speaks standard FTMS.
 - iPhone proof done (11 Nov 2026): live speed, incline and distance on a development build, matching the console (410 m credited for a 400 m counter, same speed, incline and duration).
-- Next: step "Foundation" (Rust API, PostgreSQL, GraphHopper and Photon in Docker Compose).
+- Foundation done (11 Nov 2026): API online at https://cap.theovilain.fr (docs at /docs), with GraphHopper (foot_safe) and Photon (France). Deployed on the home server in ~/cap/infra (nginx + certbot, 7 GB RAM: GraphHopper in MMAP mode).
+- Next: step "Solo loop" (routes with stages, live 3D map, steps and daily goal, summary, local save and sync).
 - Still to verify: whether the treadmill counters reset between two sessions.

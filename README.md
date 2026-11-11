@@ -7,7 +7,7 @@
 
 **Walk real-world routes on your treadmill.** Pick a real start and destination (say, Romorantin to Paris) and every kilometre walked on your Bluetooth treadmill moves your pawn along the actual walking route, at a 1:1 scale. The trip takes weeks, session after session. Race your friends on the same route in real time.
 
-> Cap is in early development. The treadmill connection works on iPhone; routes, map and races are not built yet.
+> Cap is in early development. The treadmill connection works on iPhone and the API is online; the app does not use it yet, and the map and races are not built yet.
 
 ## Features (planned for the first version)
 
@@ -40,7 +40,7 @@
 
 - [x] Step 0: decode the treadmill from a PC
 - [x] iPhone proof: live speed and distance in a minimal Expo app
-- [ ] Foundation: Rust API, PostgreSQL, GraphHopper and Photon in Docker Compose
+- [x] Foundation: Rust API, PostgreSQL, GraphHopper and Photon in Docker Compose
 - [ ] Solo loop: routes, live 3D map, session summary, offline sync
 - [ ] Multiplayer: friends, live races, leaderboards
 - [ ] Profile, finishing touches, treadmill wizard, TestFlight
