@@ -12,6 +12,8 @@ npx eas-cli@latest build --platform ios --profile development   # once, then ins
 npx expo start                                                  # dev server, the build connects to it
 ```
 
+Run the build from a terminal, not with `--non-interactive`, whenever a native capability changes (such as Sign in with Apple): EAS then signs in to the Apple account to update the provisioning profile. The archive leaves out the server folders (`.easignore` at the repository root).
+
 ## Configuration
 
 The app talks to `https://cap.theovilain.fr` by default. Set `EXPO_PUBLIC_API_URL` to use another API (for example a local one).
