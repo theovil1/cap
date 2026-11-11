@@ -41,8 +41,8 @@ Read them before starting a step. `docs/` is git-ignored except `docs/github/`.
 
 ```
 app/          Expo app (SDK 58), see app/README.md
-api/          Rust API (to come)
-infra/        Docker Compose, GraphHopper, Photon (to come)
+api/          Rust API (Axum, SQLx), see api/README.md
+infra/        Docker Compose, GraphHopper, Photon, see infra/README.md
 tools/        ble-probe: Python BLE probe (bleak)
 docs/github/  README banners and social preview
 ```
