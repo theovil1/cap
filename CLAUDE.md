@@ -50,4 +50,6 @@ docs/github/  README banners and social preview
 ## Status
 
 - Step 0 (treadmill decoding) done: the Luma speaks standard FTMS.
-- Next: step "iPhone proof", a minimal Expo app showing live speed and distance.
+- iPhone proof done (11 Nov 2026): live speed, incline and distance on a development build, matching the console (410 m credited for a 400 m counter, same speed, incline and duration).
+- Next: step "Foundation" (Rust API, PostgreSQL, GraphHopper and Photon in Docker Compose).
+- Still to verify: whether the treadmill counters reset between two sessions.
