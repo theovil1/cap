@@ -72,8 +72,10 @@ services:
     entrypoint: ["bash", "/app/import.sh"]
     environment:
       JAVA_OPTS: -Xmx${PHOTON_HEAP:-2g}
+      PHOTON_THREADS: ${PHOTON_THREADS:-4}
     volumes:
       - ./data/photon:/data
+      - ./data/photon-dump:/dump:ro
 
 volumes:
   db-data:

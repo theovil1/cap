@@ -16,17 +16,18 @@ Needs about 12 GB of RAM during the GraphHopper import and about 40 GB of disk.
 ```bash
 cp .env.example .env                       # set the passwords and JWT_SECRET
 sh scripts/download-osm.sh                 # France extract, about 4.5 GB
-docker compose run --rm photon-import      # streams the worldwide dump, keeps France (about 30 min)
+sh scripts/download-photon-dump.sh         # worldwide geocoding dump, 27 GB, parallel download (about 25 min)
+docker compose run --rm photon-import      # keeps France: about 20 million places (about 50 min)
 docker compose --profile full up -d --build
 ```
 
 GraphHopper imports the extract on its first start (about 40 minutes for two profiles, 8 GB heap), then loads the prepared graph in seconds. To update the map data, download a new extract, delete `data/graphhopper/graph-cache` and restart.
 
-The Photon dump is sorted by country: `photon/import.sh` keeps the French lines with a fast filter and stops the download once France has gone by, so Photon only parses a small part of the 27 GB dump.
+The download server limits each connection to a few MB/s, hence the parallel download. The dump is sorted by country: `photon/import.sh` keeps the French lines with a fast filter, stops reading once France has gone by and imports with several threads (`PHOTON_THREADS`). Without a local copy it streams the dump instead, much more slowly. Delete `data/photon-dump` after the import.
 
 ### Servers with little memory
 
-Import on a bigger machine, copy `data/graphhopper/graph-cache` and `data/photon` to the server, then set `GRAPHHOPPER_STORAGE=MMAP` and `GRAPHHOPPER_HEAP=1500m`: the graph is then read from disk and GraphHopper uses about 200 MB of RAM.
+Import on a bigger machine, copy `data/graphhopper/graph-cache` and `data/photon` to the server, then set `GRAPHHOPPER_STORAGE=MMAP` and `GRAPHHOPPER_HEAP=1500m`: the graph is then read from disk and GraphHopper uses about 200 MB of RAM. The Photon import itself fits in a 3 GB container (`--memory 3g`, `PHOTON_HEAP=2g`); Photon then serves France with about 500 MB.
 
 ## Day to day
 
