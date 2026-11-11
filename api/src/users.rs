@@ -192,6 +192,14 @@ async fn delete_me(State(state): State<AppState>, AuthUser(user_id): AuthUser) -
     sqlx::query!("DELETE FROM journeys WHERE created_by = $1 AND kind = 'solo'", user_id)
         .execute(&mut *tx)
         .await?;
+    // Routes hold the addresses the user typed: drop those no other journey uses.
+    sqlx::query!(
+        "DELETE FROM routes r WHERE r.created_by = $1
+         AND NOT EXISTS (SELECT 1 FROM journeys j WHERE j.route_id = r.id)",
+        user_id
+    )
+    .execute(&mut *tx)
+    .await?;
     sqlx::query!("DELETE FROM users WHERE id = $1", user_id).execute(&mut *tx).await?;
     tx.commit().await?;
     Ok(StatusCode::NO_CONTENT)

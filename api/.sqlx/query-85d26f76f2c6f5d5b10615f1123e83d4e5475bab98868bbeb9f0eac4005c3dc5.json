@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM routes r WHERE r.created_by = $1\n         AND NOT EXISTS (SELECT 1 FROM journeys j WHERE j.route_id = r.id)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "85d26f76f2c6f5d5b10615f1123e83d4e5475bab98868bbeb9f0eac4005c3dc5"
+}

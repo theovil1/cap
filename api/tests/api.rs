@@ -335,4 +335,6 @@ async fn delete_account(db: PgPool) {
     server.get("/me").add_header("authorization", bearer(&auth)).await.assert_status_unauthorized();
     let left: i64 = sqlx::query_scalar("SELECT count(*) FROM journeys").fetch_one(&db).await.unwrap();
     assert_eq!(left, 0);
+    let routes: i64 = sqlx::query_scalar("SELECT count(*) FROM routes").fetch_one(&db).await.unwrap();
+    assert_eq!(routes, 0, "routes keep the addresses typed by the user");
 }
