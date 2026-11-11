@@ -24,6 +24,7 @@ services:
 
   api:
     build: ../api
+    image: cap-api
     restart: unless-stopped
     depends_on:
       db:
@@ -42,6 +43,7 @@ services:
 
   graphhopper:
     build: ./graphhopper
+    image: cap-graphhopper
     profiles: [full]
     restart: unless-stopped
     environment:
@@ -53,6 +55,7 @@ services:
 
   photon:
     build: ./photon
+    image: cap-photon
     profiles: [full]
     restart: unless-stopped
     environment:
@@ -64,6 +67,7 @@ services:
 
   photon-import:
     build: ./photon
+    image: cap-photon
     profiles: [import]
     entrypoint: ["bash", "/app/import.sh"]
     environment:

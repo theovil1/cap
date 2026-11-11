@@ -1,0 +1,13 @@
+// Fastest walking profile: GraphHopper's foot.json, with motorways and expressways excluded
+// and no penalty on busy roads.
+{
+  "priority": [
+    { "if": "!foot_access || hike_rating >= 2", "multiply_by": "0" },
+    { "else": "", "multiply_by": "foot_priority" },
+    { "if": "road_class == MOTORWAY || road_class == TRUNK", "multiply_by": "0" },
+    { "if": "foot_road_access == PRIVATE", "multiply_by": "0.1" }
+  ],
+  "speed": [
+    { "if": "true", "limit_to": "foot_average_speed" }
+  ]
+}

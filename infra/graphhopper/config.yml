@@ -9,10 +9,13 @@ graphhopper:
   profiles:
     - name: foot_safe
       custom_model_files: [foot_safe.json]
+    - name: foot_fast
+      custom_model_files: [foot_fast.json]
 
   # Contraction hierarchies: fast queries even for routes of several hundred km.
   profiles_ch:
     - profile: foot_safe
+    - profile: foot_fast
 
   routing.non_ch.max_waypoint_distance: 1000000
   graph.dataaccess.default_type: RAM_STORE
