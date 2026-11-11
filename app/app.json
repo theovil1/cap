@@ -19,7 +19,8 @@
           "UIInterfaceOrientationPortrait",
           "UIInterfaceOrientationPortraitUpsideDown"
         ],
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "CFBundleLocalizations": ["en", "fr"]
       }
     },
     "android": {
@@ -30,7 +31,12 @@
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "permissions": [
+        "android.permission.BLUETOOTH",
+        "android.permission.BLUETOOTH_ADMIN",
+        "android.permission.BLUETOOTH_CONNECT"
+      ]
     },
     "locales": {
       "en": "./src/i18n/native/en.json",
@@ -44,7 +50,9 @@
           "backgroundColor": "#F4F2EE",
           "image": "./assets/images/splash-icon.png",
           "imageWidth": 76,
-          "dark": { "backgroundColor": "#0B0C0F" }
+          "dark": {
+            "backgroundColor": "#0B0C0F"
+          }
         }
       ],
       [
@@ -57,13 +65,29 @@
       ],
       [
         "expo-localization",
-        { "supportedLocales": { "ios": ["en", "fr"], "android": ["en", "fr"] } }
+        {
+          "supportedLocales": {
+            "ios": ["en", "fr"],
+            "android": ["en", "fr"]
+          }
+        }
       ],
       "expo-font"
     ],
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    }
+    },
+    "extra": {
+      "router": {
+        "asyncRoutes": {
+          "web": true
+        }
+      },
+      "eas": {
+        "projectId": "69f7191e-4693-4cbb-a8c7-ca5e72f1a46e"
+      }
+    },
+    "owner": "ruchoirdev"
   }
 }
