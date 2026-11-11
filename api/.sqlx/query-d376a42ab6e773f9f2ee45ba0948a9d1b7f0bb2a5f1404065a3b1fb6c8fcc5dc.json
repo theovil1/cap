@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO session_allocations (session_id, journey_id, distance_m) VALUES ($1, $2, $3)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Float8"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "d376a42ab6e773f9f2ee45ba0948a9d1b7f0bb2a5f1404065a3b1fb6c8fcc5dc"
+}

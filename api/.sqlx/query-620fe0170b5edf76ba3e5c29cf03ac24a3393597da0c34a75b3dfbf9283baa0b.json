@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE journeys SET status = 'finished' WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "620fe0170b5edf76ba3e5c29cf03ac24a3393597da0c34a75b3dfbf9283baa0b"
+}

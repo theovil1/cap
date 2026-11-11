@@ -1,0 +1,184 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT j.id, j.kind, j.status, j.created_at, r.id AS route_id,\n                r.start_label, r.start_lat, r.start_lon, r.end_label, r.end_lat, r.end_lon,\n                r.distance_m AS route_distance_m, p.distance_m, p.arrived_at\n         FROM journey_participants p\n         JOIN journeys j ON j.id = p.journey_id\n         JOIN routes r ON r.id = j.route_id\n         WHERE p.user_id = $1\n         ORDER BY j.created_at DESC",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "journeys",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "kind",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "journeys",
+            "name": "kind"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "status",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "journeys",
+            "name": "status"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "created_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "journeys",
+            "name": "created_at"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "route_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "routes",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "start_label",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "routes",
+            "name": "start_label"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "start_lat",
+        "type_info": "Float8",
+        "origin": {
+          "Table": {
+            "table": "routes",
+            "name": "start_lat"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "start_lon",
+        "type_info": "Float8",
+        "origin": {
+          "Table": {
+            "table": "routes",
+            "name": "start_lon"
+          }
+        }
+      },
+      {
+        "ordinal": 8,
+        "name": "end_label",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "routes",
+            "name": "end_label"
+          }
+        }
+      },
+      {
+        "ordinal": 9,
+        "name": "end_lat",
+        "type_info": "Float8",
+        "origin": {
+          "Table": {
+            "table": "routes",
+            "name": "end_lat"
+          }
+        }
+      },
+      {
+        "ordinal": 10,
+        "name": "end_lon",
+        "type_info": "Float8",
+        "origin": {
+          "Table": {
+            "table": "routes",
+            "name": "end_lon"
+          }
+        }
+      },
+      {
+        "ordinal": 11,
+        "name": "route_distance_m",
+        "type_info": "Float8",
+        "origin": {
+          "Table": {
+            "table": "routes",
+            "name": "distance_m"
+          }
+        }
+      },
+      {
+        "ordinal": 12,
+        "name": "distance_m",
+        "type_info": "Float8",
+        "origin": {
+          "Table": {
+            "table": "journey_participants",
+            "name": "distance_m"
+          }
+        }
+      },
+      {
+        "ordinal": 13,
+        "name": "arrived_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "journey_participants",
+            "name": "arrived_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true
+    ]
+  },
+  "hash": "2af76522a45f2746b3aad6821c57d3aea51f7e3fdd1d8e97aab42fe6712d97e5"
+}

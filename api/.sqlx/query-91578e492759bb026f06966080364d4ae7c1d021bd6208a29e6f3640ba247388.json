@@ -1,0 +1,66 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT j.id, j.kind, p.distance_m, r.distance_m AS route_distance_m\n         FROM journey_participants p\n         JOIN journeys j ON j.id = p.journey_id\n         JOIN routes r ON r.id = j.route_id\n         WHERE p.user_id = $1 AND j.status = 'active' AND p.arrived_at IS NULL\n           AND ($2::uuid[] IS NULL OR j.id = ANY($2))\n           AND ($3 = 'treadmill' OR j.kind = 'solo')\n         ORDER BY j.created_at\n         FOR UPDATE OF p",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "journeys",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "kind",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "journeys",
+            "name": "kind"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "distance_m",
+        "type_info": "Float8",
+        "origin": {
+          "Table": {
+            "table": "journey_participants",
+            "name": "distance_m"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "route_distance_m",
+        "type_info": "Float8",
+        "origin": {
+          "Table": {
+            "table": "routes",
+            "name": "distance_m"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "UuidArray",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "91578e492759bb026f06966080364d4ae7c1d021bd6208a29e6f3640ba247388"
+}
