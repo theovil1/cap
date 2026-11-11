@@ -20,7 +20,7 @@ pub const WALK_PROFILE: &str = "foot_safe";
 const EARTH_RADIUS_M: f64 = 6_371_008.8;
 
 pub fn router() -> OpenApiRouter<AppState> {
-    OpenApiRouter::new().routes(routes!(geocode))
+    OpenApiRouter::new().routes(routes!(geocode)).routes(routes!(reverse))
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, ToSchema)]
@@ -88,6 +88,54 @@ async fn geocode(
         .await
         .map_err(|e| AppError::upstream(format!("invalid geocoder response: {e}")))?;
     Ok(Json(response.features.into_iter().map(PhotonFeature::into_result).collect()))
+}
+
+#[derive(Deserialize, IntoParams)]
+pub struct ReverseQuery {
+    lat: f64,
+    lon: f64,
+    #[param(example = "fr")]
+    lang: Option<String>,
+}
+
+/// The nearest address to a point picked on the map.
+#[utoipa::path(get, path = "/reverse", tag = "geo", params(ReverseQuery), security(("bearer" = [])),
+    responses((status = 200, body = GeocodeResult), (status = 404, body = ErrorBody), (status = 502, body = ErrorBody)))]
+async fn reverse(
+    State(state): State<AppState>,
+    _user: AuthUser,
+    Query(query): Query<ReverseQuery>,
+) -> AppResult<Json<GeocodeResult>> {
+    if !(-90.0..=90.0).contains(&query.lat) || !(-180.0..=180.0).contains(&query.lon) {
+        return Err(AppError::bad_request("invalid_place", "invalid coordinates"));
+    }
+    let response: PhotonResponse = state
+        .http
+        .get(format!("{}/reverse", state.config.photon_url))
+        .query(&[
+            ("lat", query.lat.to_string()),
+            ("lon", query.lon.to_string()),
+            ("radius", "1".to_owned()),
+            ("limit", "1".to_owned()),
+            ("lang", query.lang.unwrap_or_else(|| "fr".to_owned())),
+        ])
+        .send()
+        .await
+        .and_then(reqwest::Response::error_for_status)
+        .map_err(|e| AppError::upstream(format!("geocoder unavailable: {e}")))?
+        .json()
+        .await
+        .map_err(|e| AppError::upstream(format!("invalid geocoder response: {e}")))?;
+    let mut result = response
+        .features
+        .into_iter()
+        .next()
+        .map(PhotonFeature::into_result)
+        .ok_or_else(|| AppError::not_found("nothing here"))?;
+    // Keep the point the walker chose, not the address centre.
+    result.place.lat = query.lat;
+    result.place.lon = query.lon;
+    Ok(Json(result))
 }
 
 #[derive(Deserialize)]

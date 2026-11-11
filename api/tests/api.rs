@@ -220,6 +220,16 @@ async fn geocode_maps_photon_results(db: PgPool) {
     assert_eq!(results[0]["name"], "Paris");
     assert_eq!(results[0]["place"]["label"], "Paris, 75001");
     assert_eq!(results[0]["place"]["lat"], 48.8566);
+
+    let picked: Value = server
+        .get("/reverse")
+        .add_query_param("lat", 47.0001)
+        .add_query_param("lon", 1.0)
+        .add_header("authorization", bearer(&auth))
+        .await
+        .json();
+    assert_eq!(picked["name"], "Romorantin");
+    assert_eq!(picked["place"]["lat"], 47.0001);
 }
 
 async fn create_route(server: &TestServer, auth: &Value) -> Value {
@@ -260,10 +270,13 @@ async fn journeys(db: PgPool) {
     assert_eq!(stages[0]["name"], "Romorantin");
     assert_eq!(stages[1]["name"], "Paris");
     assert_eq!(stages[1]["county"], "Paris");
+    assert_eq!(journey["start_town"], "Romorantin");
+    assert_eq!(journey["end_town"], "Paris");
     assert!(stages[1]["unlocked_at"].is_null());
 
     let list: Value = server.get("/journeys").add_header("authorization", bearer(&auth)).await.json();
     assert_eq!(list.as_array().unwrap().len(), 1);
+    assert_eq!(list[0]["start_town"], "Romorantin");
 
     let other = register(&server, "lilou").await;
     // A route can only be started by the walker who computed it.

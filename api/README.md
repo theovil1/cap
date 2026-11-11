@@ -11,10 +11,11 @@ Interactive documentation is served at `/docs` (OpenAPI at `/openapi.json`).
 | `POST /auth/register`, `/auth/login`, `/auth/apple` | Sign up or sign in, returns an access token (15 min) and a refresh token (60 days) |
 | `POST /auth/refresh`, `/auth/logout` | Rotate or revoke a refresh token (reuse of a revoked token logs the user out everywhere) |
 | `GET`, `PATCH`, `DELETE /me` | Profile, account deletion |
-| `GET /geocode` | Address autocomplete (Photon) |
-| `POST /journeys` | Compute a safe walking route (GraphHopper) and start a solo journey |
-| `GET /journeys`, `/journeys/{id}` | Journeys with progress, route geometry |
-| `POST /sessions` | Upload a session, idempotent on `local_id`, rejected above 20 km/h |
+| `GET /geocode`, `/reverse` | Address autocomplete, nearest address to a point (Photon) |
+| `POST /routes` | Compute a safe walking route (GraphHopper) and its stages, for a preview |
+| `POST /journeys` | Start a solo journey on a computed route |
+| `GET /journeys`, `/journeys/{id}` | Journeys with progress, route geometry and stages |
+| `POST /sessions` | Upload a session, idempotent on `local_id`, rejected above 20 km/h; returns the stages it unlocked |
 | `GET /sessions` | Session history |
 | `GET /health` | Liveness and database check |
 

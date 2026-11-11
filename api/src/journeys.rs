@@ -62,6 +62,9 @@ pub struct JourneySummary {
     start: Place,
     end: Place,
     route_distance_m: f64,
+    /// Town of the start and of the destination, e.g. `Romorantin-Lanthenay`.
+    start_town: Option<String>,
+    end_town: Option<String>,
     /// Distance walked by the current user on this journey.
     distance_m: f64,
     #[serde(with = "time::serde::rfc3339::option")]
@@ -197,7 +200,9 @@ async fn list_journeys(
     let rows = sqlx::query!(
         "SELECT j.id, j.kind, j.status, j.created_at, r.id AS route_id,
                 r.start_label, r.start_lat, r.start_lon, r.end_label, r.end_lat, r.end_lon,
-                r.distance_m AS route_distance_m, p.distance_m, p.arrived_at
+                r.distance_m AS route_distance_m, p.distance_m, p.arrived_at,
+                (SELECT name FROM route_stages WHERE route_id = r.id ORDER BY position LIMIT 1) AS start_town,
+                (SELECT name FROM route_stages WHERE route_id = r.id ORDER BY position DESC LIMIT 1) AS end_town
          FROM journey_participants p
          JOIN journeys j ON j.id = p.journey_id
          JOIN routes r ON r.id = j.route_id
@@ -217,6 +222,8 @@ async fn list_journeys(
                 start: Place { label: r.start_label, lat: r.start_lat, lon: r.start_lon },
                 end: Place { label: r.end_label, lat: r.end_lat, lon: r.end_lon },
                 route_distance_m: r.route_distance_m,
+                start_town: r.start_town.filter(|t| !t.is_empty()),
+                end_town: r.end_town.filter(|t| !t.is_empty()),
                 distance_m: r.distance_m,
                 arrived_at: r.arrived_at,
                 created_at: r.created_at,
@@ -241,7 +248,9 @@ async fn fetch_detail(db: &PgPool, user_id: Uuid, journey_id: Uuid) -> AppResult
     let r = sqlx::query!(
         "SELECT j.id, j.kind, j.status, j.created_at, r.id AS route_id,
                 r.start_label, r.start_lat, r.start_lon, r.end_label, r.end_lat, r.end_lon,
-                r.distance_m AS route_distance_m, r.path, p.distance_m, p.arrived_at
+                r.distance_m AS route_distance_m, r.path, p.distance_m, p.arrived_at,
+                (SELECT name FROM route_stages WHERE route_id = r.id ORDER BY position LIMIT 1) AS start_town,
+                (SELECT name FROM route_stages WHERE route_id = r.id ORDER BY position DESC LIMIT 1) AS end_town
          FROM journey_participants p
          JOIN journeys j ON j.id = p.journey_id
          JOIN routes r ON r.id = j.route_id
@@ -287,6 +296,8 @@ async fn fetch_detail(db: &PgPool, user_id: Uuid, journey_id: Uuid) -> AppResult
             start: Place { label: r.start_label, lat: r.start_lat, lon: r.start_lon },
             end: Place { label: r.end_label, lat: r.end_lat, lon: r.end_lon },
             route_distance_m: r.route_distance_m,
+            start_town: r.start_town.filter(|t| !t.is_empty()),
+            end_town: r.end_town.filter(|t| !t.is_empty()),
             distance_m: r.distance_m,
             arrived_at: r.arrived_at,
             created_at: r.created_at,
