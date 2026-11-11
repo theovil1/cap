@@ -14,6 +14,7 @@ use uuid::Uuid;
 use crate::{
     auth::AuthUser,
     error::{AppError, AppResult, ErrorBody},
+    stages::Stage,
     state::AppState,
 };
 
@@ -68,6 +69,8 @@ pub struct Allocation {
     total_m: f64,
     /// True when this session reached the destination.
     arrived: bool,
+    /// Stages passed during this session, in route order.
+    unlocked_stages: Vec<Stage>,
 }
 
 #[derive(Serialize, ToSchema)]
@@ -210,7 +213,27 @@ async fn upload_session(
                 .execute(&mut *tx)
                 .await?;
         }
-        allocations.push(Allocation { journey_id: target.id, distance_m: added, total_m, arrived });
+        sqlx::query!(
+            "INSERT INTO stage_unlocks (user_id, journey_id, stage_id, session_id)
+             SELECT $1, j.id, s.id, $3
+             FROM journeys j JOIN route_stages s ON s.route_id = j.route_id
+             WHERE j.id = $2 AND s.position > 0 AND s.at_m <= $4
+             ON CONFLICT DO NOTHING",
+            user_id,
+            target.id,
+            session_id,
+            total_m
+        )
+        .execute(&mut *tx)
+        .await?;
+        let unlocked_stages = unlocked_stages(&mut *tx, session_id, target.id).await?;
+        allocations.push(Allocation {
+            journey_id: target.id,
+            distance_m: added,
+            total_m,
+            arrived,
+            unlocked_stages,
+        });
     }
     tx.commit().await?;
 
@@ -225,7 +248,7 @@ async fn existing_result(state: &AppState, user_id: Uuid, local_id: Uuid) -> App
     )
     .fetch_one(&state.db)
     .await?;
-    let allocations = sqlx::query!(
+    let rows = sqlx::query!(
         "SELECT a.journey_id, a.distance_m, p.distance_m AS total_m,
                 (p.arrived_at IS NOT NULL) AS \"arrived!\"
          FROM session_allocations a
@@ -235,16 +258,36 @@ async fn existing_result(state: &AppState, user_id: Uuid, local_id: Uuid) -> App
         user_id
     )
     .fetch_all(&state.db)
-    .await?
-    .into_iter()
-    .map(|a| Allocation {
-        journey_id: a.journey_id,
-        distance_m: a.distance_m,
-        total_m: a.total_m,
-        arrived: a.arrived,
-    })
-    .collect();
+    .await?;
+    let mut allocations = Vec::new();
+    for a in rows {
+        allocations.push(Allocation {
+            journey_id: a.journey_id,
+            distance_m: a.distance_m,
+            total_m: a.total_m,
+            arrived: a.arrived,
+            unlocked_stages: unlocked_stages(&state.db, session_id, a.journey_id).await?,
+        });
+    }
     Ok(SessionResult { id: session_id, created: false, allocations })
+}
+
+async fn unlocked_stages(
+    db: impl sqlx::PgExecutor<'_>,
+    session_id: Uuid,
+    journey_id: Uuid,
+) -> AppResult<Vec<Stage>> {
+    Ok(sqlx::query_as!(
+        Stage,
+        "SELECT s.id, s.position, s.name, s.county, s.lat, s.lon, s.at_m
+         FROM stage_unlocks u JOIN route_stages s ON s.id = u.stage_id
+         WHERE u.session_id = $1 AND u.journey_id = $2
+         ORDER BY s.position",
+        session_id,
+        journey_id
+    )
+    .fetch_all(db)
+    .await?)
 }
 
 /// Sessions of the current user, most recent first.

@@ -3,7 +3,7 @@
 
 use std::net::SocketAddr;
 
-use axum::{Json, Router, http::StatusCode, routing::get, routing::post};
+use axum::{Json, Router, extract::Query, http::StatusCode, routing::get, routing::post};
 use axum_test::TestServer;
 use cap_api::{app, config::Config, state::AppState};
 use jsonwebtoken::{Algorithm, EncodingKey, Header};
@@ -41,6 +41,22 @@ async fn spawn_fakes() -> String {
                 Json(json!({ "features": [{
                     "geometry": { "type": "Point", "coordinates": [2.3522, 48.8566] },
                     "properties": { "name": "Paris", "postcode": "75001", "county": "Paris" }
+                }] }))
+            }),
+        )
+        .route(
+            "/reverse",
+            // Romorantin for the southern half of the fake route, Paris for the rest.
+            get(|Query(q): Query<std::collections::HashMap<String, String>>| async move {
+                let lat: f64 = q["lat"].parse().unwrap();
+                let (name, county, lat) = if lat < 47.001 {
+                    ("Romorantin", "Loir-et-Cher", 47.0)
+                } else {
+                    ("Paris", "Paris", 47.002)
+                };
+                Json(json!({ "features": [{
+                    "geometry": { "type": "Point", "coordinates": [1.0, lat] },
+                    "properties": { "name": name, "county": county, "osm_value": "town" }
                 }] }))
             }),
         )
@@ -206,14 +222,25 @@ async fn geocode_maps_photon_results(db: PgPool) {
     assert_eq!(results[0]["place"]["lat"], 48.8566);
 }
 
-async fn create_journey(server: &TestServer, auth: &Value) -> Value {
+async fn create_route(server: &TestServer, auth: &Value) -> Value {
     let response = server
-        .post("/journeys")
+        .post("/routes")
         .add_header("authorization", bearer(auth))
         .json(&json!({
             "start": { "label": "Romorantin", "lat": 47.0, "lon": 1.0 },
             "end": { "label": "Paris", "lat": 47.002, "lon": 1.0 },
         }))
+        .await;
+    response.assert_status(StatusCode::CREATED);
+    response.json()
+}
+
+async fn create_journey(server: &TestServer, auth: &Value) -> Value {
+    let route = create_route(server, auth).await;
+    let response = server
+        .post("/journeys")
+        .add_header("authorization", bearer(auth))
+        .json(&json!({ "route_id": route["id"] }))
         .await;
     response.assert_status(StatusCode::CREATED);
     response.json()
@@ -228,11 +255,24 @@ async fn journeys(db: PgPool) {
     assert!((route_distance - 222.4).abs() < 0.5, "{route_distance}");
     assert_eq!(journey["status"], "active");
     assert_eq!(journey["path"].as_array().unwrap().len(), 3);
+    let stages = journey["stages"].as_array().unwrap();
+    assert_eq!(stages.len(), 2);
+    assert_eq!(stages[0]["name"], "Romorantin");
+    assert_eq!(stages[1]["name"], "Paris");
+    assert_eq!(stages[1]["county"], "Paris");
+    assert!(stages[1]["unlocked_at"].is_null());
 
     let list: Value = server.get("/journeys").add_header("authorization", bearer(&auth)).await.json();
     assert_eq!(list.as_array().unwrap().len(), 1);
 
     let other = register(&server, "lilou").await;
+    // A route can only be started by the walker who computed it.
+    server
+        .post("/journeys")
+        .add_header("authorization", bearer(&other))
+        .json(&json!({ "route_id": journey["route_id"] }))
+        .await
+        .assert_status_not_found();
     server
         .get(&format!("/journeys/{}", journey["id"].as_str().unwrap()))
         .add_header("authorization", bearer(&other))
@@ -240,7 +280,7 @@ async fn journeys(db: PgPool) {
         .assert_status_not_found();
 
     let same_place = server
-        .post("/journeys")
+        .post("/routes")
         .add_header("authorization", bearer(&auth))
         .json(&json!({ "start": { "label": "A", "lat": 47.0, "lon": 1.0 },
             "end": { "label": "A", "lat": 47.0, "lon": 1.0 } }))
@@ -279,6 +319,7 @@ async fn sessions_are_idempotent_and_move_the_pawn(db: PgPool) {
     let first: Value = first.json();
     assert_eq!(first["allocations"][0]["journey_id"], journey["id"]);
     assert_eq!(first["allocations"][0]["total_m"], 100.0);
+    assert_eq!(first["allocations"][0]["unlocked_stages"].as_array().unwrap().len(), 0);
 
     // The app retries after a network failure: nothing is counted twice.
     let retry = server
@@ -309,10 +350,19 @@ async fn sessions_are_idempotent_and_move_the_pawn(db: PgPool) {
         .json();
     let allocation = &last["allocations"][0];
     assert_eq!(allocation["arrived"], true);
+    assert_eq!(allocation["unlocked_stages"][0]["name"], "Paris");
     assert!(
         (allocation["total_m"].as_f64().unwrap() - journey["route_distance_m"].as_f64().unwrap()).abs()
             < 1e-6
     );
+
+    let detail: Value = server
+        .get(&format!("/journeys/{}", journey["id"].as_str().unwrap()))
+        .add_header("authorization", bearer(&auth))
+        .await
+        .json();
+    assert!(detail["stages"][0]["unlocked_at"].is_null(), "the start is never unlocked");
+    assert!(detail["stages"][1]["unlocked_at"].is_string());
 
     let journeys: Value = server.get("/journeys").add_header("authorization", bearer(&auth)).await.json();
     assert_eq!(journeys[0]["status"], "finished");

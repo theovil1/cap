@@ -7,6 +7,7 @@ pub mod error;
 pub mod geo;
 pub mod journeys;
 pub mod sessions;
+pub mod stages;
 pub mod state;
 pub mod users;
 

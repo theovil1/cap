@@ -1,0 +1,114 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT s.id, s.position, s.name, s.county, s.lat, s.lon, s.at_m, u.unlocked_at AS \"unlocked_at?\"\n         FROM route_stages s\n         LEFT JOIN stage_unlocks u ON u.stage_id = s.id AND u.journey_id = $2 AND u.user_id = $3\n         WHERE s.route_id = $1\n         ORDER BY s.position",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "route_stages",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "position",
+        "type_info": "Int4",
+        "origin": {
+          "Table": {
+            "table": "route_stages",
+            "name": "position"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "name",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "route_stages",
+            "name": "name"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "county",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "route_stages",
+            "name": "county"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "lat",
+        "type_info": "Float8",
+        "origin": {
+          "Table": {
+            "table": "route_stages",
+            "name": "lat"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "lon",
+        "type_info": "Float8",
+        "origin": {
+          "Table": {
+            "table": "route_stages",
+            "name": "lon"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "at_m",
+        "type_info": "Float8",
+        "origin": {
+          "Table": {
+            "table": "route_stages",
+            "name": "at_m"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "unlocked_at?",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "stage_unlocks",
+            "name": "unlocked_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      true,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "3ccda675cfc741d04ea7d6e05e96fdda399532c7801d8247e9e5fe3915989321"
+}
