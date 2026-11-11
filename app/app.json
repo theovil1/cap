@@ -12,7 +12,9 @@
       "supportsTablet": true,
       "icon": "./assets/expo.icon",
       "infoPlist": {
-        "UISupportedInterfaceOrientations": ["UIInterfaceOrientationPortrait"],
+        "UISupportedInterfaceOrientations": [
+          "UIInterfaceOrientationPortrait"
+        ],
         "UISupportedInterfaceOrientations~ipad": [
           "UIInterfaceOrientationLandscapeLeft",
           "UIInterfaceOrientationLandscapeRight",
@@ -20,8 +22,12 @@
           "UIInterfaceOrientationPortraitUpsideDown"
         ],
         "ITSAppUsesNonExemptEncryption": false,
-        "CFBundleLocalizations": ["en", "fr"]
-      }
+        "CFBundleLocalizations": [
+          "en",
+          "fr"
+        ]
+      },
+      "usesAppleSignIn": true
     },
     "android": {
       "package": "io.github.theovil1.cap",
@@ -59,7 +65,9 @@
         "react-native-ble-plx",
         {
           "isBackgroundEnabled": true,
-          "modes": ["central"],
+          "modes": [
+            "central"
+          ],
           "bluetoothAlwaysPermission": "Cap uses Bluetooth to read speed and distance from your treadmill."
         }
       ],
@@ -67,12 +75,22 @@
         "expo-localization",
         {
           "supportedLocales": {
-            "ios": ["en", "fr"],
-            "android": ["en", "fr"]
+            "ios": [
+              "en",
+              "fr"
+            ],
+            "android": [
+              "en",
+              "fr"
+            ]
           }
         }
       ],
-      "expo-font"
+      "expo-font",
+      "expo-sqlite",
+      "expo-secure-store",
+      "expo-apple-authentication",
+      "@maplibre/maplibre-react-native"
     ],
     "experiments": {
       "typedRoutes": true,

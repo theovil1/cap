@@ -1,4 +1,98 @@
 {
+  "common": {
+    "back": "Retour",
+    "close": "Fermer"
+  },
+  "nav": {
+    "index": "Accueil",
+    "journeys": "Trajets",
+    "rankings": "Classements",
+    "profile": "Profil"
+  },
+  "welcome": {
+    "title": "Chaque pas sur le tapis te rapproche d'une vraie ville.",
+    "subtitle": "Choisis un départ et une arrivée en France, puis marche : ton pion avance sur l'itinéraire, kilomètre par kilomètre.",
+    "or": "ou avec ton e-mail",
+    "firstName": "Prénom",
+    "username": "Pseudo",
+    "email": "E-mail",
+    "password": "Mot de passe",
+    "passwordHint": "Au moins 10 caractères.",
+    "login": "Se connecter",
+    "register": "Créer mon compte",
+    "toRegister": "Pas encore de compte ? Créer un compte",
+    "toLogin": "Déjà un compte ? Se connecter"
+  },
+  "errors": {
+    "generic": "Quelque chose n'a pas marché. Réessaie.",
+    "network": "Pas de connexion au serveur. Réessaie dans un instant.",
+    "invalid_credentials": "E-mail ou mot de passe incorrect.",
+    "email_taken": "Un compte existe déjà avec cet e-mail.",
+    "username_taken": "Ce pseudo est déjà pris.",
+    "invalid_username": "Pseudo : 3 à 20 lettres minuscules, chiffres ou _.",
+    "invalid_first_name": "Indique ton prénom.",
+    "invalid_email": "Cet e-mail n'est pas valide.",
+    "weak_password": "Le mot de passe doit faire au moins 10 caractères.",
+    "invalid_apple_token": "La connexion avec Apple a échoué.",
+    "route_not_found": "Aucun itinéraire à pied sûr entre ces deux points.",
+    "route_too_short": "Le départ et l'arrivée sont au même endroit.",
+    "invalid_place": "Choisis un départ et une arrivée dans la liste."
+  },
+  "home": {
+    "hello": "Salut {{name}}",
+    "activeJourney": "Trajet actif",
+    "ofKm": "sur {{total}} km",
+    "stageIn": "étape dans {{km}} km",
+    "noJourney": "Pas encore de trajet",
+    "noJourneyHint": "Choisis une destination : chaque séance sur le tapis t'en rapprochera.",
+    "createJourney": "Créer un trajet",
+    "dailyGoal": "Objectif du jour",
+    "ofSteps": "sur {{goal}} pas",
+    "stillKm": "encore {{km}} km",
+    "goalReached": "objectif atteint",
+    "streak": "Série",
+    "days_one": "jour",
+    "days_other": "jours",
+    "record_one": "Record : {{count}} jour",
+    "record_other": "Record : {{count}} jours",
+    "treadmillConnected": "{{name}} connecté",
+    "treadmillHint": "Allume le tapis à côté du téléphone",
+    "sessionRunning": "Séance en cours, touche pour voir la carte"
+  },
+  "journeys": {
+    "title": "Trajets",
+    "new": "Nouveau trajet",
+    "active": "En cours",
+    "history": "Terminés",
+    "empty": "Ton premier trajet t'attend.",
+    "progress": "{{walked}} sur {{total}} km",
+    "arrivedOn": "{{km}} km, arrivé le {{date}}"
+  },
+  "newJourney": {
+    "title": "Nouveau trajet",
+    "start": "Départ",
+    "end": "Arrivée",
+    "startPlaceholder": "D'où pars-tu ?",
+    "endPlaceholder": "Où veux-tu aller ?",
+    "swap": "Inverser départ et arrivée",
+    "onMap": "Sur la carte",
+    "lastArrival": "Ma dernière arrivée",
+    "pickHere": "Choisir ce point",
+    "pickedPoint": "Point sur la carte",
+    "safeRoutes": "Itinéraires à pied sûrs, en France",
+    "showRoute": "Voir l'itinéraire",
+    "computing": "Calcul de l'itinéraire…"
+  },
+  "preview": {
+    "walkingRoute": "Itinéraire à pied",
+    "arrival": "Arrivée vers le {{date}}",
+    "sessions_one": "≈ {{count}} séance de {{km}} km",
+    "sessions_other": "≈ {{count}} séances de {{km}} km",
+    "safe": "Sans autoroute ni voie rapide. Surtout chemins et petites routes.",
+    "solo": "Solo",
+    "raceSoon": "Course (bientôt)",
+    "start": "Lancer le trajet"
+  },
   "treadmill": {
     "status": {
       "starting": "Démarrage du Bluetooth…",
@@ -15,11 +109,53 @@
   "session": {
     "today": "Aujourd'hui",
     "speed": "Vitesse",
+    "pace": "Allure",
     "incline": "Pente",
-    "duration": "Durée",
-    "counter": "Compteur du tapis",
-    "waiting": "Lance le tapis depuis sa console pour démarrer",
-    "newSession": "Nouvelle séance"
+    "steps": "Pas",
+    "goal": "Objectif",
+    "waiting": "Lance le tapis pour démarrer",
+    "noJourney": "Pas de trajet actif : la séance est quand même enregistrée.",
+    "stageIn": "{{name}} dans {{km}} km",
+    "fromStart": "depuis {{place}}",
+    "toEnd": "{{place}} dans {{km}} km",
+    "minimize": "Réduire la carte",
+    "finish": "Terminer la séance"
+  },
+  "summary": {
+    "done": "Séance terminée · {{minutes}} min",
+    "goalReached": "Objectif du jour atteint avec {{steps}} pas.",
+    "goalLeft": "Encore {{steps}} pas pour l'objectif du jour.",
+    "fun": {
+      "eiffel_one": "Tu as grimpé {{count}} fois la tour Eiffel… à plat.",
+      "eiffel_other": "Tu as grimpé {{count}} fois la tour Eiffel… à plat.",
+      "football_one": "Tu as traversé {{count}} terrain de foot.",
+      "football_other": "Tu as traversé {{count}} terrains de foot.",
+      "champs_one": "Tu as descendu {{count}} fois les Champs-Élysées.",
+      "champs_other": "Tu as descendu {{count}} fois les Champs-Élysées."
+    },
+    "stageUnlocked": "Étape {{n}} sur {{total}} débloquée",
+    "newCounty": "Tu entres dans un nouveau département : {{county}}.",
+    "stageKm": "{{km}} km depuis {{start}}.",
+    "nextStage": "Prochaine : {{name}}.",
+    "speedDuring": "Vitesse pendant la séance",
+    "average": "moy. {{speed}} km/h",
+    "pendingSync": "Enregistrée sur le téléphone, envoi au serveur dès que possible.",
+    "arrived": "Tu es arrivé à destination !",
+    "continue": "Continuer",
+    "share": "Partager",
+    "shareText": "Je viens de marcher {{km}} km en {{minutes}} min avec Cap."
+  },
+  "rankings": {
+    "soon": "Les classements entre amis arrivent avec les courses."
+  },
+  "profile": {
+    "username": "Pseudo",
+    "email": "E-mail",
+    "stepGoal": "Objectif de pas",
+    "rhythm": "Rythme",
+    "perWeek_one": "{{count}} séance par semaine",
+    "perWeek_other": "{{count}} séances par semaine",
+    "signOut": "Se déconnecter"
   },
   "units": {
     "km": "km",

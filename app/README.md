@@ -12,6 +12,10 @@ npx eas-cli@latest build --platform ios --profile development   # once, then ins
 npx expo start                                                  # dev server, the build connects to it
 ```
 
+## Configuration
+
+The app talks to `https://cap.theovilain.fr` by default. Set `EXPO_PUBLIC_API_URL` to use another API (for example a local one).
+
 ## Checks
 
 ```bash
@@ -25,8 +29,13 @@ npm run format      # Prettier
 
 | Path | Content |
 | --- | --- |
-| `src/app/` | Screens (Expo Router) |
+| `src/app/` | Screens (Expo Router): tabs, new journey, preview, live session, summary |
+| `src/api/` | API client, sign-in, TanStack Query hooks |
+| `src/journey/` | Pawn position along the route, stages, steps, streaks |
+| `src/session/` | Session recorder, local SQLite store, sync queue |
+| `src/map/` | MapLibre map and the Cap style derived from OpenFreeMap Liberty |
 | `src/treadmill/` | FTMS decoder, distance tracker, Bluetooth connection |
+| `src/ui/` | Shared components and the floating navigation bar |
 | `src/i18n/` | Translations (French and English) and native permission strings |
 | `src/theme.ts` | Colours and fonts from the mockups |
 

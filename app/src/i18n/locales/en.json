@@ -1,11 +1,105 @@
 {
+  "common": {
+    "back": "Back",
+    "close": "Close"
+  },
+  "nav": {
+    "index": "Home",
+    "journeys": "Journeys",
+    "rankings": "Rankings",
+    "profile": "Profile"
+  },
+  "welcome": {
+    "title": "Every step on the treadmill takes you closer to a real town.",
+    "subtitle": "Pick a start and a destination in France, then walk: your pawn moves along the route, kilometre after kilometre.",
+    "or": "or with your email",
+    "firstName": "First name",
+    "username": "Username",
+    "email": "Email",
+    "password": "Password",
+    "passwordHint": "At least 10 characters.",
+    "login": "Sign in",
+    "register": "Create my account",
+    "toRegister": "No account yet? Create one",
+    "toLogin": "Already have an account? Sign in"
+  },
+  "errors": {
+    "generic": "Something went wrong. Please try again.",
+    "network": "Cannot reach the server. Try again in a moment.",
+    "invalid_credentials": "Wrong email or password.",
+    "email_taken": "An account already uses this email.",
+    "username_taken": "This username is taken.",
+    "invalid_username": "Username: 3 to 20 lowercase letters, digits or _.",
+    "invalid_first_name": "Please enter your first name.",
+    "invalid_email": "This email is not valid.",
+    "weak_password": "The password needs at least 10 characters.",
+    "invalid_apple_token": "Sign in with Apple failed.",
+    "route_not_found": "No safe walking route between these two places.",
+    "route_too_short": "Start and destination are the same place.",
+    "invalid_place": "Pick a start and a destination from the list."
+  },
+  "home": {
+    "hello": "Hi {{name}}",
+    "activeJourney": "Active journey",
+    "ofKm": "of {{total}} km",
+    "stageIn": "stage in {{km}} km",
+    "noJourney": "No journey yet",
+    "noJourneyHint": "Pick a destination: every treadmill session brings you closer.",
+    "createJourney": "Create a journey",
+    "dailyGoal": "Daily goal",
+    "ofSteps": "of {{goal}} steps",
+    "stillKm": "{{km}} km to go",
+    "goalReached": "goal reached",
+    "streak": "Streak",
+    "days_one": "day",
+    "days_other": "days",
+    "record_one": "Best: {{count}} day",
+    "record_other": "Best: {{count}} days",
+    "treadmillConnected": "{{name}} connected",
+    "treadmillHint": "Turn on the treadmill next to your phone",
+    "sessionRunning": "Session running, tap to see the map"
+  },
+  "journeys": {
+    "title": "Journeys",
+    "new": "New journey",
+    "active": "In progress",
+    "history": "Finished",
+    "empty": "Your first journey is waiting.",
+    "progress": "{{walked}} of {{total}} km",
+    "arrivedOn": "{{km}} km, arrived on {{date}}"
+  },
+  "newJourney": {
+    "title": "New journey",
+    "start": "Start",
+    "end": "Destination",
+    "startPlaceholder": "Where do you start?",
+    "endPlaceholder": "Where do you want to go?",
+    "swap": "Swap start and destination",
+    "onMap": "On the map",
+    "lastArrival": "My last arrival",
+    "pickHere": "Pick this point",
+    "pickedPoint": "Point on the map",
+    "safeRoutes": "Safe walking routes, in France",
+    "showRoute": "Show the route",
+    "computing": "Computing the route…"
+  },
+  "preview": {
+    "walkingRoute": "Walking route",
+    "arrival": "Arrival around {{date}}",
+    "sessions_one": "≈ {{count}} session of {{km}} km",
+    "sessions_other": "≈ {{count}} sessions of {{km}} km",
+    "safe": "No motorways or expressways. Mostly paths and small roads.",
+    "solo": "Solo",
+    "raceSoon": "Race (soon)",
+    "start": "Start the journey"
+  },
   "treadmill": {
     "status": {
       "starting": "Starting Bluetooth…",
       "bluetoothOff": "Bluetooth is off",
       "unauthorized": "Allow Bluetooth in Settings",
       "unsupported": "Bluetooth is not available on this device",
-      "scanning": "Looking for your treadmill…",
+      "scanning": "Looking for the treadmill…",
       "connecting": "Connecting to {{name}}…",
       "connected": "{{name}} · live",
       "reconnecting": "Connection lost, reconnecting…"
@@ -15,11 +109,53 @@
   "session": {
     "today": "Today",
     "speed": "Speed",
+    "pace": "Pace",
     "incline": "Incline",
-    "duration": "Duration",
-    "counter": "Treadmill counter",
-    "waiting": "Start the treadmill from its console to begin",
-    "newSession": "New session"
+    "steps": "Steps",
+    "goal": "Goal",
+    "waiting": "Start the treadmill to begin",
+    "noJourney": "No active journey: the session is still recorded.",
+    "stageIn": "{{name}} in {{km}} km",
+    "fromStart": "from {{place}}",
+    "toEnd": "{{place}} in {{km}} km",
+    "minimize": "Minimise the map",
+    "finish": "End the session"
+  },
+  "summary": {
+    "done": "Session done · {{minutes}} min",
+    "goalReached": "Daily goal reached with {{steps}} steps.",
+    "goalLeft": "{{steps}} more steps for today's goal.",
+    "fun": {
+      "eiffel_one": "You climbed the Eiffel Tower {{count}} time… on the flat.",
+      "eiffel_other": "You climbed the Eiffel Tower {{count}} times… on the flat.",
+      "football_one": "You crossed {{count}} football pitch.",
+      "football_other": "You crossed {{count}} football pitches.",
+      "champs_one": "You walked down the Champs-Élysées {{count}} time.",
+      "champs_other": "You walked down the Champs-Élysées {{count}} times."
+    },
+    "stageUnlocked": "Stage {{n}} of {{total}} unlocked",
+    "newCounty": "You enter a new department: {{county}}.",
+    "stageKm": "{{km}} km from {{start}}.",
+    "nextStage": "Next: {{name}}.",
+    "speedDuring": "Speed during the session",
+    "average": "avg. {{speed}} km/h",
+    "pendingSync": "Saved on the phone, sent to the server as soon as possible.",
+    "arrived": "You reached your destination!",
+    "continue": "Continue",
+    "share": "Share",
+    "shareText": "I just walked {{km}} km in {{minutes}} min with Cap."
+  },
+  "rankings": {
+    "soon": "Friends' leaderboards come with races."
+  },
+  "profile": {
+    "username": "Username",
+    "email": "Email",
+    "stepGoal": "Step goal",
+    "rhythm": "Rhythm",
+    "perWeek_one": "{{count}} session a week",
+    "perWeek_other": "{{count}} sessions a week",
+    "signOut": "Sign out"
   },
   "units": {
     "km": "km",
