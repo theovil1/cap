@@ -1,0 +1,30 @@
+graphhopper:
+  datareader.file: /data/france-latest.osm.pbf
+  graph.location: /data/graph-cache
+  graph.encoded_values: foot_access, foot_priority, foot_average_speed, foot_road_access, hike_rating, road_class
+  import.osm.ignored_highways: motorway, motorway_link
+  prepare.min_network_size: 200
+
+  custom_models.directory: /config
+  profiles:
+    - name: foot_safe
+      custom_model_files: [foot_safe.json]
+
+  # Contraction hierarchies: fast queries even for routes of several hundred km.
+  profiles_ch:
+    - profile: foot_safe
+
+  routing.non_ch.max_waypoint_distance: 1000000
+  graph.dataaccess.default_type: RAM_STORE
+
+server:
+  application_connectors:
+    - type: http
+      port: 8989
+      bind_host: 0.0.0.0
+  admin_connectors:
+    - type: http
+      port: 8990
+      bind_host: 127.0.0.1
+  request_log:
+    appenders: []
