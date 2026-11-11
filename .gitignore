@@ -1,0 +1,31 @@
+# Local reference documents (specification, mockups). Only GitHub assets are versioned.
+docs/*
+!docs/github/
+
+# Secrets
+.env
+.env.*
+!.env.example
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# Node / Expo
+node_modules/
+.expo/
+dist/
+web-build/
+ios/
+android/
+
+# Rust
+target/
+
+# OS and editors
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
