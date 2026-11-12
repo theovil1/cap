@@ -334,7 +334,8 @@
     "arrivedOn": "Arrivé · {{when}}",
     "notStarted": "Pas encore parti",
     "leader": "Leader",
-    "rule": "Le premier arrivé à {{place}} gagne. Les positions bougent en direct."
+    "rule": "Le premier arrivé à {{place}} gagne. Les positions bougent en direct.",
+    "shareText": "Je suis {{place}} sur {{count}} dans la course {{title}} sur Cap."
   },
   "ago": {
     "now": "À l'instant",
@@ -452,5 +453,19 @@
       "mine": "Mes inscriptions",
       "friends": "Avec mes amis"
     }
+  },
+  "arrival": {
+    "done": "Trajet terminé",
+    "doneRace": "Trajet terminé · {{place}} de la course",
+    "welcome": "Bienvenue à {{place}}",
+    "lead": "{{from}} → {{to}}, entièrement à pied, sur ton tapis.",
+    "sessions_one": "séance",
+    "sessions_other": "séances",
+    "days_one": "jour",
+    "days_other": "jours",
+    "next": "Choisir le prochain trajet",
+    "share": "Partager ma médaille",
+    "medal": "Médaille d'or de {{place}}",
+    "shareText": "J'ai marché de {{from}} à {{to}}, {{km}} km, sur mon tapis avec Cap."
   }
 }

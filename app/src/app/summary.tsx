@@ -87,6 +87,12 @@ export default function SummaryScreen() {
   const minutes = Math.round(session.durationS / 60);
   const avgSpeed = (session.distanceM / session.durationS) * 3.6;
 
+  // A finished journey goes on to the arrival screen and its medal.
+  const arrived = !!summary && afterM > 0 && afterM >= summary.route_distance_m;
+  const close = () =>
+    arrived && summary
+      ? router.replace({ pathname: '/arrival', params: { id: summary.id } })
+      : router.dismissTo(HOME);
   const share = () =>
     Share.share({
       message: t('summary.shareText', { km: formatKm(session.distanceM, 2), minutes }),
@@ -214,7 +220,7 @@ export default function SummaryScreen() {
             <Button
               tone="dark"
               title={t('summary.finish')}
-              onPress={() => router.dismissTo(HOME)}
+              onPress={close}
               style={styles.flexWide}
             />
           </View>
@@ -342,11 +348,7 @@ export default function SummaryScreen() {
       </ScrollView>
       <View style={[styles.footer, { paddingBottom: insets.bottom + 12 }]}>
         <View style={styles.column}>
-          <Button
-            tone="dark"
-            title={t('summary.continue')}
-            onPress={() => router.dismissTo(HOME)}
-          />
+          <Button tone="dark" title={t('summary.continue')} onPress={close} />
         </View>
       </View>
     </View>

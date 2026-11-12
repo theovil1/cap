@@ -1,8 +1,8 @@
 import { router, useLocalSearchParams } from 'expo-router';
-import { Check, ChevronLeft, Flag, Medal } from 'lucide-react-native';
+import { Check, ChevronLeft, Flag, Medal, Share as ShareIcon } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Pressable, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import {
@@ -19,7 +19,7 @@ import { DEFAULT_SESSION_M } from '@/journey/progress';
 import type { Racer } from '@/live/race';
 import { rivalPawns, useRacers } from '@/live/use-racers';
 import { RouteMap } from '@/map/route-map';
-import { fonts, useColors } from '@/theme';
+import { fonts, useColors, useShadows } from '@/theme';
 import { useWide } from '@/ui/layout';
 import { Avatar, Button, Card, Glass, GlassButton, ProgressBar } from '@/ui/primitives';
 
@@ -28,6 +28,7 @@ export default function RaceScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const wide = useWide();
+  const shadows = useShadows();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { data: race, refetch } = useJourney(id);
   const list = useRacers(race ?? null);
@@ -45,11 +46,40 @@ export default function RaceScreen() {
   const day = race.starts_at
     ? Math.floor((openedAt - Date.parse(race.starts_at)) / 86_400_000) + 1
     : null;
+  const kicker = day ? t('race.day', { count: day }) : t('race.waitingTitle');
+  const share = () =>
+    Share.share({
+      message: me
+        ? t('race.shareText', {
+            place: formatRank(me.place),
+            count: list.length,
+            title: journeyTitle(race),
+          })
+        : journeyTitle(race),
+    });
   const panel = (
     <ScrollView
-      style={[styles.panel, { backgroundColor: colors.surface }, wide && styles.panelWide]}
-      contentContainerStyle={{ gap: 16, paddingBottom: insets.bottom + 24 }}
+      style={[
+        styles.panel,
+        { backgroundColor: colors.surface },
+        wide && [
+          styles.panelWide,
+          shadows.floating,
+          { top: insets.top + 20, bottom: insets.bottom + 20 },
+        ],
+      ]}
+      contentContainerStyle={{ gap: 16, paddingBottom: wide ? 26 : insets.bottom + 24 }}
     >
+      {wide && (
+        <View style={{ gap: 4 }}>
+          <Text style={[styles.kicker, { color: colors.textSecondary, fontSize: 13 }]}>
+            {kicker}
+          </Text>
+          <Text style={[styles.wideTitle, { color: colors.text }]} numberOfLines={2}>
+            {journeyTitle(race)}
+          </Text>
+        </View>
+      )}
       {race.status === 'waiting' ? (
         <Waiting race={race} />
       ) : (
@@ -59,10 +89,8 @@ export default function RaceScreen() {
   );
 
   return (
-    <View
-      style={[styles.screen, wide && styles.screenWide, { backgroundColor: colors.background }]}
-    >
-      <View style={wide ? { flex: 1 } : styles.mapArea}>
+    <View style={[styles.screen, { backgroundColor: colors.background }]}>
+      <View style={wide ? StyleSheet.absoluteFill : styles.mapArea}>
         <RouteMap
           path={race.path}
           walkedM={me?.distanceM ?? 0}
@@ -70,7 +98,7 @@ export default function RaceScreen() {
           mode="overview"
           rivals={rivalPawns(list)}
           initial={me?.firstName}
-          padding={{ top: insets.top + 90, bottom: 60, left: 40, right: 40 }}
+          padding={{ top: insets.top + 90, bottom: 60, left: 40, right: wide ? 470 : 40 }}
           style={StyleSheet.absoluteFill}
         />
         <View style={[styles.top, { top: insets.top + 12 }]}>
@@ -79,14 +107,21 @@ export default function RaceScreen() {
             onPress={() => router.back()}
             label={t('common.back')}
           />
-          <Glass style={styles.titlePill}>
-            <Text style={[styles.kicker, { color: colors.textSecondary }]}>
-              {day ? t('race.day', { count: day }) : t('race.waitingTitle')}
-            </Text>
-            <Text style={[styles.titleText, { color: colors.text }]} numberOfLines={1}>
-              {journeyTitle(race)}
-            </Text>
-          </Glass>
+          {!wide && (
+            <>
+              <Glass style={styles.titlePill}>
+                <Text style={[styles.kicker, { color: colors.textSecondary }]}>{kicker}</Text>
+                <Text style={[styles.titleText, { color: colors.text }]} numberOfLines={1}>
+                  {journeyTitle(race)}
+                </Text>
+              </Glass>
+              <GlassButton
+                icon={<ShareIcon size={20} color={colors.text} />}
+                onPress={share}
+                label={t('summary.share')}
+              />
+            </>
+          )}
         </View>
       </View>
       {panel}
@@ -253,14 +288,14 @@ function Standings({ race, list, me }: { race: JourneyDetail; list: Racer[]; me?
         {list.map((r) => (
           <View
             key={r.userId}
-            style={[styles.racer, r.me && { backgroundColor: colors.accent + '22' }]}
+            style={[styles.racer, r.me && { backgroundColor: colors.accentSoft }]}
           >
             <Text style={[styles.racerPlace, { color: colors.textSecondary }]}>{r.place}</Text>
             <View>
               <Avatar
                 name={r.firstName}
                 size={44}
-                tone={r.me ? 'accent' : r.place === 1 ? 'blue' : 'plain'}
+                tone={r.me ? 'accent' : r.distanceM > (me?.distanceM ?? 0) ? 'blue' : 'plain'}
               />
               {r.arrivedAt && r.place === 1 && (
                 <View style={[styles.medal, { borderColor: colors.surface }]}>
@@ -333,7 +368,6 @@ function TextButton({
 
 const styles = StyleSheet.create({
   screen: { flex: 1 },
-  screenWide: { flexDirection: 'row' },
   mapArea: { height: '44%' },
   top: { position: 'absolute', left: 20, right: 20, flexDirection: 'row', gap: 10 },
   titlePill: {
@@ -354,7 +388,18 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 34,
     marginTop: -34,
   },
-  panelWide: { flex: 0, width: 420, marginTop: 0, borderRadius: 0 },
+  panelWide: {
+    position: 'absolute',
+    right: 20,
+    width: 404,
+    flex: 0,
+    marginTop: 0,
+    paddingTop: 26,
+    paddingHorizontal: 24,
+    borderRadius: 30,
+    borderCurve: 'continuous',
+  },
+  wideTitle: { fontFamily: fonts.display, fontSize: 26, letterSpacing: -0.6 },
   heading: { fontFamily: fonts.display, fontSize: 24 },
   caption: { fontFamily: fonts.text, fontSize: 13, lineHeight: 18 },
   position: {

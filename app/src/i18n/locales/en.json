@@ -334,7 +334,8 @@
     "arrivedOn": "Arrived · {{when}}",
     "notStarted": "Not started yet",
     "leader": "Leader",
-    "rule": "The first to reach {{place}} wins. Positions move live."
+    "rule": "The first to reach {{place}} wins. Positions move live.",
+    "shareText": "I am {{place}} of {{count}} in the {{title}} race on Cap."
   },
   "ago": {
     "now": "Just now",
@@ -452,5 +453,19 @@
       "mine": "My sign-ups",
       "friends": "With friends"
     }
+  },
+  "arrival": {
+    "done": "Journey done",
+    "doneRace": "Journey done · {{place}} in the race",
+    "welcome": "Welcome to {{place}}",
+    "lead": "{{from}} → {{to}}, all on foot, on your treadmill.",
+    "sessions_one": "session",
+    "sessions_other": "sessions",
+    "days_one": "day",
+    "days_other": "days",
+    "next": "Choose the next journey",
+    "share": "Share my medal",
+    "medal": "{{place}} gold medal",
+    "shareText": "I walked from {{from}} to {{to}}, {{km}} km, on my treadmill with Cap."
   }
 }
