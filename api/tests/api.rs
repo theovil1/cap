@@ -1287,3 +1287,47 @@ async fn feed_with_bravos_and_comments(db: PgPool) {
         .json();
     assert_eq!(hidden.as_array().unwrap().len(), 0);
 }
+
+#[sqlx::test(migrator = "cap_api::MIGRATOR")]
+async fn world_and_country_rankings(db: PgPool) {
+    let server = server(db.clone()).await;
+    let theo = register(&server, "theo").await;
+    let kenji = register(&server, "kenji").await;
+    let shy = register(&server, "shy").await;
+    sqlx::query("UPDATE users SET country = 'BE' WHERE username = 'kenji'").execute(&db).await.unwrap();
+    sqlx::query("UPDATE users SET visibility = 'friends' WHERE username = 'shy'").execute(&db).await.unwrap();
+    for (walker, metres) in [(&theo, 300.0), (&kenji, 900.0), (&shy, 2_000.0)] {
+        server
+            .post("/sessions")
+            .add_header("authorization", bearer(walker))
+            .json(&session(Uuid::now_v7(), metres, 600))
+            .await
+            .assert_status(StatusCode::CREATED);
+    }
+
+    let world: Value = server
+        .get("/leaderboards?period=week&scope=world")
+        .add_header("authorization", bearer(&theo))
+        .await
+        .json();
+    // A profile for friends only stays out of the world.
+    assert_eq!(world["total"], 2);
+    assert_eq!(world["entries"][0]["username"], "kenji");
+    assert_eq!(world["entries"][0]["country"], "BE");
+    assert_eq!(world["me"]["rank"], 2);
+
+    let country: Value = server
+        .get("/leaderboards?period=all&scope=country")
+        .add_header("authorization", bearer(&theo))
+        .await
+        .json();
+    assert_eq!(country["country"], "FR");
+    assert_eq!(country["total"], 1);
+    assert_eq!(country["me"]["rank"], 1);
+
+    server
+        .get("/leaderboards?period=week&scope=galaxy")
+        .add_header("authorization", bearer(&theo))
+        .await
+        .assert_status(StatusCode::BAD_REQUEST);
+}

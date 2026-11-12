@@ -16,7 +16,7 @@ Interactive documentation is served at `/docs` (OpenAPI at `/openapi.json`).
 | `GET /friends`, `POST /friends` | Friends and pending requests; ask by username or join through an invite code |
 | `POST /friends/{id}/accept`, `DELETE /friends/{id}` | Accept a request; remove a friend, decline or cancel a request |
 | `GET /friends/invite`, `/users/search` | Personal invite code (page at `/invite/{code}` opens the app), username search |
-| `GET /leaderboards` | Ranking with friends (`period`: `week`, `month` or `streak`): km since Monday or the 1st (Paris time), days in a row with a treadmill session |
+| `GET /leaderboards` | Rankings (`period`: `week`, `month`, `all` or `streak`; `scope`: `friends`, `country` or `world`): km since Monday or the 1st (Paris time) or ever, days in a row with a treadmill session; my place and my place over the previous period |
 | `GET /geocode`, `/reverse` | Address autocomplete, nearest address to a point (Photon) |
 | `POST /routes` | Compute a safe walking route (GraphHopper) and its stages, for a preview |
 | `POST /journeys` | Start a solo journey on a computed route |
