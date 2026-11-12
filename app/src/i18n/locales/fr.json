@@ -162,7 +162,22 @@
     "shareText": "Je viens de marcher {{km}} km en {{minutes}} min avec Cap."
   },
   "rankings": {
-    "soon": "Les classements entre amis arrivent avec les courses."
+    "week": "Semaine",
+    "month": "Mois",
+    "streak": "Série",
+    "you": "Toi",
+    "weekOf": "Entre amis · semaine du {{start}} au {{end}}",
+    "monthOf": "Entre amis · {{month}}",
+    "streakInfo": "Entre amis · jours d'affilée avec une séance sur le tapis",
+    "days_one": "jour",
+    "days_other": "jours",
+    "alone": "Ajoute des amis pour te mesurer à eux.",
+    "leading": "Tu es en tête. Garde le rythme !",
+    "gapWeek": "{{km}} km d'ici dimanche et tu passes {{place}}.",
+    "gapMonth": "{{km}} km d'ici la fin du mois et tu passes {{place}}.",
+    "streakStart": "Fais une séance aujourd'hui pour lancer ta série.",
+    "streakHint_one": "{{count}} jour d'affilée. Ton record : {{best}}.",
+    "streakHint_other": "{{count}} jours d'affilée. Ton record : {{best}}."
   },
   "friends": {
     "title": "Amis",

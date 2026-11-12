@@ -162,7 +162,22 @@
     "shareText": "I just walked {{km}} km in {{minutes}} min with Cap."
   },
   "rankings": {
-    "soon": "Friends' leaderboards come with races."
+    "week": "Week",
+    "month": "Month",
+    "streak": "Streak",
+    "you": "You",
+    "weekOf": "With friends · week of {{start}} to {{end}}",
+    "monthOf": "With friends · {{month}}",
+    "streakInfo": "With friends · days in a row with a treadmill session",
+    "days_one": "day",
+    "days_other": "days",
+    "alone": "Add friends to compete with them.",
+    "leading": "You are in the lead. Keep it up!",
+    "gapWeek": "{{km}} km by Sunday and you move up to {{place}}.",
+    "gapMonth": "{{km}} km by the end of the month and you move up to {{place}}.",
+    "streakStart": "Walk today to start your streak.",
+    "streakHint_one": "{{count}} day in a row. Your record: {{best}}.",
+    "streakHint_other": "{{count}} days in a row. Your record: {{best}}."
   },
   "friends": {
     "title": "Friends",

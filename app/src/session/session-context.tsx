@@ -67,7 +67,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     if (pendingSessions().length === 0) return;
     if ((await syncPending()) > 0) {
       await Promise.all(
-        ['journeys', 'sessions', 'me'].map((key) =>
+        ['journeys', 'sessions', 'me', 'leaderboards'].map((key) =>
           queryClient.invalidateQueries({ queryKey: [key] }),
         ),
       );

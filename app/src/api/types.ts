@@ -121,3 +121,24 @@ export type UserMatch = {
   avatar_url: string | null;
   relation: 'none' | 'friend' | 'incoming' | 'outgoing';
 };
+
+export type LeaderboardPeriod = 'week' | 'month' | 'streak';
+
+export type LeaderboardEntry = {
+  rank: number;
+  user_id: string;
+  first_name: string;
+  username: string;
+  avatar_url: string | null;
+  me: boolean;
+  /** Metres (week, month) or days in a row (streak). */
+  value: number;
+  best: number | null;
+};
+
+export type Leaderboard = {
+  period: LeaderboardPeriod;
+  starts_on: string;
+  ends_on: string;
+  entries: LeaderboardEntry[];
+};

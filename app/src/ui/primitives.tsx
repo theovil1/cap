@@ -210,20 +210,34 @@ export function ProgressBar({
   );
 }
 
-export function Avatar({ name, size = 44 }: { name: string; size?: number }) {
+export function Avatar({
+  name,
+  size = 44,
+  tone = 'accent',
+}: {
+  name: string;
+  size?: number;
+  /** Rankings: the leader in accent, the second in blue, the others plain. */
+  tone?: 'accent' | 'blue' | 'plain';
+}) {
   const colors = useColors();
+  const [background, foreground] = {
+    accent: [colors.accent, colors.onAccent],
+    blue: [colors.blue, '#FFFFFF'],
+    plain: [colors.inset, colors.text],
+  }[tone];
   return (
     <View
       style={{
         width: size,
         height: size,
         borderRadius: 999,
-        backgroundColor: colors.accent,
+        backgroundColor: background,
         alignItems: 'center',
         justifyContent: 'center',
       }}
     >
-      <Text style={{ fontFamily: fonts.display, fontSize: size * 0.39, color: colors.onAccent }}>
+      <Text style={{ fontFamily: fonts.display, fontSize: size * 0.39, color: foreground }}>
         {name.trim().charAt(0).toUpperCase()}
       </Text>
     </View>

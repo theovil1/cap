@@ -31,6 +31,17 @@ export function formatPace(minPerKm: number | null): string {
   return `${Math.floor(totalS / 60)}:${String(totalS % 60).padStart(2, '0')}`;
 }
 
+/** Rank as `1er`, `2e` in French or `1st`, `2nd` in English. */
+export function formatRank(rank: number): string {
+  if (locale().startsWith('fr')) return rank === 1 ? '1er' : `${rank}e`;
+  const tens = rank % 100;
+  const suffix =
+    tens >= 11 && tens <= 13
+      ? 'th'
+      : (({ 1: 'st', 2: 'nd', 3: 'rd' } as Record<number, string>)[rank % 10] ?? 'th');
+  return `${rank}${suffix}`;
+}
+
 export function formatDate(date: Date, options: Intl.DateTimeFormatOptions): string {
   return date.toLocaleDateString(locale(), options);
 }

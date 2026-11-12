@@ -7,6 +7,8 @@ import type {
   AddFriendResult,
   FriendList,
   GeocodeResult,
+  Leaderboard,
+  LeaderboardPeriod,
   JourneyDetail,
   JourneySummary,
   Place,
@@ -164,6 +166,7 @@ function useFriendsMutation<T, R>(run: (arg: T) => Promise<R>) {
       Promise.all([
         queryClient.invalidateQueries({ queryKey: keys.friends }),
         queryClient.invalidateQueries({ queryKey: keys.userSearch }),
+        queryClient.invalidateQueries({ queryKey: ['leaderboards'] }),
       ]),
   });
 }
@@ -181,4 +184,13 @@ export function useAcceptFriend() {
 /** Removes a friend, declines their request or cancels yours. */
 export function useRemoveFriend() {
   return useFriendsMutation((id: string) => api<void>(`/friends/${id}`, { method: 'DELETE' }));
+}
+
+export function useLeaderboard(period: LeaderboardPeriod) {
+  return useQuery({
+    queryKey: ['leaderboards', period],
+    ...cached(`leaderboard:${period}`, () =>
+      api<Leaderboard>('/leaderboards', { query: { period } }),
+    ),
+  });
 }
