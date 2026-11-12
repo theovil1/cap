@@ -24,6 +24,7 @@ import { useFollow, useProfile, useReport } from '@/api/community';
 import { useAddFriend } from '@/api/queries';
 import type { PublicProfile } from '@/api/types';
 import { formatDate, formatKm, formatNumber } from '@/i18n/format';
+import { BadgeRow, NameBadge } from '@/community/profile-badges';
 import { MedalView } from '@/journey/medal-view';
 import { medalsFor } from '@/journey/medals';
 import { journeyTitle } from '@/journey/names';
@@ -119,8 +120,12 @@ function ProfileView({ profile }: { profile: PublicProfile }) {
           tone="walker"
           size={92}
         />
-        <Text style={[styles.name, { color: colors.text }]}>{walker.first_name}</Text>
+        <View style={styles.nameRow}>
+          <Text style={[styles.name, { color: colors.text }]}>{walker.first_name}</Text>
+          <NameBadge badges={profile.badges} />
+        </View>
         <Text style={[styles.place, { color: colors.textSecondary }]}>{place}</Text>
+        <BadgeRow badges={profile.badges} />
         <Text style={[styles.small, { color: colors.textMuted }]}>
           {t('walker.follows', {
             followers: formatNumber(profile.followers),
@@ -297,6 +302,7 @@ const styles = StyleSheet.create({
   content: { paddingHorizontal: 20, gap: 16, width: '100%', maxWidth: 560, alignSelf: 'center' },
   header: { flexDirection: 'row', justifyContent: 'space-between' },
   identity: { alignItems: 'center', gap: 8 },
+  nameRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 4 },
   name: { fontFamily: fonts.display, fontSize: 28, letterSpacing: -0.8, marginTop: 4 },
   place: { fontFamily: fonts.text, fontSize: 14, textAlign: 'center' },
   row: { flexDirection: 'row', gap: 10 },

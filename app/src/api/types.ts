@@ -301,6 +301,8 @@ export type FinishedJourney = {
 
 export type PublicProfile = {
   walker: Walker;
+  /** Rarest first; only `certified` goes next to the name. */
+  badges: ProfileBadge[];
   home_city: string | null;
   country: string;
   created_at: string;
@@ -335,6 +337,7 @@ export type FeedKind = 'arrived' | 'stage' | 'medal' | 'published';
 export type FeedPost = {
   id: string;
   author: Walker;
+  author_badge: ProfileBadge | null;
   kind: FeedKind;
   data: {
     title?: string;
@@ -367,4 +370,23 @@ export type Comment = {
   text: string;
   mine: boolean;
   created_at: string;
+};
+
+/** A profile badge (see the badge board in the mockups). */
+export type ProfileBadge = {
+  kind:
+    | 'team'
+    | 'certified'
+    | 'developer'
+    | 'github'
+    | 'supporter'
+    | 'beta'
+    | 'moderator'
+    | 'club'
+    | 'founder'
+    | 'organizer'
+    | 'creator'
+    | 'ambassador';
+  /** Supporter level: 1 Soutien, 2 Grand soutien, 3 Mécène. */
+  tier: number | null;
 };

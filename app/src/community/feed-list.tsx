@@ -16,8 +16,11 @@ import type { FeedPost } from '@/api/types';
 import { formatAgo, formatKm, formatNumber } from '@/i18n/format';
 import { ArrivalMedal } from '@/journey/arrival-medal';
 import { useColors } from '@/theme';
+
+import { useBadgeName } from './profile-badges';
 import { BravoButton, FeedAttachment, FeedCard } from '@/ui/feed';
 import { EmptyState } from '@/ui/layout';
+import { Badge } from '@/ui/badge';
 import { Medal } from '@/ui/medal';
 import { Avatar, Button } from '@/ui/primitives';
 
@@ -142,6 +145,7 @@ export function PostCard({ post, now }: { post: FeedPost; now: number }) {
   const edit = useEditPost();
   const remove = useDeletePost();
   const report = useReport();
+  const badgeName = useBadgeName();
   const more = () => {
     const options = post.mine
       ? [post.text ? t('feed.editWord') : t('feed.addWord'), t('feed.delete'), t('journeys.cancel')]
@@ -189,6 +193,11 @@ export function PostCard({ post, now }: { post: FeedPost; now: number }) {
           </Pressable>
         }
         name={post.author.first_name}
+        badge={
+          post.author_badge ? (
+            <Badge kind={post.author_badge.kind} size={17} label={badgeName(post.author_badge)} />
+          ) : undefined
+        }
         when={formatAgo(post.created_at, now)}
         text={post.text ?? undefined}
         attachment={<Attachment post={post} />}

@@ -17,7 +17,9 @@ import { Pressable, ScrollView, Share, StyleSheet, Text, View } from 'react-nati
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useAuth } from '@/api/auth';
+import { useProfile } from '@/api/community';
 import { useActiveJourney, useFriends, useJourneys, useSessions } from '@/api/queries';
+import { BadgeRow, NameBadge } from '@/community/profile-badges';
 import { formatAgo, formatDate, formatKm, formatNumber } from '@/i18n/format';
 import { MedalView } from '@/journey/medal-view';
 import { medalsFor } from '@/journey/medals';
@@ -52,6 +54,8 @@ export default function MyProfileScreen() {
   const { data: friends } = useFriends();
   const { summary, detail } = useActiveJourney();
   const day = useDayStats();
+  const { data: profile } = useProfile(user?.id);
+  const badges = profile?.badges ?? [];
   const [now] = useState(() => Date.now());
   if (!user) return null;
 
@@ -111,8 +115,12 @@ export default function MyProfileScreen() {
     <>
       <View style={styles.identity}>
         <Avatar name={user.first_name} size={92} photo={user.avatar_url} />
-        <Text style={[styles.name, { color: colors.text }]}>{user.first_name}</Text>
+        <View style={styles.nameRow}>
+          <Text style={[styles.name, { color: colors.text }]}>{user.first_name}</Text>
+          <NameBadge badges={badges} />
+        </View>
         <Text style={[styles.place, { color: colors.textSecondary }]}>{place}</Text>
+        <BadgeRow badges={badges} />
       </View>
       <View style={styles.row}>
         <Button
@@ -315,6 +323,7 @@ const styles = StyleSheet.create({
   content: { paddingHorizontal: 20, gap: 16, width: '100%', maxWidth: 560, alignSelf: 'center' },
   header: { flexDirection: 'row', justifyContent: 'space-between' },
   identity: { alignItems: 'center', gap: 8 },
+  nameRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 4 },
   name: { fontFamily: fonts.display, fontSize: 28, letterSpacing: -0.8, marginTop: 4 },
   place: { fontFamily: fonts.text, fontSize: 14, textAlign: 'center' },
   row: { flexDirection: 'row', gap: 10 },

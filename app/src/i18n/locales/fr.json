@@ -780,5 +780,40 @@
     "noComment": "Pas encore de commentaire.",
     "commentPlaceholder": "Un mot d'encouragement…",
     "send": "Envoyer"
+  },
+  "badges": {
+    "names": {
+      "team": "Équipe Cap",
+      "certified": "Certifié",
+      "developer": "Développeur",
+      "github": "Contributeur GitHub",
+      "supporter": "Soutien",
+      "beta": "Bêta-testeur",
+      "moderator": "Modérateur",
+      "club": "Club partenaire",
+      "founder": "Membre fondateur",
+      "organizer": "Organisateur",
+      "creator": "Créateur de trajets",
+      "ambassador": "Ambassadeur"
+    },
+    "tiers": {
+      "1": "Soutien",
+      "2": "Grand soutien",
+      "3": "Mécène"
+    },
+    "about": {
+      "team": "Fait partie de l'équipe qui construit Cap.",
+      "certified": "Identité vérifiée. Réservé aux comptes publics et aux clubs.",
+      "developer": "A contribué au code de l'app ou du serveur.",
+      "github": "Au moins une contribution acceptée sur le dépôt.",
+      "supporter": "Soutient Cap financièrement : Cap reste sans pub grâce aux soutiens.",
+      "beta": "Teste les nouveautés avant tout le monde.",
+      "moderator": "Veille sur la communauté et les trajets publiés.",
+      "club": "Compte d'un club, d'une salle ou d'une association.",
+      "founder": "Inscrit pendant la bêta, avant la sortie publique.",
+      "organizer": "A organisé au moins 3 trajets planifiés.",
+      "creator": "Ses trajets publics ont été suivis 1 000 fois.",
+      "ambassador": "A fait venir 10 marcheurs sur Cap."
+    }
   }
 }

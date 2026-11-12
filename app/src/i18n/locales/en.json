@@ -780,5 +780,40 @@
     "noComment": "No comment yet.",
     "commentPlaceholder": "A word of encouragement…",
     "send": "Send"
+  },
+  "badges": {
+    "names": {
+      "team": "Cap team",
+      "certified": "Certified",
+      "developer": "Developer",
+      "github": "GitHub contributor",
+      "supporter": "Supporter",
+      "beta": "Beta tester",
+      "moderator": "Moderator",
+      "club": "Partner club",
+      "founder": "Founding member",
+      "organizer": "Organiser",
+      "creator": "Route maker",
+      "ambassador": "Ambassador"
+    },
+    "tiers": {
+      "1": "Supporter",
+      "2": "Big supporter",
+      "3": "Patron"
+    },
+    "about": {
+      "team": "Part of the team building Cap.",
+      "certified": "Verified identity. For public accounts and clubs.",
+      "developer": "Contributed to the code of the app or the server.",
+      "github": "At least one contribution accepted on the repository.",
+      "supporter": "Supports Cap with money: Cap stays ad free thanks to supporters.",
+      "beta": "Tries what is new before everyone else.",
+      "moderator": "Looks after the community and the published routes.",
+      "club": "Account of a club, a gym or an association.",
+      "founder": "Signed up during the beta, before the public launch.",
+      "organizer": "Organised at least 3 scheduled journeys.",
+      "creator": "Their public routes were walked 1,000 times.",
+      "ambassador": "Brought 10 walkers to Cap."
+    }
   }
 }
