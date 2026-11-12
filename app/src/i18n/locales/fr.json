@@ -36,7 +36,8 @@
     "invalid_apple_token": "La connexion avec Apple a échoué.",
     "route_not_found": "Aucun itinéraire à pied sûr entre ces deux points.",
     "route_too_short": "Le départ et l'arrivée sont au même endroit.",
-    "invalid_place": "Choisis un départ et une arrivée dans la liste."
+    "invalid_place": "Choisis un départ et une arrivée dans la liste.",
+    "self_friend": "Tu ne peux pas t'ajouter toi-même."
   },
   "home": {
     "hello": "Salut {{name}}",
@@ -162,6 +163,33 @@
   },
   "rankings": {
     "soon": "Les classements entre amis arrivent avec les courses."
+  },
+  "friends": {
+    "title": "Amis",
+    "inviteTitle": "Invite tes amis",
+    "inviteText": "Envoie ton lien : la personne qui l'ouvre devient ton amie tout de suite.",
+    "share": "Partager mon lien",
+    "shareMessage": "Rejoins-moi sur Cap pour faire la course sur nos tapis : {{url}}",
+    "searchPlaceholder": "Chercher un pseudo",
+    "noMatch": "Aucun pseudo ne commence comme ça.",
+    "incoming": "Demandes reçues",
+    "outgoing": "Demandes envoyées",
+    "list_one": "{{count}} ami",
+    "list_other": "{{count}} amis",
+    "empty": "Pas encore d'amis. Partage ton lien ou cherche un pseudo.",
+    "add": "Ajouter",
+    "accept": "Accepter",
+    "decline": "Refuser",
+    "cancel": "Annuler",
+    "remove": "Retirer",
+    "isFriend": "Ami",
+    "sent": "Demande envoyée",
+    "removeTitle": "Retirer {{name}} de tes amis ?",
+    "removeBody": "Vous ne verrez plus vos classements entre vous.",
+    "failed": "Impossible pour le moment. Vérifie ta connexion et réessaie.",
+    "joined": "{{name}} et toi êtes maintenant amis",
+    "badInvite": "Ce lien d'invitation ne marche pas.",
+    "seeFriends": "Voir mes amis"
   },
   "profile": {
     "username": "Pseudo",

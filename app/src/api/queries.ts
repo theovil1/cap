@@ -4,12 +4,15 @@ import { getValue, setValue } from '@/session/store';
 
 import { api } from './client';
 import type {
+  AddFriendResult,
+  FriendList,
   GeocodeResult,
   JourneyDetail,
   JourneySummary,
   Place,
   RouteDetail,
   SessionItem,
+  UserMatch,
   UserProfile,
 } from './types';
 
@@ -19,6 +22,8 @@ export const keys = {
   journey: (id: string) => ['journeys', id] as const,
   route: (id: string) => ['routes', id] as const,
   sessions: ['sessions'] as const,
+  friends: ['friends'] as const,
+  userSearch: ['user-search'] as const,
 };
 
 /** Keeps the last answer on the phone so screens work offline. */
@@ -123,4 +128,57 @@ export function useDeleteJourney() {
       return queryClient.invalidateQueries({ queryKey: keys.journeys });
     },
   });
+}
+
+export function useFriends() {
+  return useQuery({
+    queryKey: keys.friends,
+    ...cached('friends', () => api<FriendList>('/friends')),
+  });
+}
+
+export function useUserSearch(text: string) {
+  const q = text.trim().replace(/^@/, '').toLowerCase();
+  return useQuery({
+    queryKey: [...keys.userSearch, q],
+    enabled: q.length >= 2,
+    staleTime: 10_000,
+    queryFn: () => api<UserMatch[]>('/users/search', { query: { q } }),
+  });
+}
+
+export function useInviteCode() {
+  return useQuery({
+    queryKey: ['friends', 'invite'],
+    staleTime: Infinity,
+    ...cached('invite-code', () => api<{ code: string }>('/friends/invite')),
+  });
+}
+
+/** Any change to friends refreshes the list and the search results. */
+function useFriendsMutation<T, R>(run: (arg: T) => Promise<R>) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: run,
+    onSuccess: () =>
+      Promise.all([
+        queryClient.invalidateQueries({ queryKey: keys.friends }),
+        queryClient.invalidateQueries({ queryKey: keys.userSearch }),
+      ]),
+  });
+}
+
+export function useAddFriend() {
+  return useFriendsMutation((body: { username: string } | { invite_code: string }) =>
+    api<AddFriendResult>('/friends', { method: 'POST', body }),
+  );
+}
+
+export function useAcceptFriend() {
+  return useFriendsMutation((id: string) => api<void>(`/friends/${id}/accept`, { method: 'POST' }));
+}
+
+/** Removes a friend, declines their request or cancels yours. */
+export function useRemoveFriend() {
+  return useFriendsMutation((id: string) => api<void>(`/friends/${id}`, { method: 'DELETE' }));
 }

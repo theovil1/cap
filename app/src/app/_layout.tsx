@@ -61,6 +61,8 @@ function Screens() {
           options={{ presentation: 'fullScreenModal', gestureEnabled: false }}
         />
         <Stack.Screen name="summary" options={{ presentation: 'fullScreenModal' }} />
+        <Stack.Screen name="friends" />
+        <Stack.Screen name="invite/[code]" options={{ presentation: 'modal' }} />
       </Stack.Protected>
       <Stack.Protected guard={status === 'signedOut'}>
         <Stack.Screen name="welcome" />

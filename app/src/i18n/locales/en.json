@@ -36,7 +36,8 @@
     "invalid_apple_token": "Sign in with Apple failed.",
     "route_not_found": "No safe walking route between these two places.",
     "route_too_short": "Start and destination are the same place.",
-    "invalid_place": "Pick a start and a destination from the list."
+    "invalid_place": "Pick a start and a destination from the list.",
+    "self_friend": "You cannot add yourself."
   },
   "home": {
     "hello": "Hi {{name}}",
@@ -162,6 +163,33 @@
   },
   "rankings": {
     "soon": "Friends' leaderboards come with races."
+  },
+  "friends": {
+    "title": "Friends",
+    "inviteTitle": "Invite your friends",
+    "inviteText": "Send your link: whoever opens it becomes your friend at once.",
+    "share": "Share my link",
+    "shareMessage": "Join me on Cap and race me on our treadmills: {{url}}",
+    "searchPlaceholder": "Search a username",
+    "noMatch": "No username starts like this.",
+    "incoming": "Requests received",
+    "outgoing": "Requests sent",
+    "list_one": "{{count}} friend",
+    "list_other": "{{count}} friends",
+    "empty": "No friends yet. Share your link or search a username.",
+    "add": "Add",
+    "accept": "Accept",
+    "decline": "Decline",
+    "cancel": "Cancel",
+    "remove": "Remove",
+    "isFriend": "Friend",
+    "sent": "Request sent",
+    "removeTitle": "Remove {{name}} from your friends?",
+    "removeBody": "You will no longer see each other in your rankings.",
+    "failed": "Not possible right now. Check your connection and try again.",
+    "joined": "{{name}} and you are now friends",
+    "badInvite": "This invite link does not work.",
+    "seeFriends": "See my friends"
   },
   "profile": {
     "username": "Username",

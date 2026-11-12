@@ -101,3 +101,23 @@ export type SessionItem = {
   avg_incline_pct: number;
   source: 'treadmill' | 'manual';
 };
+
+export type Friend = {
+  id: string;
+  first_name: string;
+  username: string;
+  avatar_url: string | null;
+  since: string;
+};
+
+export type FriendList = { friends: Friend[]; incoming: Friend[]; outgoing: Friend[] };
+
+export type AddFriendResult = { status: 'pending' | 'accepted'; friend: Friend };
+
+export type UserMatch = {
+  id: string;
+  first_name: string;
+  username: string;
+  avatar_url: string | null;
+  relation: 'none' | 'friend' | 'incoming' | 'outgoing';
+};
