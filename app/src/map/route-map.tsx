@@ -20,6 +20,7 @@ import {
   type RoutePoint,
 } from '@/journey/route';
 import { fonts, useColors } from '@/theme';
+import { Glass } from '@/ui/primitives';
 
 import { useSmoothDistance } from '@/journey/smooth';
 
@@ -53,7 +54,14 @@ type Props = {
   rivals?: Rival[];
 };
 
-export type Rival = { id: string; initial: string; distanceM: number; speedMps: number };
+export type Rival = {
+  id: string;
+  initial: string;
+  distanceM: number;
+  speedMps: number;
+  /** Gap to me in a glass bubble above the pawn: "+2,4 km". */
+  label?: string;
+};
 
 export function RouteMap({
   path,
@@ -297,10 +305,29 @@ function FollowCamera({
 /** A rival walks smoothly too, from the positions heard live. */
 function RivalPawn({ path, rival }: { path: RoutePoint[]; rival: Rival }) {
   const shownM = useSmoothDistance(rival.distanceM, rival.speedMps);
+  const colors = useColors();
+  const at = positionAt(path, shownM);
   return (
-    <ViewAnnotation id={`rival-${rival.id}`} lngLat={positionAt(path, shownM)} anchor="center">
-      <Pawn initial={rival.initial} rival />
-    </ViewAnnotation>
+    <>
+      <ViewAnnotation id={`rival-${rival.id}`} lngLat={at} anchor="center">
+        <Pawn initial={rival.initial} rival />
+      </ViewAnnotation>
+      {rival.label ? (
+        <ViewAnnotation
+          id={`rival-label-${rival.id}`}
+          lngLat={at}
+          anchor="bottom"
+          offset={[-24, -22]}
+        >
+          <Glass style={styles.bubble}>
+            <View style={[styles.bubbleDot, { backgroundColor: colors.blue }]}>
+              <Text style={styles.bubbleInitial}>{rival.initial.charAt(0).toUpperCase()}</Text>
+            </View>
+            <Text style={[styles.bubbleText, { color: colors.text }]}>{rival.label}</Text>
+          </Glass>
+        </ViewAnnotation>
+      ) : null}
+    </>
   );
 }
 
@@ -339,4 +366,21 @@ const styles = StyleSheet.create({
   initial: { fontFamily: fonts.display, fontSize: 14 },
   rivalArea: { width: 34, height: 34 },
   rivalPawn: { width: 28, height: 28, borderWidth: 2.5 },
+  bubble: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    height: 30,
+    paddingLeft: 5,
+    paddingRight: 11,
+  },
+  bubbleDot: {
+    width: 21,
+    height: 21,
+    borderRadius: 99,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  bubbleInitial: { fontFamily: fonts.display, fontSize: 9, color: '#FFFFFF' },
+  bubbleText: { fontFamily: fonts.textSemiBold, fontSize: 12.5, fontVariant: ['tabular-nums'] },
 });

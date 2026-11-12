@@ -160,7 +160,11 @@
     "finish": "Terminer la séance",
     "resizePanel": "Changer la taille du panneau",
     "hidePanel": "Masquer le panneau",
-    "showPanel": "Afficher le panneau"
+    "showPanel": "Afficher le panneau",
+    "stageShort": "Étape · {{km}} {{unit}}",
+    "rivalWalking": "{{name}} marche aussi",
+    "rivalAhead": "{{km}} {{unit}} devant toi",
+    "rivalBehind": "{{km}} {{unit}} derrière toi"
   },
   "summary": {
     "done": "Séance terminée · {{minutes}} min",

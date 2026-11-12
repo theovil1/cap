@@ -160,7 +160,11 @@
     "finish": "End the session",
     "resizePanel": "Resize the panel",
     "hidePanel": "Hide the panel",
-    "showPanel": "Show the panel"
+    "showPanel": "Show the panel",
+    "stageShort": "Stage · {{km}} {{unit}}",
+    "rivalWalking": "{{name}} is walking too",
+    "rivalAhead": "{{km}} {{unit}} ahead of you",
+    "rivalBehind": "{{km}} {{unit}} behind you"
   },
   "summary": {
     "done": "Session done · {{minutes}} min",

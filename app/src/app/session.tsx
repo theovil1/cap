@@ -18,7 +18,15 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useAuth } from '@/api/auth';
 import { useActiveJourney } from '@/api/queries';
-import { formatDuration, formatKm, formatNumber, formatPace, formatSpeed } from '@/i18n/format';
+import {
+  formatDuration,
+  formatKm,
+  formatNumber,
+  formatPace,
+  formatRank,
+  formatSpeed,
+} from '@/i18n/format';
+import { journeyTitle } from '@/journey/names';
 import { nextStage, paceMinPerKm, stepsFor } from '@/journey/progress';
 import { rivalPawns, useRacers } from '@/live/use-racers';
 import { MapKindButton } from '@/map/map-kind-button';
@@ -28,10 +36,10 @@ import { useDayStats } from '@/session/stats';
 import { pendingSessions } from '@/session/store';
 import { fonts, useColors, type Colors } from '@/theme';
 import { useWide } from '@/ui/layout';
-import { Figure, Glass, GlassButton, Label, ProgressBar } from '@/ui/primitives';
+import { Avatar, Figure, Glass, GlassButton, Label, ProgressBar } from '@/ui/primitives';
 import { Sheet } from '@/ui/sheet';
 
-/** Height of the top bar (minimise button and next stage) over the map. */
+/** Height of the top bar (minimise button, journey and place) over the map. */
 const TOP_BAR_H = 64;
 
 export default function SessionScreen() {
@@ -69,7 +77,12 @@ export default function SessionScreen() {
   const total = summary?.route_distance_m ?? 0;
   const walked = summary ? Math.min(total, summary.distance_m + unsyncedM + sessionM) : 0;
   const stage = detail ? nextStage(detail.stages, walked) : null;
-  const rivals = rivalPawns(useRacers(detail, walked));
+  const racers = useRacers(detail, walked);
+  const me = racers.find((r) => r.me);
+  const gap = (m: number) => `${m >= 0 ? '+' : '−'}${formatKm(Math.abs(m))} ${t('units.km')}`;
+  const rivals = rivalPawns(racers, gap);
+  // iPad: the first rival walking right now gets a card in the panel.
+  const walking = racers.find((r) => !r.me && (r.speedKmh ?? 0) > 0);
   const marks = (detail?.stages ?? [])
     .filter((s) => s.position > 0 && s.at_m < total)
     .map((s) => s.at_m / total);
@@ -96,6 +109,7 @@ export default function SessionScreen() {
       formatNumber(steps),
     ],
   ];
+  if (wide) tiles.splice(1, 0, tiles.splice(2, 1)[0]);
   if (wide) {
     tiles.push([
       <Target key="goal" size={15} color={colors.textSecondary} />,
@@ -179,6 +193,23 @@ export default function SessionScreen() {
         ))}
       </View>
 
+      {wide && walking && me ? (
+        <View style={[styles.rival, { borderColor: colors.border }]}>
+          <Avatar name={walking.firstName} tone="blue" size={40} />
+          <View style={styles.rivalText}>
+            <Text style={[styles.rivalName, { color: colors.text }]} numberOfLines={1}>
+              {t('session.rivalWalking', { name: walking.firstName })}
+            </Text>
+            <Text style={[styles.caption, { color: colors.textSecondary }]} numberOfLines={1}>
+              {t(walking.distanceM >= me.distanceM ? 'session.rivalAhead' : 'session.rivalBehind', {
+                km: formatKm(Math.abs(walking.distanceM - me.distanceM)),
+              })}
+              {' · '}
+              {formatSpeed(walking.speedKmh ?? 0)} {t('units.kmh')}
+            </Text>
+          </View>
+        </View>
+      ) : null}
       {wide && <View style={{ flex: 1 }} />}
       {summary && (
         <View style={{ gap: 9 }}>
@@ -213,7 +244,7 @@ export default function SessionScreen() {
           label={t('map.recenter')}
         />
       )}
-      <MapKindButton />
+      {wide && <MapKindButton />}
     </>
   );
 
@@ -250,15 +281,38 @@ export default function SessionScreen() {
           onPress={() => router.back()}
           label={t('session.minimize')}
         />
-        {stage && (
-          <Glass style={styles.stageChip}>
+        {summary && (
+          <Glass style={[styles.titleChip, !wide && styles.grow]}>
+            <Text style={[styles.titleText, { color: colors.text }]} numberOfLines={1}>
+              {journeyTitle(summary)}
+            </Text>
+            {me && racers.length > 1 ? (
+              <View style={[styles.place, { backgroundColor: colors.accent }]}>
+                <Text style={[styles.placeText, { color: colors.onAccent }]}>
+                  {formatRank(me.place)}
+                </Text>
+              </View>
+            ) : null}
+          </Glass>
+        )}
+        {wide && stage ? (
+          <Glass style={[styles.stageChip, styles.stageWide]}>
             <Flag size={16} color={colors.blueText} strokeWidth={2.2} />
             <Text style={[styles.stageText, { color: colors.text }]} numberOfLines={1}>
               {t('session.stageIn', { name: stage.name, km: formatKm(stage.at_m - walked) })}
             </Text>
           </Glass>
-        )}
+        ) : null}
+        {!wide && detail ? <MapKindButton /> : null}
       </View>
+      {!wide && stage ? (
+        <Glass style={[styles.stageChip, styles.stagePhone, { top: insets.top + 72 }]}>
+          <Flag size={15} color={colors.blueText} strokeWidth={2.2} />
+          <Text style={[styles.stageSmall, { color: colors.text }]} numberOfLines={1}>
+            {t('session.stageShort', { km: formatKm(stage.at_m - walked) })}
+          </Text>
+        </Glass>
+      ) : null}
       {wide ? (
         <>
           <View
@@ -335,7 +389,7 @@ function SpeedBlock({
 }) {
   if (wide) {
     return (
-      <View style={[styles.speedWide, { backgroundColor: colors.dark ? '#2A1A12' : '#FFE9DF' }]}>
+      <View style={[styles.speedWide, { backgroundColor: colors.accentSoft }]}>
         <Text style={[styles.tileLabel, { color: colors.text, fontSize: 15 }]}>{label}</Text>
         <Figure value={formatSpeed(speed)} unit={unit} size={44} color={colors.accentText} />
       </View>
@@ -360,6 +414,24 @@ const styles = StyleSheet.create({
     gap: 12,
     alignItems: 'center',
   },
+  grow: { flex: 1 },
+  titleChip: {
+    flexShrink: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    height: 48,
+    paddingHorizontal: 20,
+  },
+  titleText: {
+    flexShrink: 1,
+    fontFamily: fonts.textSemiBold,
+    fontSize: 14.5,
+    letterSpacing: -0.15,
+  },
+  place: { height: 22, paddingHorizontal: 8, borderRadius: 999, justifyContent: 'center' },
+  placeText: { fontFamily: fonts.display, fontSize: 12 },
   stageChip: {
     flexShrink: 1,
     flexDirection: 'row',
@@ -368,6 +440,20 @@ const styles = StyleSheet.create({
     height: 48,
     paddingHorizontal: 18,
   },
+  stageWide: { marginLeft: 'auto' },
+  stagePhone: { position: 'absolute', right: 20, height: 32, paddingHorizontal: 12, gap: 7 },
+  stageSmall: { fontFamily: fonts.textSemiBold, fontSize: 12.5, fontVariant: ['tabular-nums'] },
+  rival: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    borderRadius: 22,
+    borderWidth: 1,
+  },
+  rivalText: { flex: 1, gap: 2 },
+  rivalName: { fontFamily: fonts.textSemiBold, fontSize: 15 },
   mapButtons: { position: 'absolute', gap: 10, alignItems: 'flex-end' },
   mapButtonsPhone: {
     position: 'relative',

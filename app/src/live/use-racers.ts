@@ -23,9 +23,10 @@ export function useRacers(detail: JourneyDetail | null, myDistanceM?: number): R
   if (!detail || detail.kind !== 'race') return [];
   return racers(detail, heard, now, myDistanceM);
 }
-
-/** The other walkers as map pawns. */
-export function rivalPawns(list: Racer[]): Rival[] {
+/** The other walkers as map pawns, with their gap to me when a label maker is given. */
+/** The other walkers as map pawns, with their gap to me when  is given. */
+export function rivalPawns(list: Racer[], gapLabel?: (gapM: number) => string): Rival[] {
+  const myM = list.find((r) => r.me)?.distanceM ?? 0;
   return list
     .filter((r) => !r.me)
     .map((r) => ({
@@ -33,5 +34,6 @@ export function rivalPawns(list: Racer[]): Rival[] {
       initial: r.firstName,
       distanceM: r.distanceM,
       speedMps: (r.speedKmh ?? 0) / 3.6,
+      label: gapLabel?.(r.distanceM - myM),
     }));
 }
