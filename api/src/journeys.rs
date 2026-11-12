@@ -79,6 +79,8 @@ pub struct JourneySummary {
     end_town: Option<String>,
     /// Distance walked by the current user on this journey.
     distance_m: f64,
+    /// Sessions of the current user that counted for this journey.
+    sessions: i64,
     #[serde(with = "time::serde::rfc3339::option")]
     arrived_at: Option<OffsetDateTime>,
     #[serde(with = "time::serde::rfc3339")]
@@ -239,7 +241,9 @@ async fn list_journeys(
                 (SELECT count(*) FROM journey_participants o
                  WHERE o.journey_id = j.id AND o.joined_at IS NOT NULL) AS \"players!\",
                 (SELECT name FROM route_stages WHERE route_id = r.id ORDER BY position LIMIT 1) AS start_town,
-                (SELECT name FROM route_stages WHERE route_id = r.id ORDER BY position DESC LIMIT 1) AS end_town
+                (SELECT name FROM route_stages WHERE route_id = r.id ORDER BY position DESC LIMIT 1) AS end_town,
+                (SELECT count(*) FROM session_allocations a JOIN sessions s ON s.id = a.session_id
+                 WHERE a.journey_id = j.id AND s.user_id = $1 AND a.distance_m > 0) AS \"sessions!\"
          FROM journey_participants p
          JOIN journeys j ON j.id = p.journey_id
          JOIN routes r ON r.id = j.route_id
@@ -252,6 +256,7 @@ async fn list_journeys(
     Ok(Json(
         rows.into_iter()
             .map(|r| JourneySummary {
+                sessions: r.sessions,
                 id: r.id,
                 kind: r.kind,
                 status: r.status,
@@ -358,7 +363,9 @@ pub(crate) async fn fetch_detail(
                 (SELECT count(*) FROM journey_participants o
                  WHERE o.journey_id = j.id AND o.joined_at IS NOT NULL) AS \"players!\",
                 (SELECT name FROM route_stages WHERE route_id = r.id ORDER BY position LIMIT 1) AS start_town,
-                (SELECT name FROM route_stages WHERE route_id = r.id ORDER BY position DESC LIMIT 1) AS end_town
+                (SELECT name FROM route_stages WHERE route_id = r.id ORDER BY position DESC LIMIT 1) AS end_town,
+                (SELECT count(*) FROM session_allocations a JOIN sessions s ON s.id = a.session_id
+                 WHERE a.journey_id = j.id AND s.user_id = $1 AND a.distance_m > 0) AS \"sessions!\"
          FROM journey_participants p
          JOIN journeys j ON j.id = p.journey_id
          JOIN routes r ON r.id = j.route_id
@@ -399,6 +406,7 @@ pub(crate) async fn fetch_detail(
     Ok(JourneyDetail {
         participants,
         summary: JourneySummary {
+            sessions: r.sessions,
             id: r.id,
             kind: r.kind,
             status: r.status,

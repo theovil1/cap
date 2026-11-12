@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT j.id, j.kind, j.status, j.created_at, r.id AS route_id,\n                r.start_label, r.start_lat, r.start_lon, r.end_label, r.end_lat, r.end_lon,\n                r.distance_m AS route_distance_m, r.path, p.distance_m, p.arrived_at,\n                (p.joined_at IS NOT NULL) AS \"joined!\", (j.created_by = $1) AS \"mine!\", j.starts_at, p.rank,\n                (SELECT count(*) FROM journey_participants o\n                 WHERE o.journey_id = j.id AND o.joined_at IS NOT NULL) AS \"players!\",\n                (SELECT name FROM route_stages WHERE route_id = r.id ORDER BY position LIMIT 1) AS start_town,\n                (SELECT name FROM route_stages WHERE route_id = r.id ORDER BY position DESC LIMIT 1) AS end_town\n         FROM journey_participants p\n         JOIN journeys j ON j.id = p.journey_id\n         JOIN routes r ON r.id = j.route_id\n         WHERE p.user_id = $1 AND j.id = $2",
+  "query": "SELECT j.id, j.kind, j.status, j.created_at, r.id AS route_id,\n                r.start_label, r.start_lat, r.start_lon, r.end_label, r.end_lat, r.end_lon,\n                r.distance_m AS route_distance_m, r.path, p.distance_m, p.arrived_at,\n                (p.joined_at IS NOT NULL) AS \"joined!\", (j.created_by = $1) AS \"mine!\", j.starts_at, p.rank,\n                (SELECT count(*) FROM journey_participants o\n                 WHERE o.journey_id = j.id AND o.joined_at IS NOT NULL) AS \"players!\",\n                (SELECT name FROM route_stages WHERE route_id = r.id ORDER BY position LIMIT 1) AS start_town,\n                (SELECT name FROM route_stages WHERE route_id = r.id ORDER BY position DESC LIMIT 1) AS end_town,\n                (SELECT count(*) FROM session_allocations a JOIN sessions s ON s.id = a.session_id\n                 WHERE a.journey_id = j.id AND s.user_id = $1 AND a.distance_m > 0) AS \"sessions!\"\n         FROM journey_participants p\n         JOIN journeys j ON j.id = p.journey_id\n         JOIN routes r ON r.id = j.route_id\n         WHERE p.user_id = $1 AND j.id = $2",
   "describe": {
     "columns": [
       {
@@ -219,6 +219,12 @@
         "name": "end_town",
         "type_info": "Text",
         "origin": "Expression"
+      },
+      {
+        "ordinal": 22,
+        "name": "sessions!",
+        "type_info": "Int8",
+        "origin": "Expression"
       }
     ],
     "parameters": {
@@ -249,8 +255,9 @@
       true,
       null,
       null,
+      null,
       null
     ]
   },
-  "hash": "79e3bdfc60822de4e4f39de46ad70e375d71dfd15a11fc57a08a8f0b2bc5902b"
+  "hash": "a4e094e0c847159a2ac204117ba212405a281b57c9dd96c877980b107236630b"
 }

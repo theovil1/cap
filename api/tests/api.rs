@@ -376,6 +376,7 @@ async fn sessions_are_idempotent_and_move_the_pawn(db: PgPool) {
         .json();
     assert!(detail["stages"][0]["unlocked_at"].is_null(), "the start is never unlocked");
     assert!(detail["stages"][1]["unlocked_at"].is_string());
+    assert_eq!(detail["sessions"], 2, "the retry and the refused session do not count");
 
     let journeys: Value = server.get("/journeys").add_header("authorization", bearer(&auth)).await.json();
     assert_eq!(journeys[0]["status"], "finished");
