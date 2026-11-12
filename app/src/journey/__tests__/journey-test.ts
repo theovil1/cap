@@ -1,3 +1,4 @@
+import { ideasFrom } from '../ideas';
 import { estimateArrival, nextStage, stepsFor, streaks } from '../progress';
 import { followCenter, headingAt, positionAt, simplify, splitAt, type RoutePoint } from '../route';
 
@@ -88,5 +89,17 @@ describe('progress', () => {
     expect(streaks(days, today)).toEqual({ current: 2, best: 3 });
     expect(streaks([...days, '2026-11-11'], today)).toEqual({ current: 3, best: 3 });
     expect(streaks(['2026-11-08'], today).current).toBe(0);
+  });
+});
+
+describe('ideas', () => {
+  it('suggests one destination per band of distance from Romorantin', () => {
+    const ideas = ideasFrom({ lat: 47.3597, lon: 1.7428 });
+    expect(ideas).toHaveLength(4);
+    expect(ideas[0].place.label).toBe('Château de Chambord');
+    expect(ideas.map((i) => i.distanceM)).toEqual(
+      [...ideas.map((i) => i.distanceM)].sort((a, b) => a - b),
+    );
+    expect(ideas.at(-1)!.distanceM).toBeGreaterThan(200_000);
   });
 });

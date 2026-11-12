@@ -1,8 +1,9 @@
-import { Camera, Map, type MapRef } from '@maplibre/maplibre-react-native';
+import { Camera, Map, ViewAnnotation, type MapRef } from '@maplibre/maplibre-react-native';
 import { router } from 'expo-router';
 import {
   ArrowUpDown,
   ChevronLeft,
+  Footprints,
   Flag,
   MapPin,
   Route as RouteIcon,
@@ -25,9 +26,14 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { api, ApiError } from '@/api/client';
 import { useCreateRoute, useGeocode, useJourneys } from '@/api/queries';
 import type { GeocodeResult, Place } from '@/api/types';
+import { formatKm, formatNumber } from '@/i18n/format';
+import { ideasFrom } from '@/journey/ideas';
+import { DEFAULT_SESSION_M } from '@/journey/progress';
 import { useMapStyle } from '@/map/style';
 import { fonts, useColors } from '@/theme';
-import { Button, Card, GlassButton } from '@/ui/primitives';
+import { SectionHeader } from '@/ui/controls';
+import { useWide } from '@/ui/layout';
+import { Button, Card, Glass, GlassButton } from '@/ui/primitives';
 
 type Field = 'start' | 'end';
 const FRANCE: [number, number] = [2.35, 46.6];
@@ -36,6 +42,7 @@ export default function NewJourneyScreen() {
   const { t, i18n } = useTranslation();
   const colors = useColors();
   const insets = useSafeAreaInsets();
+  const wide = useWide();
   const [places, setPlaces] = useState<Record<Field, Place | null>>({ start: null, end: null });
   const [texts, setTexts] = useState<Record<Field, string>>({ start: '', end: '' });
   const [focused, setFocused] = useState<Field | null>(null);
@@ -49,6 +56,8 @@ export default function NewJourneyScreen() {
   const near = places.start ?? places.end;
   const query = focused ? texts[focused] : '';
   const results = useGeocode(focused && !places[focused] ? query : '', near, i18n.language);
+  const searching = !!focused && !places[focused];
+  const ideas = places.start && !searching ? ideasFrom(places.start) : [];
 
   const choose = (field: Field, place: Place) => {
     setPlaces((p) => ({ ...p, [field]: place }));
@@ -121,10 +130,10 @@ export default function NewJourneyScreen() {
     </View>
   );
 
-  return (
+  const form = (
     <KeyboardAvoidingView
       behavior="padding"
-      style={{ flex: 1, backgroundColor: colors.background }}
+      style={[{ flex: 1, backgroundColor: colors.background }, wide && styles.formWide]}
     >
       <ScrollView
         contentContainerStyle={[
@@ -187,7 +196,57 @@ export default function NewJourneyScreen() {
             )}
           </View>
 
-          {focused && !places[focused] && (
+          {ideas.length > 0 && (
+            <View style={styles.ideas}>
+              <View style={styles.ideasHeader}>
+                <View style={styles.flex}>
+                  <SectionHeader title={t('newJourney.ideas')} />
+                </View>
+                <Text style={[styles.resultDetail, { color: colors.textMuted }]}>
+                  {t('newJourney.onFoot')}
+                </Text>
+              </View>
+              {ideas.map((idea, i) => (
+                <Pressable
+                  key={idea.place.label}
+                  onPress={() => choose('end', idea.place)}
+                  accessibilityRole="button"
+                  style={[
+                    styles.result,
+                    styles.idea,
+                    i > 0 && { borderTopWidth: 1, borderTopColor: colors.border },
+                  ]}
+                >
+                  <View style={[styles.resultIcon, { backgroundColor: colors.surface }]}>
+                    <MapPin size={18} color={colors.accentText} />
+                  </View>
+                  <View style={styles.flex}>
+                    <Text style={[styles.resultName, { color: colors.text }]} numberOfLines={1}>
+                      {idea.place.label}
+                    </Text>
+                    <Text style={[styles.resultDetail, { color: colors.textSecondary }]}>
+                      {idea.area}
+                    </Text>
+                  </View>
+                  <View style={styles.ideaRight}>
+                    <Text style={[styles.ideaKm, { color: colors.text }]}>
+                      {formatKm(idea.distanceM, 0)} {t('units.km')}
+                    </Text>
+                    <Text style={[styles.ideaSessions, { color: colors.textMuted }]}>
+                      {t('newJourney.ideaSessions', {
+                        count: Math.max(1, Math.round(idea.distanceM / DEFAULT_SESSION_M)),
+                        n: formatNumber(
+                          Math.max(1, Math.round(idea.distanceM / DEFAULT_SESSION_M)),
+                        ),
+                      })}
+                    </Text>
+                  </View>
+                </Pressable>
+              ))}
+            </View>
+          )}
+
+          {searching && (
             <Card style={styles.results}>
               {results.isFetching && (
                 <ActivityIndicator style={{ padding: 16 }} color={colors.textMuted} />
@@ -246,6 +305,66 @@ export default function NewJourneyScreen() {
         </View>
       </View>
     </KeyboardAvoidingView>
+  );
+
+  if (!wide) return form;
+  return (
+    <View style={styles.wide}>
+      {form}
+      <PlacesMap start={places.start} end={places.end} />
+    </View>
+  );
+}
+
+/** iPad: the chosen start and arrival on a map, before the route is computed. */
+function PlacesMap({ start, end }: { start: Place | null; end: Place | null }) {
+  const { t } = useTranslation();
+  const colors = useColors();
+  const insets = useSafeAreaInsets();
+  const mapStyle = useMapStyle();
+  const points = [start, end].filter((p): p is Place => !!p);
+  const lons = points.map((p) => p.lon);
+  const lats = points.map((p) => p.lat);
+  const camera =
+    points.length === 2
+      ? {
+          bounds: [Math.min(...lons), Math.min(...lats), Math.max(...lons), Math.max(...lats)] as [
+            number,
+            number,
+            number,
+            number,
+          ],
+          padding: { top: 120, bottom: 80, left: 80, right: 80 },
+          duration: 800,
+        }
+      : points.length === 1
+        ? { center: [points[0].lon, points[0].lat] as [number, number], zoom: 9, duration: 800 }
+        : { center: FRANCE, zoom: 4.6 };
+  return (
+    <View style={[styles.flex, { backgroundColor: colors.inset }]}>
+      {mapStyle && (
+        <Map style={StyleSheet.absoluteFill} mapStyle={mapStyle} logo={false} compass={false}>
+          <Camera {...camera} />
+          {points.map((p, i) => (
+            <ViewAnnotation key={i} id={`place-${i}`} lngLat={[p.lon, p.lat]} anchor="center">
+              <View
+                style={[
+                  styles.placeDot,
+                  i === 0 && points.length === 2
+                    ? { borderColor: colors.accent }
+                    : { borderColor: colors.text },
+                  { backgroundColor: colors.surface },
+                ]}
+              />
+            </ViewAnnotation>
+          ))}
+        </Map>
+      )}
+      <Glass style={[styles.footChip, { top: insets.top + 20 }]}>
+        <Footprints size={16} color={colors.accentText} />
+        <Text style={[styles.pillText, { color: colors.text }]}>{t('newJourney.footSafe')}</Text>
+      </Glass>
+    </View>
   );
 }
 
@@ -315,6 +434,25 @@ function MapPicker({
 }
 
 const styles = StyleSheet.create({
+  flex: { flex: 1 },
+  wide: { flex: 1, flexDirection: 'row' },
+  formWide: { flex: 0, width: 470 },
+  ideas: { gap: 4, marginTop: 8 },
+  ideasHeader: { flexDirection: 'row', alignItems: 'baseline', gap: 8, marginBottom: 4 },
+  idea: { paddingHorizontal: 0 },
+  ideaRight: { alignItems: 'flex-end', gap: 2 },
+  ideaKm: { fontFamily: fonts.display, fontSize: 16, fontVariant: ['tabular-nums'] },
+  ideaSessions: { fontFamily: fonts.text, fontSize: 11.5, fontVariant: ['tabular-nums'] },
+  placeDot: { width: 18, height: 18, borderRadius: 99, borderWidth: 3.5 },
+  footChip: {
+    position: 'absolute',
+    right: 28,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    height: 44,
+    paddingHorizontal: 18,
+  },
   content: { paddingHorizontal: 20 },
   column: { width: '100%', maxWidth: 560, alignSelf: 'center', gap: 14 },
   header: { flexDirection: 'row', alignItems: 'center', gap: 14, marginBottom: 6 },

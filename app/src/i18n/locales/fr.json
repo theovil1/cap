@@ -110,21 +110,30 @@
     "pickedPoint": "Point sur la carte",
     "safeRoutes": "Itinéraires à pied sûrs, en France",
     "showRoute": "Voir l'itinéraire",
-    "computing": "Calcul de l'itinéraire…"
+    "computing": "Calcul de l'itinéraire…",
+    "ideas": "Idées au départ de chez toi",
+    "onFoot": "à pied",
+    "ideaSessions_one": "≈ {{n}} séance",
+    "ideaSessions_other": "≈ {{n}} séances",
+    "footSafe": "À pied · chemins sûrs"
   },
   "preview": {
     "walkingRoute": "Itinéraire à pied",
     "arrival": "Arrivée vers le {{date}}",
     "sessions_one": "≈ {{count}} séance de {{km}} {{unit}}",
     "sessions_other": "≈ {{count}} séances de {{km}} {{unit}}",
-    "safe": "Sans autoroute ni voie rapide",
+    "safe": "Sans autoroute ni voie rapide. Surtout chemins et petites routes.",
     "start": "Lancer le trajet",
     "solo": "Solo",
     "race": "Course",
     "createRace_one": "Créer la course à 2",
     "createRace_other": "Créer la course à {{players}}",
     "createRace_zero": "Choisis tes adversaires",
-    "noFriends": "Ajoute des amis pour faire la course avec eux →"
+    "noFriends": "Ajoute des amis pour faire la course avec eux →",
+    "distance": "Distance",
+    "stagesTile": "Étapes",
+    "sessionsTile": "Séances",
+    "about": "≈ {{count}}"
   },
   "map": {
     "recenter": "Recentrer sur mon pion",

@@ -110,21 +110,30 @@
     "pickedPoint": "Point on the map",
     "safeRoutes": "Safe walking routes, in France",
     "showRoute": "Show the route",
-    "computing": "Computing the route…"
+    "computing": "Computing the route…",
+    "ideas": "Ideas from your start",
+    "onFoot": "on foot",
+    "ideaSessions_one": "≈ {{n}} session",
+    "ideaSessions_other": "≈ {{n}} sessions",
+    "footSafe": "On foot · safe paths"
   },
   "preview": {
     "walkingRoute": "Walking route",
     "arrival": "Arrival around {{date}}",
     "sessions_one": "≈ {{count}} session of {{km}} {{unit}}",
     "sessions_other": "≈ {{count}} sessions of {{km}} {{unit}}",
-    "safe": "No motorways or expressways",
+    "safe": "No motorways or fast roads. Mostly paths and small roads.",
     "start": "Start the journey",
     "solo": "Solo",
     "race": "Race",
     "createRace_one": "Create a race for 2",
     "createRace_other": "Create a race for {{players}}",
     "createRace_zero": "Pick your rivals",
-    "noFriends": "Add friends to race them →"
+    "noFriends": "Add friends to race them →",
+    "distance": "Distance",
+    "stagesTile": "Stages",
+    "sessionsTile": "Sessions",
+    "about": "≈ {{count}}"
   },
   "map": {
     "recenter": "Recenter on my pawn",
