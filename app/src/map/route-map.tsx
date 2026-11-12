@@ -32,7 +32,7 @@ import { useMapStyle } from './style';
  */
 export type MapMode = 'follow' | 'card' | 'overview';
 
-const FOLLOW_ZOOM = 16.6;
+const FOLLOW_ZOOM = 17.6;
 const FOLLOW_PITCH = 60;
 
 type Props = {

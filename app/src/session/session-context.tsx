@@ -1,6 +1,6 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { randomUUID } from 'expo-crypto';
-import { router } from 'expo-router';
+import { router, usePathname } from 'expo-router';
 import {
   createContext,
   useCallback,
@@ -56,6 +56,12 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     strideCm.current = user?.stride_cm ?? null;
   }, [user]);
+  // The walker may already be on the live view: never open a second one on top.
+  const pathname = usePathname();
+  const onSessionScreen = useRef(false);
+  useEffect(() => {
+    onSessionScreen.current = pathname === '/session';
+  }, [pathname]);
 
   const sync = useCallback(async () => {
     if (pendingSessions().length === 0) return;
@@ -111,7 +117,10 @@ export function SessionProvider({ children }: { children: ReactNode }) {
           return;
         }
         setLive(current);
-        if (current && !wasRecording) router.push('/session');
+        if (current && !wasRecording && !onSessionScreen.current) {
+          onSessionScreen.current = true;
+          router.push('/session');
+        }
         if (current && now - lastSaved.current >= SAVE_EVERY_MS) {
           saveLive(current);
           lastSaved.current = now;
