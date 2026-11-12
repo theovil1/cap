@@ -1,0 +1,36 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT p.id FROM public_routes p JOIN routes r ON r.id = p.route_id\n         WHERE NOT p.hidden\n           AND (p.visibility = 'everyone' OR p.author_id = $1 OR EXISTS (\n                SELECT 1 FROM friendships f WHERE f.status = 'accepted'\n                  AND ((f.user_id = $1 AND f.friend_id = p.author_id) OR (f.friend_id = $1 AND f.user_id = p.author_id))))\n           AND ($2::text IS NULL OR p.title ILIKE $2 OR r.start_label ILIKE $2 OR r.end_label ILIKE $2)\n           AND ($3::text IS NULL OR $3 = ANY(p.tags))\n           AND ($4::float8 IS NULL OR r.distance_m <= $4 * 1000)\n         ORDER BY\n           CASE WHEN $5 = 'popular' THEN (SELECT count(*) FROM journeys j WHERE j.public_route_id = p.id) END DESC NULLS LAST,\n           CASE WHEN $5 = 'near' THEN (r.start_lat - $6) ^ 2 + ((r.start_lon - $7) * cos(radians($6))) ^ 2 END ASC NULLS LAST,\n           p.created_at DESC\n         LIMIT $8 OFFSET $9",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "public_routes",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Text",
+        "Float8",
+        "Text",
+        "Float8",
+        "Float8",
+        "Int8",
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "395cf394eb9789eeb936005e9ddbf29892369d8e3fa12dcfc74ffb2fa6e795f2"
+}

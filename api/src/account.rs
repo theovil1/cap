@@ -36,22 +36,7 @@ async fn set_avatar(
     headers: HeaderMap,
     body: Bytes,
 ) -> AppResult<Json<UserProfile>> {
-    let content_type = headers.get(header::CONTENT_TYPE).and_then(|v| v.to_str().ok()).unwrap_or_default();
-    let valid = match content_type {
-        "image/jpeg" => body.starts_with(&[0xFF, 0xD8, 0xFF]),
-        "image/png" => body.starts_with(b"\x89PNG"),
-        _ => false,
-    };
-    if !valid {
-        return Err(AppError::bad_request("invalid_image", "send a JPEG or PNG image"));
-    }
-    if body.len() > MAX_AVATAR_BYTES {
-        return Err(AppError::new(
-            StatusCode::PAYLOAD_TOO_LARGE,
-            "image_too_large",
-            "the image is above 512 KB",
-        ));
-    }
+    let content_type = check_image(&headers, &body, MAX_AVATAR_BYTES)?;
     let mut tx = state.db.begin().await?;
     sqlx::query!(
         "INSERT INTO user_avatars (user_id, content_type, image) VALUES ($1, $2, $3)
@@ -67,6 +52,24 @@ async fn set_avatar(
     sqlx::query!("UPDATE users SET avatar_url = $2 WHERE id = $1", user_id, url).execute(&mut *tx).await?;
     tx.commit().await?;
     Ok(Json(fetch_profile(&state.db, user_id).await?))
+}
+
+/// The content type of a JPEG or PNG body no bigger than `max_bytes`, or the error to send.
+pub(crate) fn check_image(headers: &HeaderMap, body: &Bytes, max_bytes: usize) -> AppResult<&'static str> {
+    let content_type = headers.get(header::CONTENT_TYPE).and_then(|v| v.to_str().ok()).unwrap_or_default();
+    let content_type = match content_type {
+        "image/jpeg" if body.starts_with(&[0xFF, 0xD8, 0xFF]) => "image/jpeg",
+        "image/png" if body.starts_with(&[0x89, b'P', b'N', b'G']) => "image/png",
+        _ => return Err(AppError::bad_request("invalid_image", "send a JPEG or PNG image")),
+    };
+    if body.len() > max_bytes {
+        return Err(AppError::new(
+            StatusCode::PAYLOAD_TOO_LARGE,
+            "image_too_large",
+            format!("the image is above {} KB", max_bytes / 1024),
+        ));
+    }
+    Ok(content_type)
 }
 
 /// Remove the profile photo.

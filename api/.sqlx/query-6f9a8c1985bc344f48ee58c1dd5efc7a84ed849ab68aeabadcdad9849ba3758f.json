@@ -1,0 +1,20 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO public_routes (id, route_id, author_id, title, description, visibility, tags)\n         SELECT $1, r.id, $3, $4, $5, $6, $7 FROM routes r WHERE r.id = $2 AND r.created_by = $3",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Uuid",
+        "Text",
+        "Text",
+        "Text",
+        "TextArray"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "6f9a8c1985bc344f48ee58c1dd5efc7a84ed849ab68aeabadcdad9849ba3758f"
+}

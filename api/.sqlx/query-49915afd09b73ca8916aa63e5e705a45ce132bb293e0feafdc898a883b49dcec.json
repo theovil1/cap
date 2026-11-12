@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO journeys (id, route_id, kind, status, starts_at, created_by, public_route_id)\n         SELECT $1, route_id, 'solo', 'active', now(), $3, id FROM public_routes WHERE id = $2",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "49915afd09b73ca8916aa63e5e705a45ce132bb293e0feafdc898a883b49dcec"
+}

@@ -873,3 +873,125 @@ async fn delete_account(db: PgPool) {
     let routes: i64 = sqlx::query_scalar("SELECT count(*) FROM routes").fetch_one(&db).await.unwrap();
     assert_eq!(routes, 0, "routes keep the addresses typed by the user");
 }
+
+#[sqlx::test(migrator = "cap_api::MIGRATOR")]
+async fn public_routes_from_publication_to_reports(db: PgPool) {
+    let server = server(db.clone()).await;
+    let theo = register(&server, "theo").await;
+    let lilou = register(&server, "lilou").await;
+    let route = create_route(&server, &theo).await;
+
+    // Only a route of one's own, with a title.
+    server
+        .post("/public-routes")
+        .add_header("authorization", bearer(&lilou))
+        .json(&json!({ "route_id": route["id"], "title": "La Sologne" }))
+        .await
+        .assert_status(StatusCode::NOT_FOUND);
+    server
+        .post("/public-routes")
+        .add_header("authorization", bearer(&theo))
+        .json(&json!({ "route_id": route["id"], "title": "x" }))
+        .await
+        .assert_status(StatusCode::BAD_REQUEST);
+    let published = server
+        .post("/public-routes")
+        .add_header("authorization", bearer(&theo))
+        .json(&json!({ "route_id": route["id"], "title": "De la Sologne à Paris",
+                       "description": "Forêts et étangs", "tags": ["countryside"] }))
+        .await;
+    published.assert_status(StatusCode::CREATED);
+    let published: Value = published.json();
+    let id = published["id"].as_str().unwrap().to_owned();
+    assert_eq!(published["mine"], true);
+    assert_eq!(published["walkers"], 0);
+    server
+        .post("/public-routes")
+        .add_header("authorization", bearer(&theo))
+        .json(&json!({ "route_id": route["id"], "title": "Encore" }))
+        .await
+        .assert_status(StatusCode::CONFLICT);
+
+    // Lilou finds it, by search and by tag, and starts it.
+    let found: Value = server
+        .get("/public-routes?q=sologne&tag=countryside")
+        .add_header("authorization", bearer(&lilou))
+        .await
+        .json();
+    assert_eq!(found.as_array().unwrap().len(), 1);
+    assert_eq!(found[0]["author"]["username"], "theo");
+    let featured: Value =
+        server.get("/public-routes/featured").add_header("authorization", bearer(&lilou)).await.json();
+    assert_eq!(featured["id"], id.as_str());
+    let journey =
+        server.post(&format!("/public-routes/{id}/start")).add_header("authorization", bearer(&lilou)).await;
+    journey.assert_status(StatusCode::CREATED);
+    let journey: Value = journey.json();
+    assert_eq!(journey["public_route_id"], id.as_str());
+    server
+        .post(&format!("/public-routes/{id}/start"))
+        .add_header("authorization", bearer(&lilou))
+        .await
+        .assert_status(StatusCode::CONFLICT);
+
+    // She walks it: the fastest by walking time.
+    server
+        .post("/sessions")
+        .add_header("authorization", bearer(&lilou))
+        .json(&session(Uuid::now_v7(), 500.0, 600))
+        .await
+        .assert_status(StatusCode::CREATED);
+    let detail: Value =
+        server.get(&format!("/public-routes/{id}")).add_header("authorization", bearer(&lilou)).await.json();
+    assert_eq!(detail["walkers"], 1);
+    assert_eq!(detail["finished"], 1);
+    assert_eq!(detail["fastest"][0]["walker"]["username"], "lilou");
+    assert!(detail["fastest"][0]["walking_s"].as_i64().unwrap() > 0);
+    assert_eq!(detail["my_journey_id"], journey["id"]);
+
+    // A photo, served without a token.
+    let jpeg = [0xFF, 0xD8, 0xFF, 0xE0, 0, 0x10];
+    let with_photo: Value = server
+        .put(&format!("/public-routes/{id}/photos/end"))
+        .add_header("authorization", bearer(&theo))
+        .add_header("content-type", "image/jpeg")
+        .bytes(jpeg.to_vec().into())
+        .await
+        .json();
+    let url = with_photo["photos"][0]["url"].as_str().unwrap();
+    assert_eq!(server.get(url).await.as_bytes().as_ref(), &jpeg);
+
+    // Three reports hide it; an admin shows it again and makes it the route of the week.
+    for name in ["ines", "marc", "nadia"] {
+        let walker = register(&server, name).await;
+        server
+            .post("/reports")
+            .add_header("authorization", bearer(&walker))
+            .json(&json!({ "target_type": "route", "target_id": id, "reason": "spam" }))
+            .await
+            .assert_status(StatusCode::NO_CONTENT);
+    }
+    server
+        .get(&format!("/public-routes/{id}"))
+        .add_header("authorization", bearer(&lilou))
+        .await
+        .assert_status(StatusCode::NOT_FOUND);
+    server
+        .patch(&format!("/admin/public-routes/{id}"))
+        .add_header("authorization", bearer(&lilou))
+        .json(&json!({ "hidden": false }))
+        .await
+        .assert_status(StatusCode::FORBIDDEN);
+    sqlx::query("UPDATE users SET is_admin = true WHERE username = 'theo'").execute(&db).await.unwrap();
+    let reports: Value = server.get("/admin/reports").add_header("authorization", bearer(&theo)).await.json();
+    assert_eq!(reports[0]["reports"], 3);
+    let shown: Value = server
+        .patch(&format!("/admin/public-routes/{id}"))
+        .add_header("authorization", bearer(&theo))
+        .json(&json!({ "hidden": false, "featured": true }))
+        .await
+        .json();
+    assert_eq!(shown["featured"], true);
+    let list: Value = server.get("/public-routes").add_header("authorization", bearer(&lilou)).await.json();
+    assert_eq!(list.as_array().unwrap().len(), 1);
+}

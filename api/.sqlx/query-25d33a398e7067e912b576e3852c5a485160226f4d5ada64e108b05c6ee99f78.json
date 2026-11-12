@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT j.id, j.kind, j.status, j.created_at, r.id AS route_id,\n                r.start_label, r.start_lat, r.start_lon, r.end_label, r.end_lat, r.end_lon,\n                r.distance_m AS route_distance_m, p.distance_m, p.arrived_at,\n                (p.joined_at IS NOT NULL) AS \"joined!\", (j.created_by = $1) AS \"mine!\", j.starts_at, p.rank,\n                (SELECT count(*) FROM journey_participants o\n                 WHERE o.journey_id = j.id AND o.joined_at IS NOT NULL) AS \"players!\",\n                (SELECT name FROM route_stages WHERE route_id = r.id ORDER BY position LIMIT 1) AS start_town,\n                (SELECT name FROM route_stages WHERE route_id = r.id ORDER BY position DESC LIMIT 1) AS end_town,\n                (SELECT count(*) FROM session_allocations a JOIN sessions s ON s.id = a.session_id\n                 WHERE a.journey_id = j.id AND s.user_id = $1 AND a.distance_m > 0) AS \"sessions!\"\n         FROM journey_participants p\n         JOIN journeys j ON j.id = p.journey_id\n         JOIN routes r ON r.id = j.route_id\n         WHERE p.user_id = $1\n         ORDER BY j.created_at DESC",
+  "query": "SELECT j.id, j.kind, j.status, j.created_at, j.public_route_id, r.id AS route_id,\n                r.start_label, r.start_lat, r.start_lon, r.end_label, r.end_lat, r.end_lon,\n                r.distance_m AS route_distance_m, r.path, p.distance_m, p.arrived_at,\n                (p.joined_at IS NOT NULL) AS \"joined!\", (j.created_by = $1) AS \"mine!\", j.starts_at, p.rank,\n                (SELECT count(*) FROM journey_participants o\n                 WHERE o.journey_id = j.id AND o.joined_at IS NOT NULL) AS \"players!\",\n                (SELECT name FROM route_stages WHERE route_id = r.id ORDER BY position LIMIT 1) AS start_town,\n                (SELECT name FROM route_stages WHERE route_id = r.id ORDER BY position DESC LIMIT 1) AS end_town,\n                (SELECT count(*) FROM session_allocations a JOIN sessions s ON s.id = a.session_id\n                 WHERE a.journey_id = j.id AND s.user_id = $1 AND a.distance_m > 0) AS \"sessions!\"\n         FROM journey_participants p\n         JOIN journeys j ON j.id = p.journey_id\n         JOIN routes r ON r.id = j.route_id\n         WHERE p.user_id = $1 AND j.id = $2",
   "describe": {
     "columns": [
       {
@@ -49,6 +49,17 @@
       },
       {
         "ordinal": 4,
+        "name": "public_route_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "journeys",
+            "name": "public_route_id"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
         "name": "route_id",
         "type_info": "Uuid",
         "origin": {
@@ -59,7 +70,7 @@
         }
       },
       {
-        "ordinal": 5,
+        "ordinal": 6,
         "name": "start_label",
         "type_info": "Text",
         "origin": {
@@ -70,7 +81,7 @@
         }
       },
       {
-        "ordinal": 6,
+        "ordinal": 7,
         "name": "start_lat",
         "type_info": "Float8",
         "origin": {
@@ -81,7 +92,7 @@
         }
       },
       {
-        "ordinal": 7,
+        "ordinal": 8,
         "name": "start_lon",
         "type_info": "Float8",
         "origin": {
@@ -92,7 +103,7 @@
         }
       },
       {
-        "ordinal": 8,
+        "ordinal": 9,
         "name": "end_label",
         "type_info": "Text",
         "origin": {
@@ -103,7 +114,7 @@
         }
       },
       {
-        "ordinal": 9,
+        "ordinal": 10,
         "name": "end_lat",
         "type_info": "Float8",
         "origin": {
@@ -114,7 +125,7 @@
         }
       },
       {
-        "ordinal": 10,
+        "ordinal": 11,
         "name": "end_lon",
         "type_info": "Float8",
         "origin": {
@@ -125,7 +136,7 @@
         }
       },
       {
-        "ordinal": 11,
+        "ordinal": 12,
         "name": "route_distance_m",
         "type_info": "Float8",
         "origin": {
@@ -136,7 +147,18 @@
         }
       },
       {
-        "ordinal": 12,
+        "ordinal": 13,
+        "name": "path",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "routes",
+            "name": "path"
+          }
+        }
+      },
+      {
+        "ordinal": 14,
         "name": "distance_m",
         "type_info": "Float8",
         "origin": {
@@ -147,7 +169,7 @@
         }
       },
       {
-        "ordinal": 13,
+        "ordinal": 15,
         "name": "arrived_at",
         "type_info": "Timestamptz",
         "origin": {
@@ -158,19 +180,19 @@
         }
       },
       {
-        "ordinal": 14,
+        "ordinal": 16,
         "name": "joined!",
         "type_info": "Bool",
         "origin": "Expression"
       },
       {
-        "ordinal": 15,
+        "ordinal": 17,
         "name": "mine!",
         "type_info": "Bool",
         "origin": "Expression"
       },
       {
-        "ordinal": 16,
+        "ordinal": 18,
         "name": "starts_at",
         "type_info": "Timestamptz",
         "origin": {
@@ -181,7 +203,7 @@
         }
       },
       {
-        "ordinal": 17,
+        "ordinal": 19,
         "name": "rank",
         "type_info": "Int4",
         "origin": {
@@ -192,25 +214,25 @@
         }
       },
       {
-        "ordinal": 18,
+        "ordinal": 20,
         "name": "players!",
         "type_info": "Int8",
         "origin": "Expression"
       },
       {
-        "ordinal": 19,
+        "ordinal": 21,
         "name": "start_town",
         "type_info": "Text",
         "origin": "Expression"
       },
       {
-        "ordinal": 20,
+        "ordinal": 22,
         "name": "end_town",
         "type_info": "Text",
         "origin": "Expression"
       },
       {
-        "ordinal": 21,
+        "ordinal": 23,
         "name": "sessions!",
         "type_info": "Int8",
         "origin": "Expression"
@@ -218,6 +240,7 @@
     ],
     "parameters": {
       "Left": [
+        "Uuid",
         "Uuid"
       ]
     },
@@ -225,6 +248,8 @@
       false,
       false,
       false,
+      false,
+      true,
       false,
       false,
       false,
@@ -246,5 +271,5 @@
       null
     ]
   },
-  "hash": "2bb8c6df4f42d3e8c35e1a90030a8a219d08a9887835937a2cfec01a23255233"
+  "hash": "25d33a398e7067e912b576e3852c5a485160226f4d5ada64e108b05c6ee99f78"
 }

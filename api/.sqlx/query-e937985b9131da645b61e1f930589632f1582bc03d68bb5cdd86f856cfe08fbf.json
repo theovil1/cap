@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM public_route_photos ph USING public_routes p\n         WHERE ph.public_route_id = p.id AND p.id = $1 AND p.author_id = $2 AND ph.kind = $3",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "e937985b9131da645b61e1f930589632f1582bc03d68bb5cdd86f856cfe08fbf"
+}

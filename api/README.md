@@ -25,6 +25,12 @@ Interactive documentation is served at `/docs` (OpenAPI at `/openapi.json`).
 | `DELETE /journeys/{id}` | Delete a solo journey or cancel a race not started yet (sessions stay in the history) |
 | `POST /races` | Create a race on a computed route and invite friends |
 | `POST /journeys/{id}/join`, `/leave`, `/start` | Accept an invitation, leave a race, start it (creator; unanswered invitations drop) |
+| `POST /public-routes`, `GET /public-routes` | Publish a computed route; browse (`sort`: `popular`, `new`, `near`; `q`, `tag`, `max_km`) |
+| `GET /public-routes/featured` | Route of the week (chosen by an admin, else the most started this week) |
+| `GET`, `DELETE /public-routes/{id}`, `POST /public-routes/{id}/start` | Map, stages and ten fastest by walking time; unpublish; start a solo journey on it |
+| `PUT`, `DELETE /public-routes/{id}/photos/{kind}`, `GET` (no token) | Start, end or path photo (JPEG or PNG, 2 MB at most) |
+| `POST /reports` | Report a route, post, comment or walker; three reports hide a route or a post |
+| `GET /admin/reports`, `PATCH /admin/public-routes/{id}` | Admins: open reports; hide, show or feature a route |
 | `GET /live` (WebSocket) | Send `progress` (session distance) or `stop`; receive rivals' `position` and `stop` |
 | `POST /sessions` | Upload a session, idempotent on `local_id`, rejected above 20 km/h; returns the stages it unlocked |
 | `GET /sessions` | Session history |

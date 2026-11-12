@@ -1,0 +1,59 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT target_type, target_id, count(*) AS \"reports!\",\n                array_remove(array_agg(NULLIF(reason, '')), NULL) AS \"reasons!\", max(created_at) AS \"last_at!\"\n         FROM reports WHERE resolved_at IS NULL\n         GROUP BY target_type, target_id ORDER BY 3 DESC, 5 DESC",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "target_type",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "reports",
+            "name": "target_type"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "target_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "reports",
+            "name": "target_id"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "reports!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 3,
+        "name": "reasons!",
+        "type_info": "TextArray",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 4,
+        "name": "last_at!",
+        "type_info": "Timestamptz",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false,
+      false,
+      null,
+      null,
+      null
+    ]
+  },
+  "hash": "cb4f5e8ee7ec309a084bc9819518b35cde2d2804814740e43097b3b6e1f6be01"
+}

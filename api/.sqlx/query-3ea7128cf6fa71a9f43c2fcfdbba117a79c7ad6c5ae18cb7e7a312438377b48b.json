@@ -1,0 +1,29 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT j.id FROM journeys j JOIN journey_participants jp ON jp.journey_id = j.id\n         WHERE j.public_route_id = $1 AND jp.user_id = $2 ORDER BY j.created_at DESC LIMIT 1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "journeys",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "3ea7128cf6fa71a9f43c2fcfdbba117a79c7ad6c5ae18cb7e7a312438377b48b"
+}

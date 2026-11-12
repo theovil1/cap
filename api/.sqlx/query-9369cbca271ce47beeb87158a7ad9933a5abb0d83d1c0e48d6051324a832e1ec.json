@@ -1,0 +1,287 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT p.id, p.route_id, p.title, p.description, p.visibility, p.tags, p.featured_at, p.created_at,\n                u.id AS author_id, u.first_name, u.username, u.avatar_url,\n                r.start_label, r.start_lat, r.start_lon, r.end_label, r.end_lat, r.end_lon, r.distance_m,\n                (SELECT name FROM route_stages WHERE route_id = r.id ORDER BY position LIMIT 1) AS start_town,\n                (SELECT name FROM route_stages WHERE route_id = r.id ORDER BY position DESC LIMIT 1) AS end_town,\n                (SELECT count(*) FROM route_stages WHERE route_id = r.id AND position > 0) AS \"stages!\",\n                (SELECT count(DISTINCT jp.user_id) FROM journeys j JOIN journey_participants jp ON jp.journey_id = j.id\n                 WHERE j.public_route_id = p.id AND jp.joined_at IS NOT NULL) AS \"walkers!\",\n                (SELECT count(*) FROM journeys j JOIN journey_participants jp ON jp.journey_id = j.id\n                 WHERE j.public_route_id = p.id AND jp.arrived_at IS NOT NULL) AS \"finished!\",\n                (SELECT COALESCE(array_agg(ph.kind || ':' || extract(epoch FROM ph.updated_at)::bigint ORDER BY ph.kind), '{}')\n                 FROM public_route_photos ph WHERE ph.public_route_id = p.id) AS \"photos!\"\n         FROM public_routes p\n         JOIN users u ON u.id = p.author_id\n         JOIN routes r ON r.id = p.route_id\n         WHERE p.id = ANY($1) AND (NOT p.hidden OR p.author_id = $2)",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "public_routes",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "route_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "public_routes",
+            "name": "route_id"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "title",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "public_routes",
+            "name": "title"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "description",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "public_routes",
+            "name": "description"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "visibility",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "public_routes",
+            "name": "visibility"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "tags",
+        "type_info": "TextArray",
+        "origin": {
+          "Table": {
+            "table": "public_routes",
+            "name": "tags"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "featured_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "public_routes",
+            "name": "featured_at"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "created_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "public_routes",
+            "name": "created_at"
+          }
+        }
+      },
+      {
+        "ordinal": 8,
+        "name": "author_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "users",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 9,
+        "name": "first_name",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "users",
+            "name": "first_name"
+          }
+        }
+      },
+      {
+        "ordinal": 10,
+        "name": "username",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "users",
+            "name": "username"
+          }
+        }
+      },
+      {
+        "ordinal": 11,
+        "name": "avatar_url",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "users",
+            "name": "avatar_url"
+          }
+        }
+      },
+      {
+        "ordinal": 12,
+        "name": "start_label",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "routes",
+            "name": "start_label"
+          }
+        }
+      },
+      {
+        "ordinal": 13,
+        "name": "start_lat",
+        "type_info": "Float8",
+        "origin": {
+          "Table": {
+            "table": "routes",
+            "name": "start_lat"
+          }
+        }
+      },
+      {
+        "ordinal": 14,
+        "name": "start_lon",
+        "type_info": "Float8",
+        "origin": {
+          "Table": {
+            "table": "routes",
+            "name": "start_lon"
+          }
+        }
+      },
+      {
+        "ordinal": 15,
+        "name": "end_label",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "routes",
+            "name": "end_label"
+          }
+        }
+      },
+      {
+        "ordinal": 16,
+        "name": "end_lat",
+        "type_info": "Float8",
+        "origin": {
+          "Table": {
+            "table": "routes",
+            "name": "end_lat"
+          }
+        }
+      },
+      {
+        "ordinal": 17,
+        "name": "end_lon",
+        "type_info": "Float8",
+        "origin": {
+          "Table": {
+            "table": "routes",
+            "name": "end_lon"
+          }
+        }
+      },
+      {
+        "ordinal": 18,
+        "name": "distance_m",
+        "type_info": "Float8",
+        "origin": {
+          "Table": {
+            "table": "routes",
+            "name": "distance_m"
+          }
+        }
+      },
+      {
+        "ordinal": 19,
+        "name": "start_town",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 20,
+        "name": "end_town",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 21,
+        "name": "stages!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 22,
+        "name": "walkers!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 23,
+        "name": "finished!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 24,
+        "name": "photos!",
+        "type_info": "TextArray",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "UuidArray",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      false,
+      false,
+      false,
+      false,
+      true,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  "hash": "9369cbca271ce47beeb87158a7ad9933a5abb0d83d1c0e48d6051324a832e1ec"
+}

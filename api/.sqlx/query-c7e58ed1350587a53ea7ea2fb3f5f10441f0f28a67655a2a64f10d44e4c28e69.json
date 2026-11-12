@@ -1,0 +1,18 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO public_route_photos (public_route_id, kind, content_type, image)\n         SELECT id, $3, $4, $5 FROM public_routes WHERE id = $1 AND author_id = $2\n         ON CONFLICT (public_route_id, kind) DO UPDATE SET content_type = $4, image = $5, updated_at = now()",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Text",
+        "Text",
+        "Bytea"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "c7e58ed1350587a53ea7ea2fb3f5f10441f0f28a67655a2a64f10d44e4c28e69"
+}

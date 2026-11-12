@@ -15,8 +15,8 @@ use utoipa_axum::router::OpenApiRouter;
 use utoipa_scalar::{Scalar, Servable};
 
 use crate::{
-    account, auth, friends, geo, history, journeys, leaderboards, live, races, sessions, state::AppState,
-    users,
+    account, auth, friends, geo, history, journeys, leaderboards, live, public_routes, races, sessions,
+    state::AppState, users,
 };
 
 #[derive(OpenApi)]
@@ -30,6 +30,7 @@ use crate::{
         (name = "friends", description = "Friends and invite links"),
         (name = "leaderboards", description = "Rankings between friends"),
         (name = "journeys", description = "Routes and journeys"),
+        (name = "public routes", description = "Routes shared with the community, their photos and reports"),
         (name = "races", description = "Races between friends (live positions on the /live WebSocket)"),
         (name = "sessions", description = "Treadmill sessions"),
     )
@@ -63,6 +64,7 @@ fn api_router() -> OpenApiRouter<AppState> {
         .merge(leaderboards::router())
         .merge(geo::router())
         .merge(journeys::router())
+        .merge(public_routes::router())
         .merge(races::router())
         .merge(sessions::router())
         .merge(history::router())
@@ -81,6 +83,7 @@ pub fn router(state: AppState) -> Router {
         .route("/invite/{code}", get(friends::invite_page))
         .route("/live", get(live::live_socket))
         .route("/avatars/{user_id}", get(account::get_avatar))
+        .route("/public-routes/{id}/photos/{kind}", get(public_routes::get_photo))
         .merge(api)
         .merge(Scalar::with_url("/docs", openapi.clone()))
         .route("/openapi.json", get(move || async move { Json(openapi) }))

@@ -1,0 +1,41 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT ph.content_type, ph.image FROM public_route_photos ph JOIN public_routes p ON p.id = ph.public_route_id\n         WHERE ph.public_route_id = $1 AND ph.kind = $2 AND NOT p.hidden",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "content_type",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "public_route_photos",
+            "name": "content_type"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "image",
+        "type_info": "Bytea",
+        "origin": {
+          "Table": {
+            "table": "public_route_photos",
+            "name": "image"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false
+    ]
+  },
+  "hash": "6ec097197f392ae5d9b6a0340782d5afe1900a48856eda2ebe85932e36c3d192"
+}

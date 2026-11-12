@@ -1,0 +1,26 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT p.id FROM public_routes p\n         WHERE NOT p.hidden AND p.visibility = 'everyone'\n         ORDER BY p.featured_at DESC NULLS LAST,\n                  (SELECT count(*) FROM journeys j WHERE j.public_route_id = p.id\n                     AND j.created_at > now() - interval '7 days') DESC,\n                  p.created_at DESC\n         LIMIT 1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "public_routes",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "3e4000fdb9b8bfee15c24ed25b3788a0ce19fb99cf6555f3645b13b93992a583"
+}

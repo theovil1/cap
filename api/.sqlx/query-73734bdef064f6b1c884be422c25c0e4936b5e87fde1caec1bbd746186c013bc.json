@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT EXISTS (SELECT 1 FROM journeys j JOIN journey_participants jp ON jp.journey_id = j.id\n           WHERE j.public_route_id = $1 AND jp.user_id = $2 AND j.status = 'active' AND jp.arrived_at IS NULL)\n         AS \"exists!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "exists!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "73734bdef064f6b1c884be422c25c0e4936b5e87fde1caec1bbd746186c013bc"
+}

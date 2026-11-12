@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE journeys SET public_route_id = $1 WHERE route_id = $2 AND public_route_id IS NULL",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "f54df3290eab78e53ce13609b0417e5e512ed040614b173274ceaf52abc19fad"
+}

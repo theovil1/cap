@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT EXISTS (SELECT 1 FROM public_routes p WHERE p.id = $2\n           AND (p.author_id = $1 OR (NOT p.hidden AND (p.visibility = 'everyone' OR EXISTS (\n                SELECT 1 FROM friendships f WHERE f.status = 'accepted'\n                  AND ((f.user_id = $1 AND f.friend_id = p.author_id) OR (f.friend_id = $1 AND f.user_id = p.author_id)))))))\n         AS \"visible!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "visible!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "7e15c38b43f2eca9a1740bea2e82cdb3bab82b407cfef99f7ff23c3ee203685b"
+}

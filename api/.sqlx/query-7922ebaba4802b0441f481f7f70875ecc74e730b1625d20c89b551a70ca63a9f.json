@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM public_routes WHERE id = $1 AND (author_id = $2 OR $3)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Bool"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "7922ebaba4802b0441f481f7f70875ecc74e730b1625d20c89b551a70ca63a9f"
+}

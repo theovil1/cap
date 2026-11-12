@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE reports SET resolved_at = now() WHERE target_type = 'route' AND target_id = $1 AND resolved_at IS NULL",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "5d2625c8dc9ce939703c02bbee909315398b00fba7c0481733cb28131c333f0c"
+}
