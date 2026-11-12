@@ -7,6 +7,7 @@ pub mod config;
 pub mod error;
 pub mod friends;
 pub mod geo;
+pub mod history;
 pub mod journeys;
 pub mod leaderboards;
 pub mod live;

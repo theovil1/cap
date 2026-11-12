@@ -1,9 +1,9 @@
 import type { LayerSpecification, StyleSpecification } from '@maplibre/maplibre-gl-style-spec';
 import { useQuery } from '@tanstack/react-query';
-import { useEffect, useMemo, useState, useSyncExternalStore } from 'react';
+import { useMemo, useSyncExternalStore } from 'react';
 
 import { getValue, setValue } from '@/session/store';
-import { useAppearance } from '@/settings/appearance';
+import { useDark } from '@/settings/appearance';
 
 /** OpenFreeMap Liberty: free vector tiles with 3D buildings, no key needed. */
 const LIBERTY_URL = 'https://tiles.openfreemap.org/styles/liberty';
@@ -165,26 +165,9 @@ export function useMapKind(): MapKind {
   );
 }
 
-/** Night falls on the map from 8 pm to 7 am in `auto` mood (specification). */
-export function moodAt(hour: number): Mood {
-  return hour >= 7 && hour < 20 ? 'day' : 'night';
-}
-
-/** Hour of the day, refreshed every minute. */
-function useHour(): number {
-  const [hour, setHour] = useState(() => new Date().getHours());
-  useEffect(() => {
-    const timer = setInterval(() => setHour(new Date().getHours()), 60_000);
-    return () => clearInterval(timer);
-  }, []);
-  return hour;
-}
-
-/** Plan in the profile's mood (day, night or by the hour); satellite is the same day and night. */
+/** Plan in day or night like the rest of the app; satellite is the same day and night. */
 export function useMapStyle(): StyleSpecification | null {
-  const { mapMood } = useAppearance();
-  const hour = useHour();
-  const mood: Mood = mapMood === 'auto' ? moodAt(hour) : mapMood;
+  const mood: Mood = useDark() ? 'night' : 'day';
   const mapKind = useMapKind();
   const { data } = useQuery({
     queryKey: ['map-style'],

@@ -15,7 +15,8 @@ use utoipa_axum::router::OpenApiRouter;
 use utoipa_scalar::{Scalar, Servable};
 
 use crate::{
-    account, auth, friends, geo, journeys, leaderboards, live, races, sessions, state::AppState, users,
+    account, auth, friends, geo, history, journeys, leaderboards, live, races, sessions, state::AppState,
+    users,
 };
 
 #[derive(OpenApi)]
@@ -64,6 +65,7 @@ fn api_router() -> OpenApiRouter<AppState> {
         .merge(journeys::router())
         .merge(races::router())
         .merge(sessions::router())
+        .merge(history::router())
 }
 
 /// Builds the full HTTP application.

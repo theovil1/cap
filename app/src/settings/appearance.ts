@@ -1,4 +1,5 @@
 import { useSyncExternalStore } from 'react';
+import { Appearance as SystemAppearance, useColorScheme } from 'react-native';
 
 import type { UserProfile } from '@/api/types';
 import { getValue, setValue } from '@/session/store';
@@ -13,6 +14,12 @@ const DEFAULTS: Appearance = { appColor: 'orange', mapMood: 'auto', units: 'km' 
 
 /** Kept on the phone so the first screen already has the right colours. */
 let current: Appearance = { ...DEFAULTS, ...(getValue<Appearance>('appearance') ?? {}) };
+applyScheme(current.mapMood);
+
+/** Day or night for the whole app (alerts and menus too); `auto` follows iOS. */
+function applyScheme(mood: MapMood) {
+  SystemAppearance.setColorScheme(mood === 'auto' ? 'auto' : mood === 'day' ? 'light' : 'dark');
+}
 const listeners = new Set<() => void>();
 
 let onUnits: ((units: Units) => void) | null = null;
@@ -38,6 +45,7 @@ export function syncAppearance(user: Pick<UserProfile, 'app_color' | 'map_mood' 
     return;
   }
   const unitsChanged = next.units !== current.units;
+  if (next.mapMood !== current.mapMood) applyScheme(next.mapMood);
   current = next;
   setValue('appearance', next);
   if (unitsChanged) onUnits?.(next.units);
@@ -52,4 +60,11 @@ export function useAppearance(): Appearance {
     },
     () => current,
   );
+}
+
+/** Night for the app and the map: the profile's choice, or iOS in `auto`. */
+export function useDark(): boolean {
+  const { mapMood } = useAppearance();
+  const scheme = useColorScheme();
+  return mapMood === 'auto' ? scheme === 'dark' : mapMood === 'night';
 }

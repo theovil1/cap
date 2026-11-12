@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE journeys j SET status = 'active'\n         WHERE j.id = ANY($1) AND j.status = 'finished'\n           AND EXISTS (SELECT 1 FROM journey_participants p WHERE p.journey_id = j.id AND p.arrived_at IS NULL)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "UuidArray"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "22915bba1fea649873ca56f3f56eed323c205e2a0e70ae718364db8b0e06fe96"
+}

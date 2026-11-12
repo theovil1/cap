@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM stage_unlocks u USING route_stages s, journey_participants p\n         WHERE u.stage_id = s.id AND u.user_id = $1 AND u.journey_id = ANY($2)\n           AND p.journey_id = u.journey_id AND p.user_id = u.user_id AND s.at_m > p.distance_m",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "UuidArray"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "e94c5a7519d49ef548ebe3c9f1e17a58a2e5d6962859834e79b28f88b03bd24a"
+}

@@ -1,6 +1,4 @@
-import { useColorScheme } from 'react-native';
-
-import { useAppearance, type AppColor } from '@/settings/appearance';
+import { useAppearance, useDark, type AppColor } from '@/settings/appearance';
 
 /** Colours from the validated mockups (docs/sources, not versioned). */
 const palette = {
@@ -91,7 +89,7 @@ const themes = Object.fromEntries(
 export function useColors(): Colors {
   const { appColor } = useAppearance();
   const theme = themes[appColor] ?? themes.orange;
-  return useColorScheme() === 'dark' ? theme.dark : theme.light;
+  return useDark() ? theme.dark : theme.light;
 }
 
 export const fonts = {

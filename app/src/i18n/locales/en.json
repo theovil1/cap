@@ -261,7 +261,7 @@
       "purple": "Purple",
       "pink": "Pink"
     },
-    "map": "Map",
+    "map": "Appearance",
     "moods": {
       "auto": "Auto",
       "day": "Day",
@@ -359,7 +359,14 @@
   "history": {
     "title": "My sessions",
     "add": "Add a session",
-    "empty": "No session yet."
+    "empty": "No session yet.",
+    "delete": "Delete",
+    "deleteOne": "Delete this session",
+    "deleteOneTitle": "Delete this session?",
+    "deleteOneBody": "Its distance is taken off your journeys, races and stats.",
+    "deleteAll": "Clear the whole history",
+    "deleteAllTitle": "Delete all your sessions?",
+    "deleteAllBody": "Every journey goes back to the start and your stats reset. This cannot be undone."
   },
   "manual": {
     "title": "Add a session",

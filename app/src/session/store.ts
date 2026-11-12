@@ -92,6 +92,12 @@ export function saveManual(session: Omit<StoredSession, 'result' | 'manual'>): v
   );
 }
 
+/** Forgets sessions on the phone (all when no id is given). */
+export function deleteLocal(localId?: string): void {
+  if (localId) database().runSync('DELETE FROM sessions WHERE local_id = ?', localId);
+  else database().runSync('DELETE FROM sessions');
+}
+
 export function markSynced(localId: string, result: SessionResult): void {
   database().runSync(
     'UPDATE sessions SET result = ? WHERE local_id = ?',

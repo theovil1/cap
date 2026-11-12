@@ -1,0 +1,29 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT DISTINCT a.journey_id FROM session_allocations a JOIN sessions s ON s.id = a.session_id\n         WHERE s.user_id = $1 AND ($2::uuid[] IS NULL OR s.local_id = ANY($2))",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "journey_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "session_allocations",
+            "name": "journey_id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "UuidArray"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "ca4a62bb66b3ae0879a00745294b7d7a634de2065221db513045110854b1e6ad"
+}

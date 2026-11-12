@@ -810,6 +810,53 @@ async fn account_settings_photo_and_export(db: PgPool) {
 }
 
 #[sqlx::test(migrator = "cap_api::MIGRATOR")]
+async fn deleting_sessions_moves_journeys_back(db: PgPool) {
+    let server = server(db).await;
+    let auth = register(&server, "theo").await;
+    let other = register(&server, "lilou").await;
+    let journey = create_journey(&server, &auth).await;
+    let url = format!("/journeys/{}", journey["id"].as_str().unwrap());
+    let (first, last) = (Uuid::now_v7(), Uuid::now_v7());
+    for (id, metres) in [(first, 100.0), (last, 500.0)] {
+        server
+            .post("/sessions")
+            .add_header("authorization", bearer(&auth))
+            .json(&session(id, metres, 600))
+            .await
+            .assert_status(StatusCode::CREATED);
+    }
+    let detail: Value = server.get(&url).add_header("authorization", bearer(&auth)).await.json();
+    assert_eq!(detail["status"], "finished");
+
+    // Only its walker deletes a session.
+    server
+        .delete(&format!("/sessions/{last}"))
+        .add_header("authorization", bearer(&other))
+        .await
+        .assert_status_not_found();
+    server
+        .delete(&format!("/sessions/{last}"))
+        .add_header("authorization", bearer(&auth))
+        .await
+        .assert_status(StatusCode::NO_CONTENT);
+    let detail: Value = server.get(&url).add_header("authorization", bearer(&auth)).await.json();
+    assert_eq!(detail["status"], "active");
+    assert_eq!(detail["distance_m"], 100.0);
+    assert!(detail["arrived_at"].is_null());
+    assert!(detail["stages"][1]["unlocked_at"].is_null(), "Paris is locked again");
+
+    server
+        .delete("/sessions")
+        .add_header("authorization", bearer(&auth))
+        .await
+        .assert_status(StatusCode::NO_CONTENT);
+    let detail: Value = server.get(&url).add_header("authorization", bearer(&auth)).await.json();
+    assert_eq!(detail["distance_m"], 0.0);
+    let sessions: Value = server.get("/sessions").add_header("authorization", bearer(&auth)).await.json();
+    assert_eq!(sessions.as_array().unwrap().len(), 0);
+}
+
+#[sqlx::test(migrator = "cap_api::MIGRATOR")]
 async fn delete_account(db: PgPool) {
     let server = server(db.clone()).await;
     let auth = register(&server, "theo").await;

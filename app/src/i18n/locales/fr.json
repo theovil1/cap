@@ -261,7 +261,7 @@
       "purple": "Violet",
       "pink": "Rose"
     },
-    "map": "Carte",
+    "map": "Apparence",
     "moods": {
       "auto": "Auto",
       "day": "Jour",
@@ -359,7 +359,14 @@
   "history": {
     "title": "Mes séances",
     "add": "Ajouter une séance",
-    "empty": "Pas encore de séance."
+    "empty": "Pas encore de séance.",
+    "delete": "Supprimer",
+    "deleteOne": "Supprimer cette séance",
+    "deleteOneTitle": "Supprimer cette séance ?",
+    "deleteOneBody": "Ses km sont retirés de tes trajets, de tes courses et de tes stats.",
+    "deleteAll": "Effacer tout l'historique",
+    "deleteAllTitle": "Effacer toutes tes séances ?",
+    "deleteAllBody": "Tous tes trajets repartent du début et tes stats sont remises à zéro. Ça ne peut pas être annulé."
   },
   "manual": {
     "title": "Ajouter une séance",

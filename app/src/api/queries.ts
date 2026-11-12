@@ -1,8 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
-import { getValue, setValue } from '@/session/store';
+import { deleteLocal, getValue, setValue } from '@/session/store';
 
-import { api } from './client';
+import { api, ApiError } from './client';
 import type {
   AddFriendResult,
   FriendList,
@@ -232,4 +232,29 @@ export function useStartRace() {
 /** Declines an invitation or leaves a race. */
 export function useLeaveRace() {
   return useRaceMutation((id: string) => api<void>(`/journeys/${id}/leave`, { method: 'POST' }));
+}
+
+/**
+ * Deletes one session (or the whole history) on the server and on the phone.
+ * Journeys move back, so every list refreshes.
+ */
+export function useDeleteSessions() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (localId: string | null) => {
+      try {
+        await api<void>(localId ? `/sessions/${localId}` : '/sessions', { method: 'DELETE' });
+      } catch (error) {
+        // Never sent yet: it only lives on the phone.
+        if (!(error instanceof ApiError && error.status === 404)) throw error;
+      }
+      deleteLocal(localId ?? undefined);
+    },
+    onSuccess: () =>
+      Promise.all(
+        ['journeys', 'sessions', 'leaderboards'].map((key) =>
+          queryClient.invalidateQueries({ queryKey: [key] }),
+        ),
+      ),
+  });
 }
