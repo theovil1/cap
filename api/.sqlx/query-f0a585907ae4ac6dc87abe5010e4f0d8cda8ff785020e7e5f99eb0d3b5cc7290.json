@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE journey_participants p SET joined_at = now()\n         FROM journeys j\n         WHERE j.id = p.journey_id AND p.journey_id = $1 AND p.user_id = $2\n           AND p.joined_at IS NULL AND j.status = 'waiting'",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "f0a585907ae4ac6dc87abe5010e4f0d8cda8ff785020e7e5f99eb0d3b5cc7290"
+}

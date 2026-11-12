@@ -8,6 +8,8 @@ pub mod friends;
 pub mod geo;
 pub mod journeys;
 pub mod leaderboards;
+pub mod live;
+pub mod races;
 pub mod sessions;
 pub mod stages;
 pub mod state;

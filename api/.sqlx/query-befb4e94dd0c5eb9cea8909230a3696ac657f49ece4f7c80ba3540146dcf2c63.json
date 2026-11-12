@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE journey_participants SET rank = (\n             SELECT count(*) FROM journey_participants WHERE journey_id = $1 AND arrived_at IS NOT NULL)\n         WHERE journey_id = $1 AND user_id = $2",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "befb4e94dd0c5eb9cea8909230a3696ac657f49ece4f7c80ba3540146dcf2c63"
+}

@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE journeys j SET status = 'finished'\n         WHERE j.id = $1 AND j.kind = 'race' AND j.status = 'active'\n           AND NOT EXISTS (SELECT 1 FROM journey_participants p\n                           WHERE p.journey_id = j.id AND p.arrived_at IS NULL)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "3287e5598b24675590bd32bb35b4fb062ae2f149f51352988f1355dbcd95bf52"
+}

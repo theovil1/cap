@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM journeys WHERE id = $1 AND created_by = $2 AND (kind = 'solo' OR status = 'waiting')",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "8f34b9ffdb728e79223f3caffa2a8085551cc202d5d5fd49af961e298aeaccf2"
+}

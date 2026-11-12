@@ -14,6 +14,7 @@ use uuid::Uuid;
 use crate::{
     auth::AuthUser,
     error::{AppError, AppResult, ErrorBody},
+    races,
     stages::Stage,
     state::AppState,
 };
@@ -166,20 +167,21 @@ async fn upload_session(
         return Ok((StatusCode::OK, Json(existing_result(&state, user_id, body.local_id).await?)));
     };
 
-    // Manual sessions never count in races (specification).
+    // Manual sessions never count in races, nor sessions from before the start (specification).
     let targets = sqlx::query!(
         "SELECT j.id, j.kind, p.distance_m, r.distance_m AS route_distance_m
          FROM journey_participants p
          JOIN journeys j ON j.id = p.journey_id
          JOIN routes r ON r.id = j.route_id
-         WHERE p.user_id = $1 AND j.status = 'active' AND p.arrived_at IS NULL
+         WHERE p.user_id = $1 AND j.status = 'active' AND p.arrived_at IS NULL AND p.joined_at IS NOT NULL
            AND ($2::uuid[] IS NULL OR j.id = ANY($2))
-           AND ($3 = 'treadmill' OR j.kind = 'solo')
+           AND (j.kind = 'solo' OR ($3 = 'treadmill' AND $4 >= j.starts_at))
          ORDER BY j.created_at
          FOR UPDATE OF p",
         user_id,
         body.journey_ids.as_deref(),
         body.source.as_str(),
+        body.started_at,
     )
     .fetch_all(&mut *tx)
     .await?;
@@ -212,6 +214,8 @@ async fn upload_session(
             sqlx::query!("UPDATE journeys SET status = 'finished' WHERE id = $1", target.id)
                 .execute(&mut *tx)
                 .await?;
+        } else if arrived {
+            races::record_arrival(&mut tx, target.id, user_id).await?;
         }
         sqlx::query!(
             "INSERT INTO stage_unlocks (user_id, journey_id, stage_id, session_id)

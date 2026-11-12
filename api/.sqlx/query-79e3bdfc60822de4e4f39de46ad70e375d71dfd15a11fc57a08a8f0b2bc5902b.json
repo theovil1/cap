@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT j.id, j.kind, j.status, j.created_at, r.id AS route_id,\n                r.start_label, r.start_lat, r.start_lon, r.end_label, r.end_lat, r.end_lon,\n                r.distance_m AS route_distance_m, p.distance_m, p.arrived_at,\n                (SELECT name FROM route_stages WHERE route_id = r.id ORDER BY position LIMIT 1) AS start_town,\n                (SELECT name FROM route_stages WHERE route_id = r.id ORDER BY position DESC LIMIT 1) AS end_town\n         FROM journey_participants p\n         JOIN journeys j ON j.id = p.journey_id\n         JOIN routes r ON r.id = j.route_id\n         WHERE p.user_id = $1\n         ORDER BY j.created_at DESC",
+  "query": "SELECT j.id, j.kind, j.status, j.created_at, r.id AS route_id,\n                r.start_label, r.start_lat, r.start_lon, r.end_label, r.end_lat, r.end_lon,\n                r.distance_m AS route_distance_m, r.path, p.distance_m, p.arrived_at,\n                (p.joined_at IS NOT NULL) AS \"joined!\", (j.created_by = $1) AS \"mine!\", j.starts_at, p.rank,\n                (SELECT count(*) FROM journey_participants o\n                 WHERE o.journey_id = j.id AND o.joined_at IS NOT NULL) AS \"players!\",\n                (SELECT name FROM route_stages WHERE route_id = r.id ORDER BY position LIMIT 1) AS start_town,\n                (SELECT name FROM route_stages WHERE route_id = r.id ORDER BY position DESC LIMIT 1) AS end_town\n         FROM journey_participants p\n         JOIN journeys j ON j.id = p.journey_id\n         JOIN routes r ON r.id = j.route_id\n         WHERE p.user_id = $1 AND j.id = $2",
   "describe": {
     "columns": [
       {
@@ -137,6 +137,17 @@
       },
       {
         "ordinal": 12,
+        "name": "path",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "routes",
+            "name": "path"
+          }
+        }
+      },
+      {
+        "ordinal": 13,
         "name": "distance_m",
         "type_info": "Float8",
         "origin": {
@@ -147,7 +158,7 @@
         }
       },
       {
-        "ordinal": 13,
+        "ordinal": 14,
         "name": "arrived_at",
         "type_info": "Timestamptz",
         "origin": {
@@ -158,13 +169,53 @@
         }
       },
       {
-        "ordinal": 14,
+        "ordinal": 15,
+        "name": "joined!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 16,
+        "name": "mine!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 17,
+        "name": "starts_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "journeys",
+            "name": "starts_at"
+          }
+        }
+      },
+      {
+        "ordinal": 18,
+        "name": "rank",
+        "type_info": "Int4",
+        "origin": {
+          "Table": {
+            "table": "journey_participants",
+            "name": "rank"
+          }
+        }
+      },
+      {
+        "ordinal": 19,
+        "name": "players!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 20,
         "name": "start_town",
         "type_info": "Text",
         "origin": "Expression"
       },
       {
-        "ordinal": 15,
+        "ordinal": 21,
         "name": "end_town",
         "type_info": "Text",
         "origin": "Expression"
@@ -172,6 +223,7 @@
     ],
     "parameters": {
       "Left": [
+        "Uuid",
         "Uuid"
       ]
     },
@@ -189,10 +241,16 @@
       false,
       false,
       false,
+      false,
       true,
+      null,
+      null,
+      true,
+      true,
+      null,
       null,
       null
     ]
   },
-  "hash": "45d85ba15f939de5296f766b4cc790a58cdd3c254265974a20c207b80e0fbbde"
+  "hash": "79e3bdfc60822de4e4f39de46ad70e375d71dfd15a11fc57a08a8f0b2bc5902b"
 }

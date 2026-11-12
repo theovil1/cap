@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM journey_participants WHERE journey_id = $1 AND joined_at IS NULL",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "2bdddf148ad2611a2037344f18390f13c563737cea927e86b762a116373499a4"
+}

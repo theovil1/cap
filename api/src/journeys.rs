@@ -16,6 +16,7 @@ use crate::{
     auth::AuthUser,
     error::{AppError, AppResult, ErrorBody},
     geo::{self, Place},
+    live::{LiveHub, LivePosition},
     stages::{self, Stage},
     state::AppState,
 };
@@ -57,8 +58,18 @@ pub struct JourneySummary {
     id: Uuid,
     /// `solo` or `race`.
     kind: String,
-    /// `invited`, `waiting`, `active` or `finished`.
+    /// `waiting` (a race not started yet), `active` or `finished`.
     status: String,
+    /// The current user has joined (false: invited to a race).
+    joined: bool,
+    /// The current user created it.
+    mine: bool,
+    /// Walkers in (1 for a solo journey).
+    players: i64,
+    #[serde(with = "time::serde::rfc3339::option")]
+    starts_at: Option<OffsetDateTime>,
+    /// Arrival order of the current user in a race.
+    rank: Option<i32>,
     route_id: Uuid,
     start: Place,
     end: Place,
@@ -90,6 +101,28 @@ pub struct JourneyDetail {
     #[schema(value_type = Vec<[f64; 3]>)]
     path: serde_json::Value,
     stages: Vec<JourneyStage>,
+    /// Everyone on the journey, the leader first.
+    participants: Vec<Participant>,
+}
+
+#[derive(Serialize, ToSchema)]
+pub struct Participant {
+    user_id: Uuid,
+    first_name: String,
+    username: String,
+    me: bool,
+    /// False while invited to a race.
+    joined: bool,
+    /// Distance counted from synced sessions.
+    distance_m: f64,
+    #[serde(with = "time::serde::rfc3339::option")]
+    arrived_at: Option<OffsetDateTime>,
+    rank: Option<i32>,
+    /// End of their last session, for `2 hours ago`.
+    #[serde(with = "time::serde::rfc3339::option")]
+    last_session_at: Option<OffsetDateTime>,
+    /// Set while they walk right now: distance including the session under way.
+    live: Option<LivePosition>,
 }
 
 /// Compute a safe walking route and its stages, for a preview. Nothing starts yet.
@@ -187,7 +220,7 @@ async fn start_solo_journey(
     .await?;
     tx.commit().await?;
 
-    let detail = fetch_detail(&state.db, user_id, journey_id).await?;
+    let detail = fetch_detail(&state.db, &state.live, user_id, journey_id).await?;
     Ok((StatusCode::CREATED, Json(detail)))
 }
 
@@ -202,6 +235,9 @@ async fn list_journeys(
         "SELECT j.id, j.kind, j.status, j.created_at, r.id AS route_id,
                 r.start_label, r.start_lat, r.start_lon, r.end_label, r.end_lat, r.end_lon,
                 r.distance_m AS route_distance_m, p.distance_m, p.arrived_at,
+                (p.joined_at IS NOT NULL) AS \"joined!\", (j.created_by = $1) AS \"mine!\", j.starts_at, p.rank,
+                (SELECT count(*) FROM journey_participants o
+                 WHERE o.journey_id = j.id AND o.joined_at IS NOT NULL) AS \"players!\",
                 (SELECT name FROM route_stages WHERE route_id = r.id ORDER BY position LIMIT 1) AS start_town,
                 (SELECT name FROM route_stages WHERE route_id = r.id ORDER BY position DESC LIMIT 1) AS end_town
          FROM journey_participants p
@@ -219,6 +255,11 @@ async fn list_journeys(
                 id: r.id,
                 kind: r.kind,
                 status: r.status,
+                joined: r.joined,
+                mine: r.mine,
+                players: r.players,
+                starts_at: r.starts_at,
+                rank: r.rank,
                 route_id: r.route_id,
                 start: Place { label: r.start_label, lat: r.start_lat, lon: r.start_lon },
                 end: Place { label: r.end_label, lat: r.end_lat, lon: r.end_lon },
@@ -242,10 +283,10 @@ async fn get_journey(
     AuthUser(user_id): AuthUser,
     Path(id): Path<Uuid>,
 ) -> AppResult<Json<JourneyDetail>> {
-    Ok(Json(fetch_detail(&state.db, user_id, id).await?))
+    Ok(Json(fetch_detail(&state.db, &state.live, user_id, id).await?))
 }
 
-/// Delete a solo journey for good. The walked sessions stay in the history.
+/// Delete a solo journey, or cancel a race not started yet. Sessions stay in the history.
 #[utoipa::path(delete, path = "/journeys/{id}", tag = "journeys", security(("bearer" = [])),
     params(("id" = Uuid, Path)),
     responses((status = 204), (status = 404, body = ErrorBody)))]
@@ -255,10 +296,13 @@ async fn delete_journey(
     Path(id): Path<Uuid>,
 ) -> AppResult<StatusCode> {
     // Allocations, unlocks and participants go with it (ON DELETE CASCADE).
-    let deleted =
-        sqlx::query!("DELETE FROM journeys WHERE id = $1 AND created_by = $2 AND kind = 'solo'", id, user_id)
-            .execute(&state.db)
-            .await?;
+    let deleted = sqlx::query!(
+        "DELETE FROM journeys WHERE id = $1 AND created_by = $2 AND (kind = 'solo' OR status = 'waiting')",
+        id,
+        user_id
+    )
+    .execute(&state.db)
+    .await?;
     if deleted.rows_affected() == 0 {
         return Err(AppError::not_found("journey not found"));
     }
@@ -297,14 +341,22 @@ async fn reset_journey(
     .execute(&mut *tx)
     .await?;
     tx.commit().await?;
-    Ok(Json(fetch_detail(&state.db, user_id, id).await?))
+    Ok(Json(fetch_detail(&state.db, &state.live, user_id, id).await?))
 }
 
-async fn fetch_detail(db: &PgPool, user_id: Uuid, journey_id: Uuid) -> AppResult<JourneyDetail> {
+pub(crate) async fn fetch_detail(
+    db: &PgPool,
+    live: &LiveHub,
+    user_id: Uuid,
+    journey_id: Uuid,
+) -> AppResult<JourneyDetail> {
     let r = sqlx::query!(
         "SELECT j.id, j.kind, j.status, j.created_at, r.id AS route_id,
                 r.start_label, r.start_lat, r.start_lon, r.end_label, r.end_lat, r.end_lon,
                 r.distance_m AS route_distance_m, r.path, p.distance_m, p.arrived_at,
+                (p.joined_at IS NOT NULL) AS \"joined!\", (j.created_by = $1) AS \"mine!\", j.starts_at, p.rank,
+                (SELECT count(*) FROM journey_participants o
+                 WHERE o.journey_id = j.id AND o.joined_at IS NOT NULL) AS \"players!\",
                 (SELECT name FROM route_stages WHERE route_id = r.id ORDER BY position LIMIT 1) AS start_town,
                 (SELECT name FROM route_stages WHERE route_id = r.id ORDER BY position DESC LIMIT 1) AS end_town
          FROM journey_participants p
@@ -343,11 +395,18 @@ async fn fetch_detail(db: &PgPool, user_id: Uuid, journey_id: Uuid) -> AppResult
         unlocked_at: s.unlocked_at,
     })
     .collect();
+    let participants = participants(db, live, user_id, journey_id, r.starts_at, r.route_distance_m).await?;
     Ok(JourneyDetail {
+        participants,
         summary: JourneySummary {
             id: r.id,
             kind: r.kind,
             status: r.status,
+            joined: r.joined,
+            mine: r.mine,
+            players: r.players,
+            starts_at: r.starts_at,
+            rank: r.rank,
             route_id: r.route_id,
             start: Place { label: r.start_label, lat: r.start_lat, lon: r.start_lon },
             end: Place { label: r.end_label, lat: r.end_lat, lon: r.end_lon },
@@ -361,4 +420,42 @@ async fn fetch_detail(db: &PgPool, user_id: Uuid, journey_id: Uuid) -> AppResult
         path: r.path,
         stages,
     })
+}
+
+async fn participants(
+    db: &PgPool,
+    live: &LiveHub,
+    user_id: Uuid,
+    journey_id: Uuid,
+    starts_at: Option<OffsetDateTime>,
+    route_distance_m: f64,
+) -> AppResult<Vec<Participant>> {
+    let rows = sqlx::query!(
+        "SELECT u.id, u.first_name, u.username, p.distance_m, p.arrived_at, p.rank,
+                (p.joined_at IS NOT NULL) AS \"joined!\",
+                (SELECT max(s.ended_at) FROM sessions s WHERE s.user_id = u.id) AS last_session_at
+         FROM journey_participants p JOIN users u ON u.id = p.user_id
+         WHERE p.journey_id = $1
+         ORDER BY p.rank NULLS LAST, p.distance_m DESC, lower(u.first_name)",
+        journey_id
+    )
+    .fetch_all(db)
+    .await?;
+    Ok(rows
+        .into_iter()
+        .map(|r| Participant {
+            live: live
+                .race_position(r.id, starts_at, r.distance_m, route_distance_m)
+                .filter(|_| r.arrived_at.is_none()),
+            user_id: r.id,
+            first_name: r.first_name,
+            username: r.username,
+            me: r.id == user_id,
+            joined: r.joined,
+            distance_m: r.distance_m,
+            arrived_at: r.arrived_at,
+            rank: r.rank,
+            last_session_at: r.last_session_at,
+        })
+        .collect())
 }

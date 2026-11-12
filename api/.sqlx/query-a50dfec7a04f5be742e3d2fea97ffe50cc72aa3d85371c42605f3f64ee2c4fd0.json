@@ -1,0 +1,71 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT p.journey_id, p.distance_m, r.distance_m AS route_distance_m, j.starts_at,\n                COALESCE(array_agg(o.user_id) FILTER (WHERE o.user_id IS NOT NULL), '{}') AS \"rivals!\"\n         FROM journey_participants p\n         JOIN journeys j ON j.id = p.journey_id\n         JOIN routes r ON r.id = j.route_id\n         LEFT JOIN journey_participants o\n           ON o.journey_id = p.journey_id AND o.user_id <> p.user_id AND o.joined_at IS NOT NULL\n         WHERE p.user_id = $1 AND j.kind = 'race' AND j.status = 'active'\n           AND p.joined_at IS NOT NULL AND p.arrived_at IS NULL\n         GROUP BY p.journey_id, p.distance_m, r.distance_m, j.starts_at",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "journey_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "journey_participants",
+            "name": "journey_id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "distance_m",
+        "type_info": "Float8",
+        "origin": {
+          "Table": {
+            "table": "journey_participants",
+            "name": "distance_m"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "route_distance_m",
+        "type_info": "Float8",
+        "origin": {
+          "Table": {
+            "table": "routes",
+            "name": "distance_m"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "starts_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "journeys",
+            "name": "starts_at"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "rivals!",
+        "type_info": "UuidArray",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      true,
+      null
+    ]
+  },
+  "hash": "a50dfec7a04f5be742e3d2fea97ffe50cc72aa3d85371c42605f3f64ee2c4fd0"
+}

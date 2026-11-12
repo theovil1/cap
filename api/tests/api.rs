@@ -591,6 +591,129 @@ async fn leaderboards_rank_friends(db: PgPool) {
         .assert_status(StatusCode::BAD_REQUEST);
 }
 
+/// A session that starts `offset_s` seconds from now (after a race start).
+fn session_from_now(offset_s: i64, distance_m: f64, duration_s: i64) -> Value {
+    let started = OffsetDateTime::now_utc() + time::Duration::seconds(offset_s);
+    let ended = started + time::Duration::seconds(duration_s);
+    let format = &time::format_description::well_known::Rfc3339;
+    json!({
+        "local_id": Uuid::now_v7(),
+        "started_at": started.format(format).unwrap(),
+        "ended_at": ended.format(format).unwrap(),
+        "distance_m": distance_m,
+        "duration_s": duration_s,
+        "steps": 0,
+        "source": "treadmill",
+    })
+}
+
+#[sqlx::test(migrator = "cap_api::MIGRATOR")]
+async fn races_from_invitation_to_finish(db: PgPool) {
+    let server = server(db).await;
+    let theo = register(&server, "theo").await;
+    let lilou = register(&server, "lilou").await;
+    let max = register(&server, "max").await;
+    let code: Value = server.get("/friends/invite").add_header("authorization", bearer(&theo)).await.json();
+    server
+        .post("/friends")
+        .add_header("authorization", bearer(&lilou))
+        .json(&json!({ "invite_code": code["code"] }))
+        .await
+        .assert_status_ok();
+    let lilou_id = lilou["user"]["id"].as_str().unwrap();
+    let theo_id = theo["user"]["id"].as_str().unwrap();
+    let route = create_route(&server, &theo).await;
+
+    // Only friends can be invited.
+    server
+        .post("/races")
+        .add_header("authorization", bearer(&theo))
+        .json(&json!({ "route_id": route["id"], "friend_ids": [max["user"]["id"]] }))
+        .await
+        .assert_status(StatusCode::UNPROCESSABLE_ENTITY);
+    let race = server
+        .post("/races")
+        .add_header("authorization", bearer(&theo))
+        .json(&json!({ "route_id": route["id"], "friend_ids": [lilou_id] }))
+        .await;
+    race.assert_status(StatusCode::CREATED);
+    let race: Value = race.json();
+    let url = format!("/journeys/{}", race["id"].as_str().unwrap());
+    assert_eq!(race["kind"], "race");
+    assert_eq!(race["status"], "waiting");
+    assert_eq!(race["participants"].as_array().unwrap().len(), 2);
+
+    // Lilou sees the invitation; nobody can start alone.
+    let list: Value = server.get("/journeys").add_header("authorization", bearer(&lilou)).await.json();
+    assert_eq!(list[0]["joined"], false);
+    assert_eq!(list[0]["mine"], false);
+    server
+        .post(&format!("{url}/start"))
+        .add_header("authorization", bearer(&theo))
+        .await
+        .assert_status(StatusCode::UNPROCESSABLE_ENTITY);
+    server.post(&format!("{url}/join")).add_header("authorization", bearer(&lilou)).await.assert_status_ok();
+    let started = server.post(&format!("{url}/start")).add_header("authorization", bearer(&theo)).await;
+    started.assert_status_ok();
+    let started: Value = started.json();
+    assert_eq!(started["status"], "active");
+    assert_eq!(started["players"], 2);
+
+    // A session from before the start does not count.
+    let early: Value = server
+        .post("/sessions")
+        .add_header("authorization", bearer(&theo))
+        .json(&session(Uuid::now_v7(), 100.0, 90))
+        .await
+        .json();
+    assert_eq!(early["allocations"].as_array().unwrap().len(), 0);
+
+    // Live: Théo walks, Lilou sees his pawn move.
+    let mut lilou_live = server
+        .get_websocket("/live")
+        .add_header("authorization", bearer(&lilou))
+        .await
+        .into_websocket()
+        .await;
+    let mut theo_live =
+        server.get_websocket("/live").add_header("authorization", bearer(&theo)).await.into_websocket().await;
+    let now = OffsetDateTime::now_utc().format(&time::format_description::well_known::Rfc3339).unwrap();
+    theo_live
+        .send_json(&json!({ "type": "progress", "started_at": now, "session_m": 50.0, "speed_kmh": 4.8 }))
+        .await;
+    let seen: Value = lilou_live.receive_json().await;
+    assert_eq!(seen["type"], "position");
+    assert_eq!(seen["user_id"], theo_id);
+    assert_eq!(seen["distance_m"], 50.0);
+    let detail: Value = server.get(&url).add_header("authorization", bearer(&lilou)).await.json();
+    let theo_row =
+        detail["participants"].as_array().unwrap().iter().find(|p| p["user_id"] == theo_id).unwrap();
+    assert_eq!(theo_row["live"]["distance_m"], 50.0);
+    theo_live.send_json(&json!({ "type": "stop" })).await;
+    let stop: Value = lilou_live.receive_json().await;
+    assert_eq!(stop["type"], "stop");
+
+    // Théo arrives first; the race ends when Lilou leaves.
+    let arrival: Value = server
+        .post("/sessions")
+        .add_header("authorization", bearer(&theo))
+        .json(&session_from_now(1, 300.0, 300))
+        .await
+        .json();
+    assert_eq!(arrival["allocations"][0]["arrived"], true);
+    let detail: Value = server.get(&url).add_header("authorization", bearer(&theo)).await.json();
+    assert_eq!(detail["rank"], 1);
+    assert_eq!(detail["status"], "active");
+    server.delete(&url).add_header("authorization", bearer(&theo)).await.assert_status_not_found();
+    server
+        .post(&format!("{url}/leave"))
+        .add_header("authorization", bearer(&lilou))
+        .await
+        .assert_status(StatusCode::NO_CONTENT);
+    let detail: Value = server.get(&url).add_header("authorization", bearer(&theo)).await.json();
+    assert_eq!(detail["status"], "finished");
+}
+
 #[sqlx::test(migrator = "cap_api::MIGRATOR")]
 async fn delete_account(db: PgPool) {
     let server = server(db.clone()).await;

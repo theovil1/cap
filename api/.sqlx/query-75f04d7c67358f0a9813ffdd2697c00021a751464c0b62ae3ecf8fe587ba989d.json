@@ -1,0 +1,102 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT u.id, u.first_name, u.username, p.distance_m, p.arrived_at, p.rank,\n                (p.joined_at IS NOT NULL) AS \"joined!\",\n                (SELECT max(s.ended_at) FROM sessions s WHERE s.user_id = u.id) AS last_session_at\n         FROM journey_participants p JOIN users u ON u.id = p.user_id\n         WHERE p.journey_id = $1\n         ORDER BY p.rank NULLS LAST, p.distance_m DESC, lower(u.first_name)",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "users",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "first_name",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "users",
+            "name": "first_name"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "username",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "users",
+            "name": "username"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "distance_m",
+        "type_info": "Float8",
+        "origin": {
+          "Table": {
+            "table": "journey_participants",
+            "name": "distance_m"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "arrived_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "journey_participants",
+            "name": "arrived_at"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "rank",
+        "type_info": "Int4",
+        "origin": {
+          "Table": {
+            "table": "journey_participants",
+            "name": "rank"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "joined!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 7,
+        "name": "last_session_at",
+        "type_info": "Timestamptz",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      true,
+      true,
+      null,
+      null
+    ]
+  },
+  "hash": "75f04d7c67358f0a9813ffdd2697c00021a751464c0b62ae3ecf8fe587ba989d"
+}

@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use sqlx::PgPool;
 
-use crate::{auth::apple::AppleKeys, config::Config};
+use crate::{auth::apple::AppleKeys, config::Config, live::LiveHub};
 
 #[derive(Clone)]
 pub struct AppState {
@@ -10,6 +10,8 @@ pub struct AppState {
     pub config: Arc<Config>,
     pub http: reqwest::Client,
     pub apple_keys: Arc<AppleKeys>,
+    /// Walkers on a live race right now.
+    pub live: Arc<LiveHub>,
 }
 
 impl AppState {
@@ -19,6 +21,6 @@ impl AppState {
             .timeout(std::time::Duration::from_secs(30))
             .build()?;
         let apple_keys = Arc::new(AppleKeys::new(config.apple_keys_url.clone()));
-        Ok(Self { db, config: Arc::new(config), http, apple_keys })
+        Ok(Self { db, config: Arc::new(config), http, apple_keys, live: Arc::default() })
     }
 }

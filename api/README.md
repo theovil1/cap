@@ -20,7 +20,10 @@ Interactive documentation is served at `/docs` (OpenAPI at `/openapi.json`).
 | `POST /journeys` | Start a solo journey on a computed route |
 | `GET /journeys`, `/journeys/{id}` | Journeys with progress, route geometry and stages |
 | `POST /journeys/{id}/reset` | Start a solo journey again from the beginning |
-| `DELETE /journeys/{id}` | Delete a solo journey (sessions stay in the history) |
+| `DELETE /journeys/{id}` | Delete a solo journey or cancel a race not started yet (sessions stay in the history) |
+| `POST /races` | Create a race on a computed route and invite friends |
+| `POST /journeys/{id}/join`, `/leave`, `/start` | Accept an invitation, leave a race, start it (creator; unanswered invitations drop) |
+| `GET /live` (WebSocket) | Send `progress` (session distance) or `stop`; receive rivals' `position` and `stop` |
 | `POST /sessions` | Upload a session, idempotent on `local_id`, rejected above 20 km/h; returns the stages it unlocked |
 | `GET /sessions` | Session history |
 | `GET /health` | Liveness and database check |
