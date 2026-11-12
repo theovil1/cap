@@ -53,5 +53,6 @@ docs/github/  README banners and social preview
 - iPhone proof done (11 Nov 2026): live speed, incline and distance on a development build, matching the console (410 m credited for a 400 m counter, same speed, incline and duration).
 - Foundation done (11 Nov 2026): API online at https://cap.theovilain.fr (docs at /docs), with GraphHopper (foot_safe) and Photon (France). Deployed on the home server in ~/cap/infra (nginx + certbot, 7 GB RAM: GraphHopper in MMAP mode).
 - Solo loop done (12 Nov 2026), tried on the iPhone with the treadmill: route preview with stages, sign-in, live 3D map (plan or IGN satellite, resizable sheet, smooth pawn), summary, home screen, local SQLite save and sync queue, journey reset and deletion. API deployed.
-- Next: Multiplayer (friends, live races, leaderboards), after a short plan.
+- Multiplayer coded and deployed (12 Nov 2026): friends (username search, requests, invite link /invite/{code} opening cap://invite/{code}), leaderboards (week, month, streak, Paris time), live races (invitations, start by the creator, /live WebSocket relaying positions every 2 s, rival pawns, race screen, place in the summary). Not yet tried with a second walker.
+- Next: try a real race with a friend, then Profile and finishing touches, after a short plan.
 - Still to verify: whether the treadmill counters reset between two sessions.
