@@ -332,7 +332,7 @@ export function Avatar({
   if (photo) {
     return (
       <Image
-        source={{ uri: photo.startsWith('http') ? photo : `${API_URL}${photo}` }}
+        source={{ uri: /^(https?|file):/.test(photo) ? photo : `${API_URL}${photo}` }}
         style={box}
         contentFit="cover"
         transition={150}

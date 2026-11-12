@@ -14,6 +14,7 @@ import { useEffect, useState } from 'react';
 
 import { AuthProvider, useAuth } from '@/api/auth';
 import '@/i18n';
+import { useOnboarding } from '@/onboarding/state';
 import { SessionProvider } from '@/session/session-context';
 import { useColors } from '@/theme';
 
@@ -47,6 +48,7 @@ export default function RootLayout() {
 
 function Screens() {
   const { status } = useAuth();
+  const { pending } = useOnboarding();
   const colors = useColors();
 
   useEffect(() => {
@@ -58,7 +60,10 @@ function Screens() {
     <Stack
       screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.background } }}
     >
-      <Stack.Protected guard={status === 'signedIn'}>
+      <Stack.Protected guard={status === 'signedIn' && pending}>
+        <Stack.Screen name="onboarding" options={{ gestureEnabled: false }} />
+      </Stack.Protected>
+      <Stack.Protected guard={status === 'signedIn' && !pending}>
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="new-journey" />
         <Stack.Screen name="preview" />

@@ -10,14 +10,23 @@
     "community": "Communauté"
   },
   "welcome": {
-    "title": "Chaque pas sur le tapis te rapproche d'une vraie ville.",
-    "subtitle": "Choisis un départ et une arrivée en France, puis marche : ton pion avance sur l'itinéraire, kilomètre par kilomètre.",
-    "or": "ou avec ton e-mail",
+    "title": "Marche jusqu'à Paris.",
+    "titleAccent": "Sans quitter ton salon.",
+    "subtitle": "Chaque km sur ton tapis te fait avancer sur un vrai trajet, avec tes amis.",
+    "apple": "Continuer avec Apple",
+    "withEmail": "Continuer avec un e-mail",
+    "already": "Déjà inscrit ?",
+    "signIn": "Se connecter",
+    "formKicker": "Ton compte",
+    "registerTitle": "Crée ton compte",
+    "registerText": "Ton pseudo permet à tes amis de te trouver.",
+    "loginTitle": "Content de te revoir",
+    "loginText": "Connecte-toi avec ton e-mail.",
     "firstName": "Prénom",
     "username": "Pseudo",
     "email": "E-mail",
     "password": "Mot de passe",
-    "passwordHint": "Au moins 10 caractères.",
+    "passwordHint": "Au moins 10 caractères",
     "login": "Se connecter",
     "register": "Créer mon compte",
     "toRegister": "Pas encore de compte ? Créer un compte",
@@ -814,6 +823,118 @@
       "organizer": "A organisé au moins 3 trajets planifiés.",
       "creator": "Ses trajets publics ont été suivis 1 000 fois.",
       "ambassador": "A fait venir 10 marcheurs sur Cap."
+    }
+  },
+  "onboarding": {
+    "step": "Étape {{step}} sur {{total}}",
+    "skip": "Passer",
+    "continue": "Continuer",
+    "cancel": "Annuler",
+    "perDay": "{{steps}} pas / jour",
+    "side": {
+      "title": "Ton départ",
+      "current": "en cours",
+      "destination": "Destination",
+      "profile": "Profil",
+      "goal": "Objectif",
+      "mood": "Ambiance",
+      "bluetooth": "Bluetooth",
+      "treadmill": "Tapis",
+      "profileValue": "{{name}} · {{cm}} cm",
+      "moodValue": "{{color}} · {{mood}}",
+      "allowed": "Autorisé",
+      "colors": {
+        "orange": "Orange",
+        "blue": "Bleu",
+        "green": "Vert",
+        "purple": "Violet",
+        "pink": "Rose"
+      },
+      "moods": {
+        "auto": "carte auto",
+        "day": "carte de jour",
+        "night": "carte de nuit"
+      }
+    },
+    "destination": {
+      "kicker": "Ta première aventure",
+      "title": "Jusqu'où veux-tu marcher ?",
+      "text": "Départ de chez toi, à {{town}}. Tu pourras changer à tout moment.",
+      "textNoHome": "D'abord, d'où pars-tu ? Indique ta ville.",
+      "detail": "{{km}} {{unit}} · ≈ {{sessions}} séances",
+      "homePlaceholder": "Ta ville",
+      "endPlaceholder": "Une ville, un monument",
+      "other": "Choisir une autre destination",
+      "changeHome": "Changer de départ"
+    },
+    "profile": {
+      "kicker": "Ton profil",
+      "title": "Fais connaissance avec Cap",
+      "text": "Ta taille sert à transformer les km du tapis en pas.",
+      "photo": "Ajouter une photo",
+      "firstName": "Prénom",
+      "height": "Ta taille",
+      "less": "Moins",
+      "more": "Plus",
+      "stride": "Ta foulée : {{cm}} cm"
+    },
+    "goal": {
+      "kicker": "Ton rythme",
+      "title": "Ton objectif de chaque jour",
+      "text": "Une étude de 2025 montre l'essentiel des bienfaits dès {{steps}} pas.",
+      "steps": "pas",
+      "recommended": "Recommandé",
+      "why5000": "≈ {{km}} {{unit}} · pour démarrer en douceur",
+      "why7000": "≈ {{km}} {{unit}} · l'essentiel des bienfaits",
+      "why10000": "≈ {{km}} {{unit}} · pour aller plus loin",
+      "perWeek": "Séances par semaine",
+      "arrival": "À ce rythme, tu arrives à <b>{{place}} vers le {{date}}</b>."
+    },
+    "mood": {
+      "kicker": "À ton image",
+      "title": "Choisis ton ambiance",
+      "text": "Tu pourras tout changer plus tard dans ton profil.",
+      "color": "Couleur de l'app",
+      "map": "Carte",
+      "auto": "Auto : jour ou nuit selon l'heure"
+    },
+    "bluetooth": {
+      "kicker": "Ton tapis",
+      "title": "Connectons ton tapis",
+      "text": "Cap lit la vitesse et la distance de ton tapis en Bluetooth. Il ne le pilote jamais.",
+      "compatible": "Compatible avec la plupart des tapis connectés",
+      "noLocation": "Aucune donnée de localisation utilisée",
+      "together": "Ton tapis n'est pas reconnu ? On l'ajoute ensemble",
+      "note": "iOS va te demander l'autorisation juste après.",
+      "allow": "Autoriser le Bluetooth"
+    },
+    "treadmill": {
+      "kicker": "Ton tapis",
+      "found": "On l'a trouvé !",
+      "looking": "On cherche ton tapis",
+      "text": "Allume ton tapis et garde ton téléphone à côté.",
+      "connected": "Connecté · compatible FTMS",
+      "speed": "Vitesse",
+      "speedUnit": "{{speedUnit}}",
+      "distance": "Distance",
+      "incline": "Pente",
+      "yes": "Oui",
+      "no": "Non",
+      "settings": "Ouvrir les Réglages",
+      "notYours": "Ton tapis n'est pas reconnu ?",
+      "setUp": "Le nommer et vérifier sa vitesse"
+    },
+    "ready": {
+      "kicker": "C'est parti, {{name}}",
+      "title": "Tout est prêt",
+      "text": "Lance ton tapis : la séance démarre toute seule et ton pion quitte {{town}}.",
+      "textNoRoute": "Lance ton tapis : la séance démarre toute seule. Choisis ton premier trajet depuis l'accueil.",
+      "route": "Trajet",
+      "goal": "Objectif",
+      "arrival": "Arrivée estimée",
+      "around": "vers le {{date}}",
+      "treadmill": "Tapis",
+      "start": "Commencer"
     }
   }
 }

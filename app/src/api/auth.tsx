@@ -10,6 +10,7 @@ import {
 } from 'react';
 
 import i18n from '@/i18n';
+import { isNewAccount, resetOnboarding, startOnboarding } from '@/onboarding/state';
 import { clearAll, getValue, setValue } from '@/session/store';
 import { syncAppearance } from '@/settings/appearance';
 import { syncPending } from '@/session/sync';
@@ -77,6 +78,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const forget = useCallback(() => {
     clearAll();
+    resetOnboarding();
     queryClient.clear();
     setUserState(null);
     setStatus('signedOut');
@@ -92,9 +94,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [forget]);
 
   const accept = useCallback(
-    async (auth: AuthResponse) => {
+    async (auth: AuthResponse, fresh = false) => {
       // Another account on this phone: its local data must not leak to this one.
-      if (getValue<UserProfile>(PROFILE_KEY)?.id !== auth.user.id) clearAll();
+      if (getValue<UserProfile>(PROFILE_KEY)?.id !== auth.user.id) {
+        clearAll();
+        resetOnboarding();
+      }
+      // A new walker goes through the onboarding before the app.
+      if (fresh) startOnboarding();
       await saveSession(auth);
       setUser(auth.user);
       setStatus('signedIn');
@@ -117,14 +124,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             method: 'POST',
             body: { email, password, first_name: firstName, username },
           }),
+          true,
         ),
-      signInWithApple: async (identityToken, firstName) =>
-        accept(
-          await api<AuthResponse>('/auth/apple', {
-            method: 'POST',
-            body: { identity_token: identityToken, first_name: firstName },
-          }),
-        ),
+      signInWithApple: async (identityToken, firstName) => {
+        const auth = await api<AuthResponse>('/auth/apple', {
+          method: 'POST',
+          body: { identity_token: identityToken, first_name: firstName },
+        });
+        // The same call signs in and signs up: a fresh account is a new walker.
+        await accept(auth, isNewAccount(auth.user.created_at));
+      },
       signOut: async () => {
         // Send what is still waiting before the local data is wiped.
         await syncPending().catch(() => 0);

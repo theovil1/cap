@@ -16,6 +16,7 @@ import { useAuth } from '@/api/auth';
 import type { JourneySummary } from '@/api/types';
 import { sendProgress, sendStop, setLiveWanted } from '@/live/live-client';
 import { stepsFor } from '@/journey/progress';
+import { useOnboarding } from '@/onboarding/state';
 import { calibrated, factorFor, getSavedTreadmill } from '@/treadmill/calibration';
 import { TreadmillConnection, type ConnectionSnapshot } from '@/treadmill/connection';
 import type { TreadmillData } from '@/treadmill/ftms';
@@ -46,6 +47,8 @@ const SessionContext = createContext<SessionContextValue | null>(null);
  */
 export function SessionProvider({ children }: { children: ReactNode }) {
   const { status, user } = useAuth();
+  // A new walker is asked for Bluetooth at the onboarding step that explains it.
+  const { bluetooth } = useOnboarding();
   const queryClient = useQueryClient();
   const [connection, setConnection] = useState<ConnectionSnapshot>({
     status: 'starting',
@@ -76,7 +79,9 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const onSessionScreen = useRef(false);
   useEffect(() => {
-    onSessionScreen.current = ['/session', '/stride', '/treadmill'].includes(pathname);
+    onSessionScreen.current = ['/session', '/stride', '/treadmill', '/onboarding'].includes(
+      pathname,
+    );
   }, [pathname]);
 
   const sync = useCallback(async () => {
@@ -120,7 +125,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   }, [status, store]);
 
   useEffect(() => {
-    if (status !== 'signedIn') return;
+    if (status !== 'signedIn' || !bluetooth) return;
     // The Bluetooth name of the treadmill, for its saved name and speed correction.
     let hardwareName: string | null = null;
     const treadmill = new TreadmillConnection({
@@ -177,7 +182,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       clearInterval(timer);
       appState.remove();
     };
-  }, [status, store, sync, onRace]);
+  }, [status, bluetooth, store, sync, onRace]);
 
   const finishNow = useCallback(() => store(recorder.current.finish(Date.now())), [store]);
 

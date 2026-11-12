@@ -10,14 +10,23 @@
     "community": "Community"
   },
   "welcome": {
-    "title": "Every step on the treadmill takes you closer to a real town.",
-    "subtitle": "Pick a start and a destination in France, then walk: your pawn moves along the route, kilometre after kilometre.",
-    "or": "or with your email",
+    "title": "Walk to Paris.",
+    "titleAccent": "Without leaving your living room.",
+    "subtitle": "Every km on your treadmill moves you along a real route, with your friends.",
+    "apple": "Continue with Apple",
+    "withEmail": "Continue with email",
+    "already": "Already signed up?",
+    "signIn": "Sign in",
+    "formKicker": "Your account",
+    "registerTitle": "Create your account",
+    "registerText": "Your username lets your friends find you.",
+    "loginTitle": "Welcome back",
+    "loginText": "Sign in with your email.",
     "firstName": "First name",
     "username": "Username",
     "email": "Email",
     "password": "Password",
-    "passwordHint": "At least 10 characters.",
+    "passwordHint": "At least 10 characters",
     "login": "Sign in",
     "register": "Create my account",
     "toRegister": "No account yet? Create one",
@@ -814,6 +823,118 @@
       "organizer": "Organised at least 3 scheduled journeys.",
       "creator": "Their public routes were walked 1,000 times.",
       "ambassador": "Brought 10 walkers to Cap."
+    }
+  },
+  "onboarding": {
+    "step": "Step {{step}} of {{total}}",
+    "skip": "Skip",
+    "continue": "Continue",
+    "cancel": "Cancel",
+    "perDay": "{{steps}} steps / day",
+    "side": {
+      "title": "Your start",
+      "current": "in progress",
+      "destination": "Destination",
+      "profile": "Profile",
+      "goal": "Goal",
+      "mood": "Look",
+      "bluetooth": "Bluetooth",
+      "treadmill": "Treadmill",
+      "profileValue": "{{name}} · {{cm}} cm",
+      "moodValue": "{{color}} · {{mood}}",
+      "allowed": "Allowed",
+      "colors": {
+        "orange": "Orange",
+        "blue": "Blue",
+        "green": "Green",
+        "purple": "Purple",
+        "pink": "Pink"
+      },
+      "moods": {
+        "auto": "auto map",
+        "day": "day map",
+        "night": "night map"
+      }
+    },
+    "destination": {
+      "kicker": "Your first adventure",
+      "title": "How far do you want to walk?",
+      "text": "Starting from home, in {{town}}. You can change it at any time.",
+      "textNoHome": "First, where do you start from? Enter your town.",
+      "detail": "{{km}} {{unit}} · ≈ {{sessions}} sessions",
+      "homePlaceholder": "Your town",
+      "endPlaceholder": "A town, a landmark",
+      "other": "Pick another destination",
+      "changeHome": "Change start"
+    },
+    "profile": {
+      "kicker": "Your profile",
+      "title": "Get to know Cap",
+      "text": "Your height turns the treadmill km into steps.",
+      "photo": "Add a photo",
+      "firstName": "First name",
+      "height": "Your height",
+      "less": "Less",
+      "more": "More",
+      "stride": "Your stride: {{cm}} cm"
+    },
+    "goal": {
+      "kicker": "Your pace",
+      "title": "Your daily goal",
+      "text": "A 2025 study shows most of the benefits from {{steps}} steps.",
+      "steps": "steps",
+      "recommended": "Recommended",
+      "why5000": "≈ {{km}} {{unit}} · to start gently",
+      "why7000": "≈ {{km}} {{unit}} · most of the benefits",
+      "why10000": "≈ {{km}} {{unit}} · to go further",
+      "perWeek": "Sessions per week",
+      "arrival": "At this pace, you reach <b>{{place}} around {{date}}</b>."
+    },
+    "mood": {
+      "kicker": "Make it yours",
+      "title": "Pick your look",
+      "text": "You can change everything later in your profile.",
+      "color": "App colour",
+      "map": "Map",
+      "auto": "Auto: day or night by the time"
+    },
+    "bluetooth": {
+      "kicker": "Your treadmill",
+      "title": "Let's connect your treadmill",
+      "text": "Cap reads your treadmill's speed and distance over Bluetooth. It never controls it.",
+      "compatible": "Works with most connected treadmills",
+      "noLocation": "No location data used",
+      "together": "Treadmill not recognised? We add it together",
+      "note": "iOS will ask for permission right after.",
+      "allow": "Allow Bluetooth"
+    },
+    "treadmill": {
+      "kicker": "Your treadmill",
+      "found": "Found it!",
+      "looking": "Looking for your treadmill",
+      "text": "Switch your treadmill on and keep your phone nearby.",
+      "connected": "Connected · FTMS compatible",
+      "speed": "Speed",
+      "speedUnit": "{{speedUnit}}",
+      "distance": "Distance",
+      "incline": "Incline",
+      "yes": "Yes",
+      "no": "No",
+      "settings": "Open Settings",
+      "notYours": "Treadmill not recognised?",
+      "setUp": "Name it and check its speed"
+    },
+    "ready": {
+      "kicker": "Let's go, {{name}}",
+      "title": "All set",
+      "text": "Start your treadmill: the session starts on its own and your pawn leaves {{town}}.",
+      "textNoRoute": "Start your treadmill: the session starts on its own. Pick your first route from the home screen.",
+      "route": "Route",
+      "goal": "Goal",
+      "arrival": "Estimated arrival",
+      "around": "around {{date}}",
+      "treadmill": "Treadmill",
+      "start": "Start"
     }
   }
 }
