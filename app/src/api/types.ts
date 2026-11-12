@@ -275,3 +275,46 @@ export type LiveStandings = {
   friends: Standing[];
   others_m: number[];
 };
+
+export type FinishedJourney = {
+  id: string;
+  kind: 'solo' | 'race' | 'event';
+  title: string | null;
+  start: Place;
+  end: Place;
+  start_town: string | null;
+  end_town: string | null;
+  route_distance_m: number;
+  arrived_at: string;
+  rank: number | null;
+};
+
+export type PublicProfile = {
+  walker: Walker;
+  home_city: string | null;
+  country: string;
+  created_at: string;
+  total_m: number;
+  finished: number;
+  best_streak: number;
+  streak: number;
+  followers: number;
+  following: number;
+  relation: 'me' | 'friend' | 'incoming' | 'outgoing' | 'none';
+  i_follow: boolean;
+  follows_me: boolean;
+  mutual_friends: number;
+  mutual_names: string[];
+  journeys: FinishedJourney[];
+  under_way: {
+    id: string;
+    title: string | null;
+    start: Place;
+    end: Place;
+    start_town: string | null;
+    end_town: string | null;
+    distance_m: number;
+    route_distance_m: number;
+    path: RoutePoint[];
+  } | null;
+};

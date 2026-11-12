@@ -1,5 +1,5 @@
 import { Camera, Map, ViewAnnotation, type MapRef } from '@maplibre/maplibre-react-native';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import {
   ArrowUpDown,
   ChevronLeft,
@@ -39,6 +39,8 @@ type Field = 'start' | 'end';
 const FRANCE: [number, number] = [2.35, 46.6];
 
 export default function NewJourneyScreen() {
+  // A challenge from a profile: the friend to race against.
+  const { with: rival } = useLocalSearchParams<{ with?: string }>();
   const { t, i18n } = useTranslation();
   const colors = useColors();
   const insets = useSafeAreaInsets();
@@ -76,7 +78,11 @@ export default function NewJourneyScreen() {
     createRoute.mutate(
       { start: places.start, end: places.end },
       {
-        onSuccess: (route) => router.push({ pathname: '/preview', params: { routeId: route.id } }),
+        onSuccess: (route) =>
+          router.push({
+            pathname: '/preview',
+            params: rival ? { routeId: route.id, with: rival } : { routeId: route.id },
+          }),
         onError: (e) =>
           setError(
             e instanceof ApiError

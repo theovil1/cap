@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
+import { Pressable, StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
 
 import { fonts, useColors } from '@/theme';
 import { radius, type } from '@/tokens';
@@ -121,6 +121,7 @@ export function RankRow({
   me,
   first,
   compact,
+  onPress,
 }: {
   rank: number | string;
   name: string;
@@ -133,10 +134,15 @@ export function RankRow({
   first?: boolean;
   /** Tighter rows of the live sheet. */
   compact?: boolean;
+  /** Opens the walker's profile. */
+  onPress?: () => void;
 }) {
   const colors = useColors();
   return (
-    <View
+    <Pressable
+      onPress={onPress}
+      disabled={!onPress}
+      accessibilityRole={onPress ? 'button' : undefined}
       style={[
         compact ? styles.rowCompact : styles.row,
         !first && !me && !compact && { borderTopWidth: 1, borderTopColor: colors.border },
@@ -167,7 +173,7 @@ export function RankRow({
         ) : null}
       </View>
       <Amount value={value} unit={unit} size={compact ? 16 : 17} />
-    </View>
+    </Pressable>
   );
 }
 

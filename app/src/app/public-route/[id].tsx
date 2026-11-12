@@ -207,7 +207,11 @@ function Body({ route }: { route: PublicRouteDetail }) {
     <>
       {route.featured ? <Tag label={t('explore.ofTheWeek')} icon={Sparkles} /> : null}
       <Text style={[styles.title, { color: colors.text }]}>{route.title}</Text>
-      <View style={styles.author}>
+      <Pressable
+        style={styles.author}
+        onPress={() => router.push({ pathname: '/walker/[id]', params: { id: route.author.id } })}
+        accessibilityRole="link"
+      >
         <Avatar
           name={route.author.first_name}
           seed={route.author.id}
@@ -221,7 +225,7 @@ function Body({ route }: { route: PublicRouteDetail }) {
             stages: t('explore.stages', { count: route.stages }),
           })}
         </Text>
-      </View>
+      </Pressable>
       {route.description ? (
         <Text style={[styles.description, { color: colors.textSecondary }]}>
           {route.description}
@@ -256,6 +260,7 @@ function Body({ route }: { route: PublicRouteDetail }) {
           .map((f, i) => (
             <RankRow
               key={f.walker.id + f.arrived_at}
+              onPress={() => router.push({ pathname: '/walker/[id]', params: { id: f.walker.id } })}
               first={i === 0}
               rank={f.rank}
               name={f.walker.first_name}

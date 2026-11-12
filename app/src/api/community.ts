@@ -6,6 +6,7 @@ import type {
   EventCard,
   JourneyDetail,
   LiveStandings,
+  PublicProfile,
   PublicRouteCard,
   PublicRouteDetail,
   PublicRouteSort,
@@ -200,5 +201,27 @@ export function useRegister() {
         queryClient.invalidateQueries({ queryKey: journeyKeys.journeys }),
       ]);
     },
+  });
+}
+
+export const profileKeys = {
+  profile: (id: string) => ['profiles', id] as const,
+};
+
+export function useProfile(id: string | undefined) {
+  return useQuery({
+    queryKey: profileKeys.profile(id ?? ''),
+    enabled: !!id,
+    queryFn: () => api<PublicProfile>(`/users/${id}/profile`),
+  });
+}
+
+/** Follow (`true`) or stop following (`false`) a walker. */
+export function useFollow() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, on }: { id: string; on: boolean }) =>
+      api<void>(`/users/${id}/follow`, { method: on ? 'POST' : 'DELETE' }),
+    onSuccess: (_, { id }) => queryClient.invalidateQueries({ queryKey: profileKeys.profile(id) }),
   });
 }

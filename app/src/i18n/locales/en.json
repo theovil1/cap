@@ -721,5 +721,18 @@
     "submit": "Schedule",
     "tooSoon": "The start must be at least 10 minutes away.",
     "failed": "The scheduled journey could not be created."
+  },
+  "walker": {
+    "gone": "This walker no longer exists.",
+    "follows": "{{followers}} followers · {{following}} following",
+    "follow": "Follow",
+    "following": "Following",
+    "challenge": "Challenge",
+    "requestSent": "Friend request sent to {{name}}. You can race once it is accepted.",
+    "pending": "The friend request with {{name}} is waiting for an answer.",
+    "report": "Report this walker",
+    "noMedal": "No medal yet.",
+    "mutual_one": "1 friend in common: {{names}}",
+    "mutual_other": "{{count}} friends in common · {{names}} and {{others}} others"
   }
 }

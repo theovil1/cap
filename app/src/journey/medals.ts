@@ -1,14 +1,28 @@
 import type { JourneySummary } from '@/api/types';
 import type { Metal } from '@/tokens';
 
+/** What a medal needs of a finished journey (mine, or another walker's). */
+export type MedalJourney = Pick<
+  JourneySummary,
+  | 'id'
+  | 'kind'
+  | 'rank'
+  | 'arrived_at'
+  | 'start'
+  | 'end'
+  | 'start_town'
+  | 'end_town'
+  | 'route_distance_m'
+> & { title?: string | null };
+
 type Ribbon = 'cap' | 'green' | 'blue' | 'black' | 'locked';
 
 /** One medal of the profile, won or the next one to win. */
 export type EarnedMedal =
-  | { kind: 'journey'; journey: JourneySummary; metal: Metal; ribbon: Ribbon }
+  | { kind: 'journey'; journey: MedalJourney; metal: Metal; ribbon: Ribbon }
   | { kind: 'distance'; km: number; metal: Metal; ribbon: Ribbon; progress?: number }
   | { kind: 'streak'; days: number; metal: Metal; ribbon: Ribbon }
-  | { kind: 'race'; journey: JourneySummary; place: number; metal: Metal; ribbon: Ribbon };
+  | { kind: 'race'; journey: MedalJourney; place: number; metal: Metal; ribbon: Ribbon };
 
 /** Levels of the medal board: bronze, silver, gold, then Cap, the rarest. */
 const LEVELS: { metal: Metal; ribbon: Ribbon }[] = [
@@ -30,7 +44,7 @@ export function medalsFor({
   totalM,
   bestStreak,
 }: {
-  journeys: JourneySummary[];
+  journeys: MedalJourney[];
   totalM: number;
   bestStreak: number;
 }): EarnedMedal[] {

@@ -35,13 +35,13 @@ export default function PreviewScreen() {
   const insets = useSafeAreaInsets();
   const wide = useWide();
   const { user } = useAuth();
-  const { routeId } = useLocalSearchParams<{ routeId: string }>();
+  const { routeId, with: rival } = useLocalSearchParams<{ routeId: string; with?: string }>();
   const route = useQueryClient().getQueryData<RouteDetail>(keys.route(routeId));
   const startJourney = useStartJourney();
   const averageM = useAverageSessionM();
   const [failed, setFailed] = useState(false);
-  const [mode, setMode] = useState<'solo' | 'race'>('solo');
-  const [picked, setPicked] = useState<string[]>([]);
+  const [mode, setMode] = useState<'solo' | 'race'>(rival ? 'race' : 'solo');
+  const [picked, setPicked] = useState<string[]>(rival ? [rival] : []);
   const createRace = useCreateRace();
   const { data: friendList } = useFriends();
   const friends = friendList?.friends ?? [];

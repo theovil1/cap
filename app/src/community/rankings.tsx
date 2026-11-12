@@ -1,3 +1,4 @@
+import { router } from 'expo-router';
 import type { TFunction } from 'i18next';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -62,6 +63,11 @@ export function Rankings() {
           {entries.map((entry, index) => (
             <RankRow
               key={entry.user_id}
+              onPress={
+                entry.me
+                  ? undefined
+                  : () => router.push({ pathname: '/walker/[id]', params: { id: entry.user_id } })
+              }
               first={index === 0}
               rank={entry.rank}
               name={entry.me ? t('rankings.you') : entry.first_name}

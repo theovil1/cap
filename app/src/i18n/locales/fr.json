@@ -721,5 +721,18 @@
     "submit": "Planifier",
     "tooSoon": "Le départ doit être au moins dans 10 minutes.",
     "failed": "Le trajet planifié n'a pas pu être créé."
+  },
+  "walker": {
+    "gone": "Ce marcheur n'existe plus.",
+    "follows": "{{followers}} abonnés · {{following}} abonnements",
+    "follow": "Suivre",
+    "following": "Suivi",
+    "challenge": "Défier",
+    "requestSent": "Demande d'ami envoyée à {{name}}. Vous pourrez faire la course quand elle sera acceptée.",
+    "pending": "La demande d'ami avec {{name}} attend une réponse.",
+    "report": "Signaler ce marcheur",
+    "noMedal": "Pas encore de médaille.",
+    "mutual_one": "1 ami en commun : {{names}}",
+    "mutual_other": "{{count}} amis en commun · {{names}} et {{others}} autres"
   }
 }
