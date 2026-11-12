@@ -24,7 +24,8 @@ pub fn router() -> OpenApiRouter<AppState> {
     OpenApiRouter::new()
         .routes(routes!(create_route))
         .routes(routes!(start_solo_journey, list_journeys))
-        .routes(routes!(get_journey))
+        .routes(routes!(get_journey, delete_journey))
+        .routes(routes!(reset_journey))
 }
 
 #[derive(Deserialize, ToSchema)]
@@ -241,6 +242,61 @@ async fn get_journey(
     AuthUser(user_id): AuthUser,
     Path(id): Path<Uuid>,
 ) -> AppResult<Json<JourneyDetail>> {
+    Ok(Json(fetch_detail(&state.db, user_id, id).await?))
+}
+
+/// Delete a solo journey for good. The walked sessions stay in the history.
+#[utoipa::path(delete, path = "/journeys/{id}", tag = "journeys", security(("bearer" = [])),
+    params(("id" = Uuid, Path)),
+    responses((status = 204), (status = 404, body = ErrorBody)))]
+async fn delete_journey(
+    State(state): State<AppState>,
+    AuthUser(user_id): AuthUser,
+    Path(id): Path<Uuid>,
+) -> AppResult<StatusCode> {
+    // Allocations, unlocks and participants go with it (ON DELETE CASCADE).
+    let deleted =
+        sqlx::query!("DELETE FROM journeys WHERE id = $1 AND created_by = $2 AND kind = 'solo'", id, user_id)
+            .execute(&state.db)
+            .await?;
+    if deleted.rows_affected() == 0 {
+        return Err(AppError::not_found("journey not found"));
+    }
+    Ok(StatusCode::NO_CONTENT)
+}
+
+/// Start a solo journey again from the beginning. The walked sessions stay
+/// in the history but no longer count for this journey.
+#[utoipa::path(post, path = "/journeys/{id}/reset", tag = "journeys", security(("bearer" = [])),
+    params(("id" = Uuid, Path)),
+    responses((status = 200, body = JourneyDetail), (status = 404, body = ErrorBody)))]
+async fn reset_journey(
+    State(state): State<AppState>,
+    AuthUser(user_id): AuthUser,
+    Path(id): Path<Uuid>,
+) -> AppResult<Json<JourneyDetail>> {
+    let mut tx = state.db.begin().await?;
+    let reset = sqlx::query!(
+        "UPDATE journeys SET status = 'active', starts_at = now()
+         WHERE id = $1 AND created_by = $2 AND kind = 'solo'",
+        id,
+        user_id
+    )
+    .execute(&mut *tx)
+    .await?;
+    if reset.rows_affected() == 0 {
+        return Err(AppError::not_found("journey not found"));
+    }
+    sqlx::query!("DELETE FROM session_allocations WHERE journey_id = $1", id).execute(&mut *tx).await?;
+    sqlx::query!("DELETE FROM stage_unlocks WHERE journey_id = $1", id).execute(&mut *tx).await?;
+    sqlx::query!(
+        "UPDATE journey_participants SET distance_m = 0, arrived_at = NULL, rank = NULL
+         WHERE journey_id = $1",
+        id
+    )
+    .execute(&mut *tx)
+    .await?;
+    tx.commit().await?;
     Ok(Json(fetch_detail(&state.db, user_id, id).await?))
 }
 

@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE journey_participants SET distance_m = 0, arrived_at = NULL, rank = NULL\n         WHERE journey_id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "5079b43af8756f99f675cd25d513354e93aaaf5f718da4b65568cd7ba8aaafbc"
+}

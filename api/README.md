@@ -15,6 +15,8 @@ Interactive documentation is served at `/docs` (OpenAPI at `/openapi.json`).
 | `POST /routes` | Compute a safe walking route (GraphHopper) and its stages, for a preview |
 | `POST /journeys` | Start a solo journey on a computed route |
 | `GET /journeys`, `/journeys/{id}` | Journeys with progress, route geometry and stages |
+| `POST /journeys/{id}/reset` | Start a solo journey again from the beginning |
+| `DELETE /journeys/{id}` | Delete a solo journey (sessions stay in the history) |
 | `POST /sessions` | Upload a session, idempotent on `local_id`, rejected above 20 km/h; returns the stages it unlocked |
 | `GET /sessions` | Session history |
 | `GET /health` | Liveness and database check |

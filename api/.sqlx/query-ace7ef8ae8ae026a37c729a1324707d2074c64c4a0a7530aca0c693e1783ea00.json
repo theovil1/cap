@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE journeys SET status = 'active', starts_at = now()\n         WHERE id = $1 AND created_by = $2 AND kind = 'solo'",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "ace7ef8ae8ae026a37c729a1324707d2074c64c4a0a7530aca0c693e1783ea00"
+}

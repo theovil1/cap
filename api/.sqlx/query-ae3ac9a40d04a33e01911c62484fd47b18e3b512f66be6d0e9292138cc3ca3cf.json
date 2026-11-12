@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM stage_unlocks WHERE journey_id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "ae3ac9a40d04a33e01911c62484fd47b18e3b512f66be6d0e9292138cc3ca3cf"
+}
