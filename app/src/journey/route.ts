@@ -77,3 +77,36 @@ export function bounds(path: RoutePoint[]): [number, number, number, number] {
   }
   return [minLon, minLat, maxLon, maxLat];
 }
+
+/** Moves a point by `meters` towards `bearing` (degrees clockwise from north). */
+export function offsetBy([lon, lat]: LngLat, bearing: number, meters: number): LngLat {
+  const rad = (bearing * Math.PI) / 180;
+  const dLat = (meters * Math.cos(rad)) / 111_320;
+  const dLon = (meters * Math.sin(rad)) / (111_320 * Math.cos((lat * Math.PI) / 180));
+  return [lon + dLon, lat + dLat];
+}
+
+/**
+ * Camera centre that shows the pawn in the middle of the free area of the
+ * screen (above a bottom panel, left of a side panel) in a tilted view.
+ * Computed here rather than with camera padding, which the iOS map applies
+ * with the camera's current tilt and heading and so misses after a drag.
+ */
+export function followCenter(
+  pawn: LngLat,
+  view: { heading: number; zoom: number; pitch: number; height: number },
+  free: { bottom: number; right: number },
+): LngLat {
+  // MapLibre: 512 px tiles and a vertical field of view of about 36.87 degrees.
+  const metersPerPx =
+    (40_075_016.686 * Math.cos((pawn[1] * Math.PI) / 180)) / (512 * 2 ** view.zoom);
+  const toCenter = view.height / 2 / Math.tan((36.87 * Math.PI) / 360);
+  const pitch = (view.pitch * Math.PI) / 180;
+  // Ground distance between the screen centre and a point `y` px below it.
+  const y = free.bottom / 2;
+  const below = Math.atan(y / toCenter);
+  const groundPx =
+    toCenter * Math.sin(pitch) - toCenter * Math.cos(pitch) * Math.tan(pitch - below);
+  const ahead = offsetBy(pawn, view.heading, groundPx * metersPerPx);
+  return offsetBy(ahead, view.heading + 90, (free.right / 2) * metersPerPx);
+}

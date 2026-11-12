@@ -47,9 +47,11 @@ export function Sheet({
       bounciness: 0,
       speed: 18,
     }).start();
+  // One animation per snap: with the native driver, a second spring started
+  // on top would restart from a stale value and make the sheet flicker.
   const snapTo = (i: number) => {
-    glide(offsetOf(i));
-    setIndex(i);
+    if (i === index) glide(offsetOf(i));
+    else setIndex(i);
   };
   useEffect(() => {
     Object.assign(box, { heights, full, snapTo });
@@ -65,8 +67,8 @@ export function Sheet({
       bounciness: 0,
       speed: 18,
     }).start();
-    onChange?.(index, height);
-  }, [offset, height, index, translate, onChange]);
+  }, [offset, translate]);
+  useEffect(() => onChange?.(index, height), [index, height, onChange]);
 
   const [responder] = useState(() =>
     PanResponder.create({

@@ -1,9 +1,24 @@
 import { Camera, GeoJSONSource, Layer, Map, ViewAnnotation } from '@maplibre/maplibre-react-native';
 import { useMemo, useState } from 'react';
-import { StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
+import {
+  StyleSheet,
+  Text,
+  useWindowDimensions,
+  View,
+  type StyleProp,
+  type ViewStyle,
+} from 'react-native';
 
 import type { Stage } from '@/api/types';
-import { bounds, headingAt, positionAt, simplify, splitAt, type RoutePoint } from '@/journey/route';
+import {
+  bounds,
+  followCenter,
+  headingAt,
+  positionAt,
+  simplify,
+  splitAt,
+  type RoutePoint,
+} from '@/journey/route';
 import { fonts, useColors } from '@/theme';
 
 import { useMapStyle } from './style';
@@ -16,6 +31,7 @@ import { useMapStyle } from './style';
 export type MapMode = 'follow' | 'card' | 'overview';
 
 const FOLLOW_ZOOM = 16.6;
+const FOLLOW_PITCH = 60;
 
 type Props = {
   path: RoutePoint[];
@@ -44,6 +60,7 @@ export function RouteMap({
 }: Props) {
   const colors = useColors();
   const mapStyle = useMapStyle();
+  const { height: screenH } = useWindowDimensions();
   // While a finger is on the map the camera holds still; a pinch keeps following.
   const [touching, setTouching] = useState(false);
   const [followZoom, setFollowZoom] = useState(FOLLOW_ZOOM);
@@ -100,13 +117,28 @@ export function RouteMap({
           padding,
           duration: 800,
         }
-      : mode === 'follow' && (!following || touching)
-        ? {}
+      : mode === 'follow'
+        ? following && !touching
+          ? {
+              // No camera padding here: see followCenter.
+              center: followCenter(
+                pawn,
+                { heading, zoom: followZoom, pitch: FOLLOW_PITCH, height: screenH },
+                { bottom: padding?.bottom ?? 0, right: padding?.right ?? 0 },
+              ),
+              zoom: followZoom,
+              pitch: FOLLOW_PITCH,
+              bearing: heading,
+              padding: { top: 0, bottom: 0, left: 0, right: 0 },
+              duration: 900,
+              easing: 'linear' as const,
+            }
+          : {}
         : {
             center: pawn,
-            zoom: mode === 'follow' ? followZoom : 15.2,
-            pitch: mode === 'follow' ? 60 : 52,
-            bearing: mode === 'follow' ? heading : 0,
+            zoom: 15.2,
+            pitch: 52,
+            bearing: 0,
             padding,
             duration: 900,
             easing: 'linear' as const,
