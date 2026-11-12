@@ -42,6 +42,21 @@ export function formatRank(rank: number): string {
   return `${rank}${suffix}`;
 }
 
+/** `Il y a 2 h`, `Hier` or a date, for the last time someone walked. */
+export function formatAgo(iso: string, now: number): string {
+  const then = new Date(iso);
+  const minutes = Math.floor((now - then.getTime()) / 60_000);
+  if (minutes < 1) return i18n.t('ago.now');
+  if (minutes < 60) return i18n.t('ago.minutes', { count: minutes });
+  const yesterday = new Date(now);
+  yesterday.setDate(yesterday.getDate() - 1);
+  if (minutes < 24 * 60 && then.getDate() === new Date(now).getDate()) {
+    return i18n.t('ago.hours', { count: Math.floor(minutes / 60) });
+  }
+  if (then.toDateString() === yesterday.toDateString()) return i18n.t('ago.yesterday');
+  return formatDate(then, { day: 'numeric', month: 'long' });
+}
+
 export function formatDate(date: Date, options: Intl.DateTimeFormatOptions): string {
   return date.toLocaleDateString(locale(), options);
 }

@@ -1,5 +1,5 @@
 import { router } from 'expo-router';
-import { Ellipsis, Flag, Plus } from 'lucide-react-native';
+import { ChevronRight, Ellipsis, Flag, Plus, Swords } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 import { ActionSheetIOS, Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 
@@ -15,7 +15,9 @@ export default function JourneysScreen() {
   const { t } = useTranslation();
   const colors = useColors();
   const { data: journeys = [] } = useJourneys();
-  const active = journeys.filter((j) => j.status === 'active');
+  const invitations = journeys.filter((j) => j.status === 'waiting' && !j.joined);
+  const waiting = journeys.filter((j) => j.status === 'waiting' && j.joined);
+  const active = journeys.filter((j) => j.status === 'active' && j.joined);
   const finished = journeys.filter((j) => j.status === 'finished');
 
   return (
@@ -26,6 +28,10 @@ export default function JourneysScreen() {
         icon={<Plus size={20} color="#FFFFFF" />}
         onPress={() => router.push('/new-journey')}
       />
+      {invitations.length > 0 && (
+        <Section title={t('journeys.invitations')} journeys={invitations} />
+      )}
+      {waiting.length > 0 && <Section title={t('journeys.waiting')} journeys={waiting} />}
       {active.length > 0 && <Section title={t('journeys.active')} journeys={active} />}
       {finished.length > 0 && <Section title={t('journeys.history')} journeys={finished} />}
       {journeys.length === 0 && (
@@ -88,46 +94,69 @@ function JourneyRow({ journey }: { journey: JourneySummary }) {
   const colors = useColors();
   const openMenu = useJourneyMenu(journey);
   const ratio = journey.distance_m / journey.route_distance_m;
+  const race = journey.kind === 'race';
   return (
-    <Card style={styles.row}>
-      <View style={styles.rowTop}>
-        <Text style={[styles.name, { color: colors.text }]} numberOfLines={1}>
-          {journeyTitle(journey)}
-        </Text>
-        {journey.arrived_at ? (
-          <Flag size={18} color={colors.accent} />
-        ) : (
-          <Text style={[styles.percent, { color: colors.accentText }]}>
-            {formatNumber(Math.floor(ratio * 100))} %
+    <Pressable
+      disabled={!race}
+      onPress={() => router.push({ pathname: '/race/[id]', params: { id: journey.id } })}
+      accessibilityRole={race ? 'button' : undefined}
+    >
+      <Card style={styles.row}>
+        <View style={styles.rowTop}>
+          <Text style={[styles.name, { color: colors.text }]} numberOfLines={1}>
+            {journeyTitle(journey)}
           </Text>
+          {journey.arrived_at ? (
+            <Flag size={18} color={colors.accent} />
+          ) : (
+            <Text style={[styles.percent, { color: colors.accentText }]}>
+              {formatNumber(Math.floor(ratio * 100))} %
+            </Text>
+          )}
+          {race ? (
+            <ChevronRight size={20} color={colors.textMuted} />
+          ) : (
+            <Pressable
+              onPress={openMenu}
+              accessibilityRole="button"
+              accessibilityLabel={t('journeys.options')}
+              hitSlop={10}
+              style={[styles.more, { backgroundColor: colors.inset }]}
+            >
+              <Ellipsis size={18} color={colors.textSecondary} />
+            </Pressable>
+          )}
+        </View>
+        {race && (
+          <View style={styles.raceTag}>
+            <Swords size={14} color={colors.blueText} />
+            <Text style={[styles.detail, { color: colors.blueText }]}>
+              {journey.status === 'waiting'
+                ? journey.joined
+                  ? t('journeys.raceWaiting')
+                  : t('journeys.raceInvited')
+                : t('journeys.racePlayers', { count: journey.players })}
+            </Text>
+          </View>
         )}
-        <Pressable
-          onPress={openMenu}
-          accessibilityRole="button"
-          accessibilityLabel={t('journeys.options')}
-          hitSlop={10}
-          style={[styles.more, { backgroundColor: colors.inset }]}
-        >
-          <Ellipsis size={18} color={colors.textSecondary} />
-        </Pressable>
-      </View>
-      <Text style={[styles.detail, { color: colors.textSecondary }]}>
-        {journey.arrived_at
-          ? t('journeys.arrivedOn', {
-              km: formatKm(journey.route_distance_m, 0),
-              date: formatDate(new Date(journey.arrived_at), {
-                day: 'numeric',
-                month: 'long',
-                year: 'numeric',
-              }),
-            })
-          : t('journeys.progress', {
-              walked: formatKm(journey.distance_m),
-              total: formatKm(journey.route_distance_m, 0),
-            })}
-      </Text>
-      {!journey.arrived_at && <ProgressBar ratio={ratio} />}
-    </Card>
+        <Text style={[styles.detail, { color: colors.textSecondary }]}>
+          {journey.arrived_at
+            ? t('journeys.arrivedOn', {
+                km: formatKm(journey.route_distance_m, 0),
+                date: formatDate(new Date(journey.arrived_at), {
+                  day: 'numeric',
+                  month: 'long',
+                  year: 'numeric',
+                }),
+              })
+            : t('journeys.progress', {
+                walked: formatKm(journey.distance_m),
+                total: formatKm(journey.route_distance_m, 0),
+              })}
+        </Text>
+        {!journey.arrived_at && <ProgressBar ratio={ratio} />}
+      </Card>
+    </Pressable>
   );
 }
 
@@ -139,6 +168,7 @@ const styles = StyleSheet.create({
   rowTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10 },
   name: { flex: 1, fontFamily: fonts.display, fontSize: 18 },
   percent: { fontFamily: fonts.display, fontSize: 18, fontVariant: ['tabular-nums'] },
+  raceTag: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   more: { width: 32, height: 32, borderRadius: 99, alignItems: 'center', justifyContent: 'center' },
   detail: { fontFamily: fonts.text, fontSize: 13, fontVariant: ['tabular-nums'] },
 });

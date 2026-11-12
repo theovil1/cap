@@ -13,6 +13,8 @@ import {
 import { AppState } from 'react-native';
 
 import { useAuth } from '@/api/auth';
+import type { JourneySummary } from '@/api/types';
+import { sendProgress, sendStop, setLiveWanted } from '@/live/live-client';
 import { stepsFor } from '@/journey/progress';
 import { TreadmillConnection, type ConnectionSnapshot } from '@/treadmill/connection';
 import type { TreadmillData } from '@/treadmill/ftms';
@@ -52,6 +54,18 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   const [live, setLive] = useState<LiveSession | null>(null);
   const recorder = useRef(new SessionRecorder(randomUUID));
   const lastSaved = useRef(0);
+  const lastSent = useRef(0);
+  // Live races: rivals see the pawn move while the walker is on a race.
+  useEffect(() => {
+    setLiveWanted(status === 'signedIn');
+  }, [status]);
+  const onRace = useCallback(
+    () =>
+      (queryClient.getQueryData<JourneySummary[]>(['journeys']) ?? []).some(
+        (j) => j.kind === 'race' && j.status === 'active' && j.joined,
+      ),
+    [queryClient],
+  );
   const strideCm = useRef<number | null>(null);
   useEffect(() => {
     strideCm.current = user?.stride_cm ?? null;
@@ -77,6 +91,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   const store = useCallback(
     (finished: FinishedSession | null) => {
       setLive(null);
+      sendStop();
       if (!finished) {
         clearLive();
         return;
@@ -121,6 +136,10 @@ export function SessionProvider({ children }: { children: ReactNode }) {
           onSessionScreen.current = true;
           router.push('/session');
         }
+        if (current && now - lastSent.current >= 2_000 && onRace()) {
+          sendProgress(current.startedAt, current.distanceM, current.speedKmh);
+          lastSent.current = now;
+        }
         if (current && now - lastSaved.current >= SAVE_EVERY_MS) {
           saveLive(current);
           lastSaved.current = now;
@@ -144,7 +163,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       clearInterval(timer);
       appState.remove();
     };
-  }, [status, store, sync]);
+  }, [status, store, sync, onRace]);
 
   const finishNow = useCallback(() => store(recorder.current.finish(Date.now())), [store]);
 

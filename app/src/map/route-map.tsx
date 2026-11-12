@@ -49,7 +49,11 @@ type Props = {
   onUserMove?: () => void;
   /** Treadmill speed: in `follow` mode the pawn keeps walking between frames. */
   speedMps?: number;
+  /** Other walkers of a race, drawn as blue pawns. */
+  rivals?: Rival[];
 };
+
+export type Rival = { id: string; initial: string; distanceM: number; speedMps: number };
 
 export function RouteMap({
   path,
@@ -62,6 +66,7 @@ export function RouteMap({
   following = true,
   onUserMove,
   speedMps = 0,
+  rivals = [],
 }: Props) {
   const colors = useColors();
   const mapStyle = useMapStyle();
@@ -218,6 +223,9 @@ export function RouteMap({
           />
         </GeoJSONSource>
       )}
+      {rivals.map((rival) => (
+        <RivalPawn key={rival.id} path={path} rival={rival} />
+      ))}
       {camera && (
         <ViewAnnotation id="pawn" lngLat={pawn} anchor="center">
           <Pawn initial={initial ?? ''} />
@@ -286,13 +294,30 @@ function FollowCamera({
   );
 }
 
-function Pawn({ initial }: { initial: string }) {
-  const colors = useColors();
+/** A rival walks smoothly too, from the positions heard live. */
+function RivalPawn({ path, rival }: { path: RoutePoint[]; rival: Rival }) {
+  const shownM = useSmoothDistance(rival.distanceM, rival.speedMps);
   return (
-    <View style={styles.pawnArea} pointerEvents="none">
-      <View style={[styles.halo, { backgroundColor: colors.accent }]} />
-      <View style={[styles.pawn, { backgroundColor: colors.accent, borderColor: colors.surface }]}>
-        <Text style={[styles.initial, { color: colors.onAccent }]}>
+    <ViewAnnotation id={`rival-${rival.id}`} lngLat={positionAt(path, shownM)} anchor="center">
+      <Pawn initial={rival.initial} rival />
+    </ViewAnnotation>
+  );
+}
+
+function Pawn({ initial, rival = false }: { initial: string; rival?: boolean }) {
+  const colors = useColors();
+  const color = rival ? colors.blue : colors.accent;
+  return (
+    <View style={[styles.pawnArea, rival && styles.rivalArea]} pointerEvents="none">
+      {!rival && <View style={[styles.halo, { backgroundColor: color }]} />}
+      <View
+        style={[
+          styles.pawn,
+          rival && styles.rivalPawn,
+          { backgroundColor: color, borderColor: colors.surface },
+        ]}
+      >
+        <Text style={[styles.initial, { color: rival ? '#FFFFFF' : colors.onAccent }]}>
           {initial.charAt(0).toUpperCase()}
         </Text>
       </View>
@@ -312,4 +337,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   initial: { fontFamily: fonts.display, fontSize: 14 },
+  rivalArea: { width: 34, height: 34 },
+  rivalPawn: { width: 28, height: 28, borderWidth: 2.5 },
 });

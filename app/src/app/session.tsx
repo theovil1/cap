@@ -20,6 +20,7 @@ import { useAuth } from '@/api/auth';
 import { useActiveJourney } from '@/api/queries';
 import { formatDuration, formatKm, formatNumber, formatPace } from '@/i18n/format';
 import { nextStage, paceMinPerKm, stepsFor } from '@/journey/progress';
+import { rivalPawns, useRacers } from '@/live/use-racers';
 import { MapKindButton } from '@/map/map-kind-button';
 import { RouteMap } from '@/map/route-map';
 import { useSession } from '@/session/session-context';
@@ -68,6 +69,7 @@ export default function SessionScreen() {
   const total = summary?.route_distance_m ?? 0;
   const walked = summary ? Math.min(total, summary.distance_m + unsyncedM + sessionM) : 0;
   const stage = detail ? nextStage(detail.stages, walked) : null;
+  const rivals = rivalPawns(useRacers(detail, walked));
   const marks = (detail?.stages ?? [])
     .filter((s) => s.position > 0 && s.at_m < total)
     .map((s) => s.at_m / total);
@@ -227,6 +229,7 @@ export default function SessionScreen() {
           walkedM={walked}
           mode="follow"
           speedMps={live ? speed / 3.6 : 0}
+          rivals={rivals}
           following={following}
           onUserMove={() => setFollowing(false)}
           initial={user?.first_name}

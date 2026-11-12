@@ -37,7 +37,10 @@
     "route_not_found": "Aucun itinéraire à pied sûr entre ces deux points.",
     "route_too_short": "Le départ et l'arrivée sont au même endroit.",
     "invalid_place": "Choisis un départ et une arrivée dans la liste.",
-    "self_friend": "Tu ne peux pas t'ajouter toi-même."
+    "self_friend": "Tu ne peux pas t'ajouter toi-même.",
+    "not_friends": "Tu ne peux inviter que tes amis.",
+    "no_opponent": "Il faut au moins un ami prêt pour lancer.",
+    "invalid_race": "Invite entre 1 et 7 amis."
   },
   "home": {
     "hello": "Salut {{name}}",
@@ -76,7 +79,13 @@
     "restartBody": "Ton pion revient au départ et les étapes passées sont oubliées. Tes séances restent dans ton historique.",
     "deleteTitle": "Supprimer ce trajet ?",
     "deleteBody": "Il disparaît pour de bon. Tes séances restent dans ton historique.",
-    "failed": "Impossible pour le moment. Vérifie ta connexion et réessaie."
+    "failed": "Impossible pour le moment. Vérifie ta connexion et réessaie.",
+    "invitations": "Invitations",
+    "waiting": "Courses à lancer",
+    "raceInvited": "Invitation à une course",
+    "raceWaiting": "Course en attente du départ",
+    "racePlayers_one": "Course · {{count}} joueur",
+    "racePlayers_other": "Course · {{count}} joueurs"
   },
   "newJourney": {
     "title": "Nouveau trajet",
@@ -99,7 +108,13 @@
     "sessions_one": "≈ {{count}} séance de {{km}} km",
     "sessions_other": "≈ {{count}} séances de {{km}} km",
     "safe": "Sans autoroute ni voie rapide",
-    "start": "Lancer le trajet"
+    "start": "Lancer le trajet",
+    "solo": "Solo",
+    "race": "Course",
+    "createRace_one": "Créer la course à 2",
+    "createRace_other": "Créer la course à {{players}}",
+    "createRace_zero": "Choisis tes adversaires",
+    "noFriends": "Ajoute des amis pour faire la course avec eux →"
   },
   "map": {
     "recenter": "Recentrer sur mon pion",
@@ -159,7 +174,9 @@
     "arrived": "Tu es arrivé à destination !",
     "continue": "Continuer",
     "share": "Partager",
-    "shareText": "Je viens de marcher {{km}} km en {{minutes}} min avec Cap."
+    "shareText": "Je viens de marcher {{km}} km en {{minutes}} min avec Cap.",
+    "racePlace": "Tu es {{place}} sur {{count}}",
+    "seeRace": "Voir"
   },
   "rankings": {
     "week": "Semaine",
@@ -220,5 +237,45 @@
     "kmh": "km/h",
     "m": "m",
     "percent": "%"
+  },
+  "race": {
+    "day_one": "Course · jour {{count}}",
+    "day_other": "Course · jour {{count}}",
+    "waitingTitle": "Course en préparation",
+    "waitingMine": "Lance la course quand tes amis sont prêts. Tout le monde part de zéro.",
+    "waitingOther": "La course démarre quand son créateur la lance. Tout le monde part de zéro.",
+    "ready": "Prêt",
+    "invited": "Invité",
+    "start": "Lancer la course",
+    "needOpponent": "Il faut au moins un ami prêt pour lancer.",
+    "cancel": "Annuler la course",
+    "cancelTitle": "Annuler cette course ?",
+    "cancelBody": "Elle disparaît pour tout le monde.",
+    "join": "Rejoindre la course",
+    "decline": "Refuser",
+    "leave": "Quitter la course",
+    "leaveTitle": "Quitter cette course ?",
+    "yourPlace": "Ta position",
+    "of_one": "sur {{count}}",
+    "of_other": "sur {{count}}",
+    "behind": "{{km}} km derrière {{name}}",
+    "ahead": "{{km}} km d'avance",
+    "sessionsToPass_one": "≈ {{count}} séance pour le doubler",
+    "sessionsToPass_other": "≈ {{count}} séances pour le doubler",
+    "arrived": "Arrivé {{place}}",
+    "over": "Course terminée",
+    "live": "En direct · {{speed}} km/h",
+    "arrivedOn": "Arrivé · {{when}}",
+    "notStarted": "Pas encore parti",
+    "leader": "Leader",
+    "rule": "Le premier arrivé à {{place}} gagne. Les positions bougent en direct."
+  },
+  "ago": {
+    "now": "À l'instant",
+    "minutes_one": "Il y a {{count}} min",
+    "minutes_other": "Il y a {{count}} min",
+    "hours_one": "Il y a {{count}} h",
+    "hours_other": "Il y a {{count}} h",
+    "yesterday": "Hier"
   }
 }

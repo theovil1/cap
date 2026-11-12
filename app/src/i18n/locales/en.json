@@ -37,7 +37,10 @@
     "route_not_found": "No safe walking route between these two places.",
     "route_too_short": "Start and destination are the same place.",
     "invalid_place": "Pick a start and a destination from the list.",
-    "self_friend": "You cannot add yourself."
+    "self_friend": "You cannot add yourself.",
+    "not_friends": "You can only invite friends.",
+    "no_opponent": "At least one friend must be ready to start.",
+    "invalid_race": "Invite 1 to 7 friends."
   },
   "home": {
     "hello": "Hi {{name}}",
@@ -76,7 +79,13 @@
     "restartBody": "Your pawn goes back to the start and the passed stages are forgotten. Your sessions stay in your history.",
     "deleteTitle": "Delete this journey?",
     "deleteBody": "It is gone for good. Your sessions stay in your history.",
-    "failed": "Not possible right now. Check your connection and try again."
+    "failed": "Not possible right now. Check your connection and try again.",
+    "invitations": "Invitations",
+    "waiting": "Races to start",
+    "raceInvited": "Invited to a race",
+    "raceWaiting": "Race waiting to start",
+    "racePlayers_one": "Race · {{count}} walker",
+    "racePlayers_other": "Race · {{count}} walkers"
   },
   "newJourney": {
     "title": "New journey",
@@ -99,7 +108,13 @@
     "sessions_one": "≈ {{count}} session of {{km}} km",
     "sessions_other": "≈ {{count}} sessions of {{km}} km",
     "safe": "No motorways or expressways",
-    "start": "Start the journey"
+    "start": "Start the journey",
+    "solo": "Solo",
+    "race": "Race",
+    "createRace_one": "Create a race for 2",
+    "createRace_other": "Create a race for {{players}}",
+    "createRace_zero": "Pick your rivals",
+    "noFriends": "Add friends to race them →"
   },
   "map": {
     "recenter": "Recenter on my pawn",
@@ -159,7 +174,9 @@
     "arrived": "You reached your destination!",
     "continue": "Continue",
     "share": "Share",
-    "shareText": "I just walked {{km}} km in {{minutes}} min with Cap."
+    "shareText": "I just walked {{km}} km in {{minutes}} min with Cap.",
+    "racePlace": "You are {{place}} of {{count}}",
+    "seeRace": "See"
   },
   "rankings": {
     "week": "Week",
@@ -220,5 +237,45 @@
     "kmh": "km/h",
     "m": "m",
     "percent": "%"
+  },
+  "race": {
+    "day_one": "Race · day {{count}}",
+    "day_other": "Race · day {{count}}",
+    "waitingTitle": "Race getting ready",
+    "waitingMine": "Start the race when your friends are ready. Everyone starts from zero.",
+    "waitingOther": "The race starts when its creator says so. Everyone starts from zero.",
+    "ready": "Ready",
+    "invited": "Invited",
+    "start": "Start the race",
+    "needOpponent": "At least one friend must be ready to start.",
+    "cancel": "Cancel the race",
+    "cancelTitle": "Cancel this race?",
+    "cancelBody": "It is gone for everyone.",
+    "join": "Join the race",
+    "decline": "Decline",
+    "leave": "Leave the race",
+    "leaveTitle": "Leave this race?",
+    "yourPlace": "Your place",
+    "of_one": "of {{count}}",
+    "of_other": "of {{count}}",
+    "behind": "{{km}} km behind {{name}}",
+    "ahead": "{{km}} km ahead",
+    "sessionsToPass_one": "≈ {{count}} session to pass them",
+    "sessionsToPass_other": "≈ {{count}} sessions to pass them",
+    "arrived": "Arrived {{place}}",
+    "over": "Race over",
+    "live": "Live · {{speed}} km/h",
+    "arrivedOn": "Arrived · {{when}}",
+    "notStarted": "Not started yet",
+    "leader": "Leader",
+    "rule": "The first to reach {{place}} wins. Positions move live."
+  },
+  "ago": {
+    "now": "Just now",
+    "minutes_one": "{{count}} min ago",
+    "minutes_other": "{{count}} min ago",
+    "hours_one": "{{count}} h ago",
+    "hours_other": "{{count}} h ago",
+    "yesterday": "Yesterday"
   }
 }

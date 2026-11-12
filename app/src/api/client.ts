@@ -50,6 +50,15 @@ export async function restoreSession(): Promise<boolean> {
   }
 }
 
+/** A new access token, for the live WebSocket (null when signed out or offline). */
+export async function freshAccessToken(): Promise<string | null> {
+  try {
+    return (await refresh()) ? (session?.accessToken ?? null) : null;
+  } catch {
+    return null;
+  }
+}
+
 export function storedRefreshToken(): string | null {
   return session?.refreshToken ?? null;
 }

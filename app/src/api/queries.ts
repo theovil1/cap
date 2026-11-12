@@ -63,7 +63,8 @@ export function useJourney(id: string | undefined) {
 /** The journey receiving the km by default: the most recent active one. */
 export function useActiveJourney() {
   const journeys = useJourneys();
-  const active = journeys.data?.find((j) => j.status === 'active');
+  // The most recent journey under way that the walker is in (solo or race).
+  const active = journeys.data?.find((j) => j.status === 'active' && j.joined);
   const detail = useJourney(active?.id);
   return { summary: active ?? null, detail: detail.data ?? null, isLoading: journeys.isLoading };
 }
@@ -193,4 +194,42 @@ export function useLeaderboard(period: LeaderboardPeriod) {
       api<Leaderboard>('/leaderboards', { query: { period } }),
     ),
   });
+}
+
+/** Any change to a race refreshes it and the journey list. */
+function useRaceMutation<T, R>(run: (arg: T) => Promise<R>) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: run,
+    onSuccess: (result) => {
+      if (result && typeof result === 'object' && 'id' in result) {
+        const journey = result as unknown as JourneyDetail;
+        queryClient.setQueryData(keys.journey(journey.id), journey);
+      }
+      return queryClient.invalidateQueries({ queryKey: keys.journeys });
+    },
+  });
+}
+
+export function useCreateRace() {
+  return useRaceMutation((body: { route_id: string; friend_ids: string[] }) =>
+    api<JourneyDetail>('/races', { method: 'POST', body }),
+  );
+}
+
+export function useJoinRace() {
+  return useRaceMutation((id: string) =>
+    api<JourneyDetail>(`/journeys/${id}/join`, { method: 'POST' }),
+  );
+}
+
+export function useStartRace() {
+  return useRaceMutation((id: string) =>
+    api<JourneyDetail>(`/journeys/${id}/start`, { method: 'POST' }),
+  );
+}
+
+/** Declines an invitation or leaves a race. */
+export function useLeaveRace() {
+  return useRaceMutation((id: string) => api<void>(`/journeys/${id}/leave`, { method: 'POST' }));
 }

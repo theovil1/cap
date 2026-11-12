@@ -50,7 +50,16 @@ export type RouteDetail = {
 export type JourneySummary = {
   id: string;
   kind: 'solo' | 'race';
-  status: 'invited' | 'waiting' | 'active' | 'finished';
+  /** `waiting`: a race not started yet. */
+  status: 'waiting' | 'active' | 'finished';
+  /** False while invited to a race. */
+  joined: boolean;
+  /** Created by the current user. */
+  mine: boolean;
+  players: number;
+  starts_at: string | null;
+  /** Arrival order of the current user in a race. */
+  rank: number | null;
   route_id: string;
   start: Place;
   end: Place;
@@ -62,9 +71,26 @@ export type JourneySummary = {
   created_at: string;
 };
 
+export type LivePosition = { distance_m: number; speed_kmh: number };
+
+export type Participant = {
+  user_id: string;
+  first_name: string;
+  username: string;
+  me: boolean;
+  joined: boolean;
+  distance_m: number;
+  arrived_at: string | null;
+  rank: number | null;
+  last_session_at: string | null;
+  /** Set while they walk right now. */
+  live: LivePosition | null;
+};
+
 export type JourneyDetail = JourneySummary & {
   path: RoutePoint[];
   stages: (Stage & { unlocked_at: string | null })[];
+  participants: Participant[];
 };
 
 export type SessionUpload = {

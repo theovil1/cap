@@ -1,14 +1,16 @@
 import { Redirect, router, useLocalSearchParams } from 'expo-router';
-import { Flag, Share as ShareIcon, Sparkle, X } from 'lucide-react-native';
+import { Flag, Share as ShareIcon, Sparkle, Swords, X } from 'lucide-react-native';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ScrollView, Share, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useAuth } from '@/api/auth';
-import { useActiveJourney, useJourney } from '@/api/queries';
+import { useActiveJourney, useJourney, useJourneys } from '@/api/queries';
 import type { Stage } from '@/api/types';
-import { formatKm, formatNumber, formatPace } from '@/i18n/format';
+import { formatKm, formatNumber, formatPace, formatRank } from '@/i18n/format';
+import { journeyTitle } from '@/journey/names';
+import { useRacers } from '@/live/use-racers';
 import { paceMinPerKm } from '@/journey/progress';
 import { RouteMap } from '@/map/route-map';
 import { useDayStats } from '@/session/stats';
@@ -45,6 +47,8 @@ export default function SummaryScreen() {
   const detail = useJourney(journeyId).data ?? null;
   const summary = detail;
   const day = useDayStats();
+  const { data: journeys = [] } = useJourneys();
+  const races = journeys.filter((j) => j.kind === 'race' && j.status !== 'waiting' && j.joined);
   const [chartWidth, setChartWidth] = useState(0);
 
   if (!session) return <Redirect href={HOME} />;
@@ -117,6 +121,10 @@ export default function SummaryScreen() {
               : t('summary.goalLeft', { steps: formatNumber(goal - day.todaySteps) })}{' '}
             {t(`summary.fun.${fun.key}`, { count: fun.count })}
           </Text>
+
+          {races.map((race) => (
+            <RacePlace key={race.id} id={race.id} />
+          ))}
 
           {stage && detail && (
             <Card style={styles.stageCard}>
@@ -208,7 +216,49 @@ export default function SummaryScreen() {
   );
 }
 
+/** Place in a race after this session, with a way to the race screen. */
+function RacePlace({ id }: { id: string }) {
+  const { t } = useTranslation();
+  const colors = useColors();
+  const race = useJourney(id).data ?? null;
+  const list = useRacers(race);
+  const me = list.find((r) => r.me);
+  if (!race || !me) return null;
+  return (
+    <Card style={styles.race}>
+      <View style={[styles.raceIcon, { backgroundColor: colors.blueSoft }]}>
+        <Swords size={18} color={colors.blueText} />
+      </View>
+      <View style={{ flex: 1, gap: 2 }}>
+        <Text style={[styles.raceTitle, { color: colors.text }]}>
+          {t('summary.racePlace', { place: formatRank(me.place), count: list.length })}
+        </Text>
+        <Text style={[styles.raceName, { color: colors.textSecondary }]} numberOfLines={1}>
+          {journeyTitle(race)}
+        </Text>
+      </View>
+      <Button
+        title={t('summary.seeRace')}
+        onPress={() => router.push({ pathname: '/race/[id]', params: { id } })}
+        tone="dark"
+        style={styles.raceButton}
+      />
+    </Card>
+  );
+}
+
 const styles = StyleSheet.create({
+  race: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 14 },
+  raceIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 13,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  raceTitle: { fontFamily: fonts.textSemiBold, fontSize: 15.5 },
+  raceName: { fontFamily: fonts.text, fontSize: 13 },
+  raceButton: { height: 40, paddingHorizontal: 14, borderRadius: 14 },
   content: { paddingHorizontal: 20 },
   column: { width: '100%', maxWidth: 560, alignSelf: 'center', gap: 14 },
   header: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 14 },

@@ -1,13 +1,13 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { Redirect, router, useLocalSearchParams } from 'expo-router';
-import { CalendarDays, ChevronLeft, Flag, ShieldCheck } from 'lucide-react-native';
+import { CalendarDays, Check, ChevronLeft, Flag, ShieldCheck, Swords } from 'lucide-react-native';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useAuth } from '@/api/auth';
-import { keys, useSessions, useStartJourney } from '@/api/queries';
+import { keys, useCreateRace, useFriends, useSessions, useStartJourney } from '@/api/queries';
 import type { RouteDetail } from '@/api/types';
 import { formatDate, formatKm, formatNumber, shortPlace } from '@/i18n/format';
 import { DEFAULT_SESSION_M, estimateArrival } from '@/journey/progress';
@@ -16,7 +16,7 @@ import { RouteMap } from '@/map/route-map';
 import { fonts, useColors } from '@/theme';
 import { HOME } from '@/ui/routes';
 import { useWide } from '@/ui/layout';
-import { Button, Figure, Glass, GlassButton, Label } from '@/ui/primitives';
+import { Avatar, Button, Figure, Glass, GlassButton, Label } from '@/ui/primitives';
 
 /** Average of the last treadmill sessions, or 4.5 km for a new walker. */
 function useAverageSessionM(): number {
@@ -37,6 +37,11 @@ export default function PreviewScreen() {
   const startJourney = useStartJourney();
   const averageM = useAverageSessionM();
   const [failed, setFailed] = useState(false);
+  const [mode, setMode] = useState<'solo' | 'race'>('solo');
+  const [picked, setPicked] = useState<string[]>([]);
+  const createRace = useCreateRace();
+  const { data: friendList } = useFriends();
+  const friends = friendList?.friends ?? [];
 
   // The preview lives in memory only: after a restart, start again.
   if (!route) return <Redirect href="/new-journey" />;
@@ -47,11 +52,26 @@ export default function PreviewScreen() {
 
   const start = () => {
     setFailed(false);
+    if (mode === 'race') {
+      createRace.mutate(
+        { route_id: route.id, friend_ids: picked },
+        {
+          onSuccess: (race) => {
+            router.dismissTo(HOME);
+            router.push({ pathname: '/race/[id]', params: { id: race.id } });
+          },
+          onError: () => setFailed(true),
+        },
+      );
+      return;
+    }
     startJourney.mutate(route.id, {
       onSuccess: () => router.dismissTo(HOME),
       onError: () => setFailed(true),
     });
   };
+  const toggle = (id: string) =>
+    setPicked((list) => (list.includes(id) ? list.filter((x) => x !== id) : [...list, id]));
 
   const panel = (
     <View
@@ -125,15 +145,91 @@ export default function PreviewScreen() {
         <Text style={[styles.caption, { color: colors.success }]}>{t('preview.safe')}</Text>
       </View>
 
+      <View style={[styles.segment, { backgroundColor: colors.inset }]} accessibilityRole="tablist">
+        {(['solo', 'race'] as const).map((m) => (
+          <Pressable
+            key={m}
+            onPress={() => setMode(m)}
+            accessibilityRole="tab"
+            accessibilityState={{ selected: mode === m }}
+            style={[styles.segmentItem, mode === m && { backgroundColor: colors.surface }]}
+          >
+            <Text
+              style={[
+                styles.segmentText,
+                { color: mode === m ? colors.text : colors.textSecondary },
+              ]}
+            >
+              {t(`preview.${m}`)}
+            </Text>
+          </Pressable>
+        ))}
+      </View>
+      {mode === 'race' &&
+        (friends.length === 0 ? (
+          <Pressable onPress={() => router.push('/friends')} accessibilityRole="button">
+            <Text style={[styles.caption, { color: colors.blueText }]}>
+              {t('preview.noFriends')}
+            </Text>
+          </Pressable>
+        ) : (
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.friends}
+          >
+            {friends.map((friend) => {
+              const on = picked.includes(friend.id);
+              return (
+                <Pressable
+                  key={friend.id}
+                  onPress={() => toggle(friend.id)}
+                  accessibilityRole="checkbox"
+                  accessibilityState={{ checked: on }}
+                  style={styles.friend}
+                >
+                  <View>
+                    <Avatar name={friend.first_name} size={46} tone={on ? 'blue' : 'plain'} />
+                    {on && (
+                      <View
+                        style={[
+                          styles.tick,
+                          { backgroundColor: colors.blue, borderColor: colors.surface },
+                        ]}
+                      >
+                        <Check size={11} color="#FFFFFF" strokeWidth={3} />
+                      </View>
+                    )}
+                  </View>
+                  <Text style={[styles.friendName, { color: colors.text }]} numberOfLines={1}>
+                    {friend.first_name}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </ScrollView>
+        ))}
+
       {failed && (
         <Text style={[styles.caption, { color: colors.danger }]}>{t('errors.network')}</Text>
       )}
       <Button
         tone="accent"
-        title={t('preview.start')}
-        icon={<Flag size={20} color={colors.onAccent} />}
+        title={
+          mode === 'race'
+            ? t('preview.createRace', { count: picked.length, players: picked.length + 1 })
+            : t('preview.start')
+        }
+        icon={
+          mode === 'race' ? (
+            <Swords size={20} color={colors.onAccent} />
+          ) : (
+            <Flag size={20} color={colors.onAccent} />
+          )
+        }
         onPress={start}
-        loading={startJourney.isPending}
+        loading={startJourney.isPending || createRace.isPending}
+        disabled={mode === 'race' && picked.length === 0}
       />
     </View>
   );
@@ -209,6 +305,29 @@ const styles = StyleSheet.create({
     fontFamily: fonts.textSemiBold,
     fontSize: 12.5,
     textAlign: 'center',
+  },
+  segment: { flexDirection: 'row', padding: 4, borderRadius: 18 },
+  segmentItem: {
+    flex: 1,
+    height: 44,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  segmentText: { fontFamily: fonts.textSemiBold, fontSize: 15 },
+  friends: { gap: 14, paddingVertical: 2 },
+  friend: { width: 62, alignItems: 'center', gap: 5 },
+  friendName: { fontFamily: fonts.textMedium, fontSize: 12.5 },
+  tick: {
+    position: 'absolute',
+    right: -2,
+    bottom: -2,
+    width: 19,
+    height: 19,
+    borderRadius: 99,
+    borderWidth: 2,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   stageKm: { fontFamily: fonts.text, fontSize: 12, fontVariant: ['tabular-nums'] },
 });
