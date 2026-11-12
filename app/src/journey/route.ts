@@ -102,11 +102,12 @@ export function followCenter(
     (40_075_016.686 * Math.cos((pawn[1] * Math.PI) / 180)) / (512 * 2 ** view.zoom);
   const toCenter = view.height / 2 / Math.tan((36.87 * Math.PI) / 360);
   const pitch = (view.pitch * Math.PI) / 180;
-  // Ground distance between the screen centre and a point `y` px below it.
+  // The free area's middle is `y` px above the screen centre: the pawn goes
+  // there, farther from the camera, so the centre sits behind the pawn.
   const y = free.bottom / 2;
-  const below = Math.atan(y / toCenter);
+  const above = Math.atan(y / toCenter);
   const groundPx =
-    toCenter * Math.sin(pitch) - toCenter * Math.cos(pitch) * Math.tan(pitch - below);
-  const ahead = offsetBy(pawn, view.heading, groundPx * metersPerPx);
-  return offsetBy(ahead, view.heading + 90, (free.right / 2) * metersPerPx);
+    toCenter * Math.cos(pitch) * Math.tan(pitch + above) - toCenter * Math.sin(pitch);
+  const behind = offsetBy(pawn, view.heading + 180, groundPx * metersPerPx);
+  return offsetBy(behind, view.heading + 90, (free.right / 2) * metersPerPx);
 }

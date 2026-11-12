@@ -13,14 +13,15 @@ describe('route', () => {
   it('centres the follow camera on the free area', () => {
     const view = { heading: 0, zoom: 16, pitch: 0, height: 800 };
     expect(followCenter([1, 47], view, { bottom: 0, right: 0 })).toEqual([1, 47]);
-    // Flat view, panel of 400 px at the bottom: centre 200 px north of the pawn.
+    // Flat view, panel of 400 px at the bottom: the pawn shows 200 px above the
+    // screen centre, so the centre is 200 px south of it.
     const metersPerPx = (40_075_016.686 * Math.cos((47 * Math.PI) / 180)) / (512 * 2 ** 16);
     const [lon, lat] = followCenter([1, 47], view, { bottom: 400, right: 0 });
     expect(lon).toBeCloseTo(1, 9);
-    expect((lat - 47) * 111_320).toBeCloseTo(200 * metersPerPx, 3);
-    // Tilted, the same panel needs a longer step ahead; a side panel shifts it east.
+    expect((47 - lat) * 111_320).toBeCloseTo(200 * metersPerPx, 3);
+    // Tilted, the same panel needs a longer step back; a side panel shifts it east.
     const tilted = followCenter([1, 47], { ...view, pitch: 60 }, { bottom: 400, right: 0 });
-    expect(tilted[1]).toBeGreaterThan(lat);
+    expect(tilted[1]).toBeLessThan(lat);
     expect(followCenter([1, 47], view, { bottom: 0, right: 440 })[0]).toBeGreaterThan(1);
   });
 
