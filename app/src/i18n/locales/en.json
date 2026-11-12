@@ -217,9 +217,9 @@
     "month": "Month",
     "streak": "Streak",
     "you": "You",
-    "weekOf": "With friends · week of {{start}} to {{end}}",
-    "monthOf": "With friends · {{month}}",
-    "streakInfo": "With friends · days in a row with a treadmill session",
+    "weekOf": "{{scope}} · week of {{start}} to {{end}}",
+    "monthOf": "{{scope}} · {{month}}",
+    "streakInfo": "{{scope}} · days in a row with a treadmill session",
     "days_one": "day",
     "days_other": "days",
     "alone": "Add friends to compete with them.",
@@ -229,10 +229,29 @@
     "streakStart": "Walk today to start your streak.",
     "streakHint_one": "{{count}} day in a row. Your record: {{best}}.",
     "streakHint_other": "{{count}} days in a row. Your record: {{best}}.",
-    "myPlace": "Your place among friends",
+    "myPlace": {
+      "friends": "Your place among friends",
+      "country": "Your place · {{country}}",
+      "world": "Your place in the world"
+    },
     "world": "World",
     "country": "Country",
-    "friends": "Friends"
+    "friends": "Friends",
+    "all": "All time",
+    "allInfo": "{{scope}} · all time, treadmill sessions",
+    "scopeLabel": {
+      "friends": "Friends",
+      "country": "{{country}}",
+      "world": "World"
+    },
+    "top": "Top {{percent}} % · {{value}} {{period}}",
+    "during": {
+      "week": "this week",
+      "month": "this month",
+      "all": "in all",
+      "streak": "in a row"
+    },
+    "gapAll": "{{km}} {{unit}} more and you are {{place}}."
   },
   "friends": {
     "title": "Friends",

@@ -217,9 +217,9 @@
     "month": "Mois",
     "streak": "Série",
     "you": "Toi",
-    "weekOf": "Entre amis · semaine du {{start}} au {{end}}",
-    "monthOf": "Entre amis · {{month}}",
-    "streakInfo": "Entre amis · jours d'affilée avec une séance sur le tapis",
+    "weekOf": "{{scope}} · semaine du {{start}} au {{end}}",
+    "monthOf": "{{scope}} · {{month}}",
+    "streakInfo": "{{scope}} · jours d'affilée avec une séance sur le tapis",
     "days_one": "jour",
     "days_other": "jours",
     "alone": "Ajoute des amis pour te mesurer à eux.",
@@ -229,10 +229,29 @@
     "streakStart": "Fais une séance aujourd'hui pour lancer ta série.",
     "streakHint_one": "{{count}} jour d'affilée. Ton record : {{best}}.",
     "streakHint_other": "{{count}} jours d'affilée. Ton record : {{best}}.",
-    "myPlace": "Ta place entre amis",
+    "myPlace": {
+      "friends": "Ta place entre amis",
+      "country": "Ta place · {{country}}",
+      "world": "Ta place dans le monde"
+    },
     "world": "Monde",
     "country": "Pays",
-    "friends": "Amis"
+    "friends": "Amis",
+    "all": "Toujours",
+    "allInfo": "{{scope}} · depuis toujours, séances sur le tapis",
+    "scopeLabel": {
+      "friends": "Entre amis",
+      "country": "{{country}}",
+      "world": "Monde"
+    },
+    "top": "Top {{percent}} % · {{value}} {{period}}",
+    "during": {
+      "week": "cette semaine",
+      "month": "ce mois-ci",
+      "all": "en tout",
+      "streak": "d'affilée"
+    },
+    "gapAll": "{{km}} {{unit}} de plus et tu passes {{place}}."
   },
   "friends": {
     "title": "Amis",

@@ -161,7 +161,8 @@ export type UserMatch = {
   relation: 'none' | 'friend' | 'incoming' | 'outgoing';
 };
 
-export type LeaderboardPeriod = 'week' | 'month' | 'streak';
+export type LeaderboardPeriod = 'week' | 'month' | 'all' | 'streak';
+export type LeaderboardScope = 'friends' | 'country' | 'world';
 
 export type LeaderboardEntry = {
   rank: number;
@@ -169,17 +170,26 @@ export type LeaderboardEntry = {
   first_name: string;
   username: string;
   avatar_url: string | null;
+  country: string;
   me: boolean;
-  /** Metres (week, month) or days in a row (streak). */
+  /** Metres (week, month, all) or days in a row (streak). */
   value: number;
   best: number | null;
 };
 
 export type Leaderboard = {
   period: LeaderboardPeriod;
+  scope: LeaderboardScope;
   starts_on: string;
   ends_on: string;
+  /** Walkers ranked; the first fifty come in `entries` out of the friends. */
+  total: number;
+  country: string;
   entries: LeaderboardEntry[];
+  /** My row, even outside the first fifty. */
+  me: LeaderboardEntry | null;
+  /** My rank over the previous week or month. */
+  previous_rank: number | null;
 };
 
 /** A walker as shown next to what they did. */

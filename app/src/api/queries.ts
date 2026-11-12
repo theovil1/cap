@@ -9,6 +9,7 @@ import type {
   GeocodeResult,
   Leaderboard,
   LeaderboardPeriod,
+  LeaderboardScope,
   JourneyDetail,
   JourneySummary,
   Place,
@@ -187,11 +188,11 @@ export function useRemoveFriend() {
   return useFriendsMutation((id: string) => api<void>(`/friends/${id}`, { method: 'DELETE' }));
 }
 
-export function useLeaderboard(period: LeaderboardPeriod) {
+export function useLeaderboard(period: LeaderboardPeriod, scope: LeaderboardScope = 'friends') {
   return useQuery({
-    queryKey: ['leaderboards', period],
-    ...cached(`leaderboard:${period}`, () =>
-      api<Leaderboard>('/leaderboards', { query: { period } }),
+    queryKey: ['leaderboards', period, scope],
+    ...cached(`leaderboard:${period}:${scope}`, () =>
+      api<Leaderboard>('/leaderboards', { query: { period, scope } }),
     ),
   });
 }
