@@ -41,7 +41,7 @@
 - [x] Step 0: decode the treadmill from a PC
 - [x] iPhone proof: live speed and distance in a minimal Expo app
 - [x] Foundation: Rust API, PostgreSQL, GraphHopper and Photon in Docker Compose
-- [ ] Solo loop: routes, live 3D map, session summary, offline sync
+- [x] Solo loop: routes, live 3D map, session summary, offline sync
 - [ ] Multiplayer: friends, live races, leaderboards
 - [ ] Profile, finishing touches, treadmill wizard, TestFlight
 
