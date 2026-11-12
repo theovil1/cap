@@ -1,7 +1,15 @@
 import { useKeepAwake } from 'expo-keep-awake';
 import { router } from 'expo-router';
-import { ChevronDown, Flag, Footprints, Gauge, Target, TrendingUp } from 'lucide-react-native';
-import type { ReactNode } from 'react';
+import {
+  ChevronDown,
+  Flag,
+  Footprints,
+  Gauge,
+  LocateFixed,
+  Target,
+  TrendingUp,
+} from 'lucide-react-native';
+import { useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -11,6 +19,7 @@ import { useActiveJourney } from '@/api/queries';
 import { formatDuration, formatKm, formatNumber, formatPace } from '@/i18n/format';
 import { journeyTitle } from '@/journey/names';
 import { nextStage, paceMinPerKm, stepsFor } from '@/journey/progress';
+import { MapKindButton } from '@/map/map-kind-button';
 import { RouteMap } from '@/map/route-map';
 import { useSession } from '@/session/session-context';
 import { useDayStats } from '@/session/stats';
@@ -28,6 +37,8 @@ export default function SessionScreen() {
   const { user } = useAuth();
   const { connection, data, live, finishNow } = useSession();
   const { summary, detail } = useActiveJourney();
+  // The camera stops following the pawn while the walker looks around.
+  const [following, setFollowing] = useState(true);
 
   const sessionM = live?.distanceM ?? 0;
   const steps = stepsFor(sessionM, user?.stride_cm);
@@ -170,6 +181,8 @@ export default function SessionScreen() {
           path={detail.path}
           walkedM={walked}
           mode="follow"
+          following={following}
+          onUserMove={() => setFollowing(false)}
           initial={user?.first_name}
           padding={wide ? { right: 440 } : { bottom: 360 }}
           style={StyleSheet.absoluteFill}
@@ -209,6 +222,24 @@ export default function SessionScreen() {
             {t('session.stageIn', { name: stage.name, km: formatKm(stage.at_m - walked) })}
           </Text>
         </Glass>
+      )}
+      {detail && (
+        <View
+          style={[
+            styles.mapButtons,
+            { top: insets.top + (wide ? 56 : 118) },
+            wide ? { right: 460 } : { right: 20 },
+          ]}
+        >
+          <MapKindButton />
+          {!following && (
+            <GlassButton
+              icon={<LocateFixed size={21} color={colors.text} />}
+              onPress={() => setFollowing(true)}
+              label={t('map.recenter')}
+            />
+          )}
+        </View>
       )}
       {panel}
     </View>
@@ -265,6 +296,7 @@ const styles = StyleSheet.create({
     height: 34,
     paddingHorizontal: 12,
   },
+  mapButtons: { position: 'absolute', gap: 10, alignItems: 'flex-end' },
   stageText: { fontFamily: fonts.textSemiBold, fontSize: 12.5, fontVariant: ['tabular-nums'] },
   panel: {
     position: 'absolute',

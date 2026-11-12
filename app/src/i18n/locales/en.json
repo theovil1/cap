@@ -88,10 +88,13 @@
     "arrival": "Arrival around {{date}}",
     "sessions_one": "≈ {{count}} session of {{km}} km",
     "sessions_other": "≈ {{count}} sessions of {{km}} km",
-    "safe": "No motorways or expressways. Mostly paths and small roads.",
-    "solo": "Solo",
-    "raceSoon": "Race (soon)",
+    "safe": "No motorways or expressways",
     "start": "Start the journey"
+  },
+  "map": {
+    "recenter": "Recenter on my pawn",
+    "satellite": "Switch to satellite view",
+    "plan": "Switch to map view"
   },
   "treadmill": {
     "status": {

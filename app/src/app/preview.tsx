@@ -3,7 +3,7 @@ import { Redirect, router, useLocalSearchParams } from 'expo-router';
 import { CalendarDays, ChevronLeft, Flag, ShieldCheck } from 'lucide-react-native';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useAuth } from '@/api/auth';
@@ -11,6 +11,7 @@ import { keys, useSessions, useStartJourney } from '@/api/queries';
 import type { RouteDetail } from '@/api/types';
 import { formatDate, formatKm, formatNumber, shortPlace } from '@/i18n/format';
 import { DEFAULT_SESSION_M, estimateArrival } from '@/journey/progress';
+import { MapKindButton } from '@/map/map-kind-button';
 import { RouteMap } from '@/map/route-map';
 import { fonts, useColors } from '@/theme';
 import { HOME } from '@/ui/routes';
@@ -60,19 +61,18 @@ export default function PreviewScreen() {
         wide && styles.panelWide,
       ]}
     >
-      <Label>{t('preview.walkingRoute')}</Label>
-      <View style={styles.summary}>
-        <Figure value={formatKm(route.distance_m, 0)} unit={t('units.km')} size={68} />
-        <View style={{ alignItems: 'flex-end', gap: 4, flexShrink: 1 }}>
-          <View style={styles.inline}>
-            <CalendarDays size={17} color={colors.text} />
-            <Text style={[styles.arrival, { color: colors.text }]}>
+      <View style={{ gap: 6 }}>
+        <Label>{t('preview.walkingRoute')}</Label>
+        <Figure value={formatKm(route.distance_m, 0)} unit={t('units.km')} size={60} />
+        <View style={styles.inline}>
+          <CalendarDays size={16} color={colors.textSecondary} />
+          <Text style={[styles.caption, { color: colors.textSecondary }]}>
+            <Text style={{ color: colors.text, fontFamily: fonts.textSemiBold }}>
               {t('preview.arrival', {
                 date: formatDate(estimate.date, { day: 'numeric', month: 'long' }),
               })}
             </Text>
-          </View>
-          <Text style={[styles.caption, { color: colors.textSecondary }]}>
+            {'  '}
             {t('preview.sessions', { count: estimate.sessions, km: formatKm(averageM) })}
           </Text>
         </View>
@@ -85,16 +85,32 @@ export default function PreviewScreen() {
       >
         {route.stages.map((stage, i) => (
           <View key={stage.id} style={styles.stage}>
-            <View
-              style={[
-                styles.stageDot,
-                {
-                  borderColor: i === 0 ? colors.accent : colors.textMuted,
-                  backgroundColor: colors.surface,
-                },
-              ]}
-            />
-            <Text style={[styles.stageName, { color: colors.text }]} numberOfLines={2}>
+            <View style={styles.stageTrack}>
+              <View
+                style={[
+                  styles.stageLine,
+                  { backgroundColor: i === 0 ? 'transparent' : colors.track },
+                ]}
+              />
+              <View
+                style={[
+                  styles.stageDot,
+                  {
+                    borderColor: i === 0 ? colors.accent : colors.textMuted,
+                    backgroundColor: colors.surface,
+                  },
+                ]}
+              />
+              <View
+                style={[
+                  styles.stageLine,
+                  {
+                    backgroundColor: i === route.stages.length - 1 ? 'transparent' : colors.track,
+                  },
+                ]}
+              />
+            </View>
+            <Text style={[styles.stageName, { color: colors.text }]} numberOfLines={1}>
               {stage.name || (i === 0 ? first : last)}
             </Text>
             <Text style={[styles.stageKm, { color: colors.textMuted }]}>
@@ -104,20 +120,9 @@ export default function PreviewScreen() {
         ))}
       </ScrollView>
 
-      <View style={[styles.safe, { backgroundColor: colors.successSoft }]}>
-        <ShieldCheck size={20} color={colors.success} />
-        <Text style={[styles.safeText, { color: colors.text }]}>{t('preview.safe')}</Text>
-      </View>
-
-      <View style={[styles.segment, { backgroundColor: colors.inset }]}>
-        <View style={[styles.segmentItem, { backgroundColor: colors.surface }]}>
-          <Text style={[styles.segmentText, { color: colors.text }]}>{t('preview.solo')}</Text>
-        </View>
-        <Pressable disabled style={styles.segmentItem}>
-          <Text style={[styles.segmentText, { color: colors.textMuted }]}>
-            {t('preview.raceSoon')}
-          </Text>
-        </Pressable>
+      <View style={styles.inline}>
+        <ShieldCheck size={16} color={colors.success} />
+        <Text style={[styles.caption, { color: colors.success }]}>{t('preview.safe')}</Text>
       </View>
 
       {failed && (
@@ -158,6 +163,7 @@ export default function PreviewScreen() {
               {first} → {last}
             </Text>
           </Glass>
+          <MapKindButton />
         </View>
       </View>
       {panel}
@@ -178,7 +184,7 @@ const styles = StyleSheet.create({
   },
   titleText: { fontFamily: fonts.textSemiBold, fontSize: 15 },
   panel: {
-    gap: 14,
+    gap: 18,
     paddingTop: 22,
     paddingHorizontal: 20,
     borderTopLeftRadius: 34,
@@ -186,29 +192,23 @@ const styles = StyleSheet.create({
     marginTop: -34,
   },
   panelWide: { width: 420, marginTop: 0, borderRadius: 0, justifyContent: 'center' },
-  summary: {
-    flexDirection: 'row',
-    alignItems: 'flex-end',
-    justifyContent: 'space-between',
-    gap: 12,
-  },
   inline: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  arrival: { fontFamily: fonts.textSemiBold, fontSize: 15 },
-  caption: { fontFamily: fonts.text, fontSize: 13, fontVariant: ['tabular-nums'] },
-  stages: { gap: 6, paddingVertical: 4 },
-  stage: { width: 82, alignItems: 'center', gap: 4 },
-  stageDot: { width: 14, height: 14, borderRadius: 99, borderWidth: 2.5 },
-  stageName: { fontFamily: fonts.textSemiBold, fontSize: 12.5, textAlign: 'center' },
-  stageKm: { fontFamily: fonts.text, fontSize: 12, fontVariant: ['tabular-nums'] },
-  safe: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 14, borderRadius: 18 },
-  safeText: { flex: 1, fontFamily: fonts.textMedium, fontSize: 14.5, lineHeight: 20 },
-  segment: { flexDirection: 'row', padding: 4, borderRadius: 18 },
-  segmentItem: {
-    flex: 1,
-    height: 46,
-    borderRadius: 14,
-    alignItems: 'center',
-    justifyContent: 'center',
+  caption: {
+    flexShrink: 1,
+    fontFamily: fonts.textMedium,
+    fontSize: 13.5,
+    fontVariant: ['tabular-nums'],
   },
-  segmentText: { fontFamily: fonts.textSemiBold, fontSize: 15.5 },
+  stages: { paddingVertical: 2 },
+  stage: { width: 96, alignItems: 'center', gap: 3 },
+  stageTrack: { flexDirection: 'row', alignItems: 'center', alignSelf: 'stretch' },
+  stageLine: { flex: 1, height: 2 },
+  stageDot: { width: 14, height: 14, borderRadius: 99, borderWidth: 2.5 },
+  stageName: {
+    paddingHorizontal: 4,
+    fontFamily: fonts.textSemiBold,
+    fontSize: 12.5,
+    textAlign: 'center',
+  },
+  stageKm: { fontFamily: fonts.text, fontSize: 12, fontVariant: ['tabular-nums'] },
 });

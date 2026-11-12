@@ -23,9 +23,23 @@ type Props = {
   initial?: string;
   padding?: { top?: number; bottom?: number; left?: number; right?: number };
   style?: StyleProp<ViewStyle>;
+  /** In `follow` mode, false leaves the camera where the walker moved it. */
+  following?: boolean;
+  /** Called when the walker starts moving the map by hand. */
+  onUserMove?: () => void;
 };
 
-export function RouteMap({ path, walkedM, mode, stages = [], initial, padding, style }: Props) {
+export function RouteMap({
+  path,
+  walkedM,
+  mode,
+  stages = [],
+  initial,
+  padding,
+  style,
+  following = true,
+  onUserMove,
+}: Props) {
   const colors = useColors();
   const mapStyle = useMapStyle();
   // Long routes are lightened for the overview; the session keeps every point.
@@ -55,15 +69,17 @@ export function RouteMap({ path, walkedM, mode, stages = [], initial, padding, s
   const stagePoints = useMemo<GeoJSON.FeatureCollection>(
     () => ({
       type: 'FeatureCollection',
-      features: stages.map((s) => ({
-        type: 'Feature',
-        properties: {
-          name: s.name,
-          passed: s.at_m <= walkedM,
-          end: s.position === 0 || s.at_m >= path.at(-1)![2],
-        },
-        geometry: { type: 'Point', coordinates: positionAt(path, s.at_m) },
-      })),
+      // No dot under the pawn: it already marks where the walker stands.
+      features: stages
+        .filter((s) => Math.abs(s.at_m - walkedM) > 1)
+        .map((s) => ({
+          type: 'Feature',
+          properties: {
+            passed: s.at_m <= walkedM,
+            end: s.position === 0 || s.at_m >= path.at(-1)![2],
+          },
+          geometry: { type: 'Point', coordinates: positionAt(path, s.at_m) },
+        })),
     }),
     [stages, walkedM, path],
   );
@@ -79,15 +95,17 @@ export function RouteMap({ path, walkedM, mode, stages = [], initial, padding, s
           padding,
           duration: 800,
         }
-      : {
-          center: pawn,
-          zoom: mode === 'follow' ? 16.6 : 15.2,
-          pitch: mode === 'follow' ? 60 : 52,
-          bearing: mode === 'follow' ? heading : 0,
-          padding,
-          duration: 900,
-          easing: 'linear' as const,
-        };
+      : mode === 'follow' && !following
+        ? {}
+        : {
+            center: pawn,
+            zoom: mode === 'follow' ? 16.6 : 15.2,
+            pitch: mode === 'follow' ? 60 : 52,
+            bearing: mode === 'follow' ? heading : 0,
+            padding,
+            duration: 900,
+            easing: 'linear' as const,
+          };
   const interactive = mode !== 'card';
 
   return (
@@ -104,6 +122,9 @@ export function RouteMap({ path, walkedM, mode, stages = [], initial, padding, s
       touchRotate={interactive}
       touchPitch={interactive}
       doubleTapZoom={interactive}
+      onRegionWillChange={(event) => {
+        if (event.nativeEvent.userInteraction) onUserMove?.();
+      }}
     >
       <Camera {...camera} />
       <GeoJSONSource id="route" data={lines}>
@@ -141,23 +162,6 @@ export function RouteMap({ path, walkedM, mode, stages = [], initial, padding, s
                 colors.accent,
                 colors.textSecondary,
               ],
-            }}
-          />
-          <Layer
-            id="stage-names"
-            type="symbol"
-            layout={{
-              'text-field': ['get', 'name'],
-              'text-font': ['Noto Sans Regular'],
-              'text-size': 12,
-              'text-anchor': 'left',
-              'text-offset': [0.9, 0],
-              'text-optional': true,
-            }}
-            paint={{
-              'text-color': colors.text,
-              'text-halo-color': colors.background,
-              'text-halo-width': 1.5,
             }}
           />
         </GeoJSONSource>

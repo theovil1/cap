@@ -88,10 +88,13 @@
     "arrival": "Arrivée vers le {{date}}",
     "sessions_one": "≈ {{count}} séance de {{km}} km",
     "sessions_other": "≈ {{count}} séances de {{km}} km",
-    "safe": "Sans autoroute ni voie rapide. Surtout chemins et petites routes.",
-    "solo": "Solo",
-    "raceSoon": "Course (bientôt)",
+    "safe": "Sans autoroute ni voie rapide",
     "start": "Lancer le trajet"
+  },
+  "map": {
+    "recenter": "Recentrer sur mon pion",
+    "satellite": "Passer en vue satellite",
+    "plan": "Passer en vue plan"
   },
   "treadmill": {
     "status": {

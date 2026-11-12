@@ -1,5 +1,6 @@
 import type { LayerSpecification, StyleSpecification } from '@maplibre/maplibre-gl-style-spec';
 import { useQuery } from '@tanstack/react-query';
+import { useMemo, useSyncExternalStore } from 'react';
 import { useColorScheme } from 'react-native';
 
 import { getValue, setValue } from '@/session/store';
@@ -91,9 +92,71 @@ export function capStyle(base: StyleSpecification, mood: Mood): StyleSpecificati
   };
 }
 
-/** The style follows iOS light and dark mode (map mood setting comes later). */
+/** IGN aerial photos (Etalab open licence, no key), France only. */
+const IGN_ORTHO =
+  'https://data.geopf.fr/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0' +
+  '&LAYER=ORTHOIMAGERY.ORTHOPHOTOS&STYLE=normal&TILEMATRIXSET=PM' +
+  '&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}&FORMAT=image/jpeg';
+
+/** Aerial photos with Liberty's place and street names on top. */
+export function satelliteStyle(base: StyleSpecification): StyleSpecification {
+  const labels = base.layers
+    .filter((layer) => layer.type === 'symbol' && !HIDDEN.test(layer.id))
+    .map((layer) => ({
+      ...layer,
+      paint: {
+        ...(('paint' in layer && layer.paint) || {}),
+        'text-color': '#FFFFFF',
+        'text-halo-color': 'rgba(0, 0, 0, 0.75)',
+        'text-halo-width': 1.4,
+      },
+    })) as LayerSpecification[];
+  return {
+    ...base,
+    sources: {
+      ...base.sources,
+      ign: {
+        type: 'raster',
+        tiles: [IGN_ORTHO],
+        tileSize: 256,
+        maxzoom: 19,
+        attribution: '© IGN',
+      },
+    },
+    layers: [
+      { id: 'background', type: 'background', paint: { 'background-color': '#1F2A1E' } },
+      { id: 'ign-ortho', type: 'raster', source: 'ign' },
+      ...labels,
+    ],
+  };
+}
+
+export type MapKind = 'plan' | 'satellite';
+
+/** The map kind is shared by every map and kept between launches. */
+let kind: MapKind = getValue<MapKind>('map-kind') ?? 'plan';
+const listeners = new Set<() => void>();
+
+export function setMapKind(next: MapKind) {
+  kind = next;
+  setValue('map-kind', next);
+  listeners.forEach((listener) => listener());
+}
+
+export function useMapKind(): MapKind {
+  return useSyncExternalStore(
+    (listener) => {
+      listeners.add(listener);
+      return () => listeners.delete(listener);
+    },
+    () => kind,
+  );
+}
+
+/** Plan follows iOS light and dark mode; satellite is the same day and night. */
 export function useMapStyle(): StyleSpecification | null {
   const mood: Mood = useColorScheme() === 'dark' ? 'night' : 'day';
+  const mapKind = useMapKind();
   const { data } = useQuery({
     queryKey: ['map-style'],
     staleTime: 7 * 86_400_000,
@@ -105,5 +168,8 @@ export function useMapStyle(): StyleSpecification | null {
       return style;
     },
   });
-  return data ? capStyle(data, mood) : null;
+  return useMemo(() => {
+    if (!data) return null;
+    return mapKind === 'satellite' ? satelliteStyle(data) : capStyle(data, mood);
+  }, [data, mapKind, mood]);
 }
