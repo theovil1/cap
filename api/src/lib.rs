@@ -3,6 +3,7 @@
 pub mod account;
 pub mod app;
 pub mod auth;
+pub mod badges;
 pub mod config;
 pub mod error;
 pub mod events;

@@ -16,6 +16,7 @@ use uuid::Uuid;
 
 use crate::{
     auth::AuthUser,
+    badges::{Badge, badges_of},
     error::{AppError, AppResult, ErrorBody},
     leaderboards::streaks,
     public_routes::Walker,
@@ -167,6 +168,8 @@ pub async fn published(
 pub struct FeedPost {
     id: Uuid,
     author: Walker,
+    /// The author's rarest badge.
+    author_badge: Option<Badge>,
     /// `arrived`, `stage`, `medal` or `published`.
     kind: String,
     /// What the card shows, frozen when it happened.
@@ -237,6 +240,7 @@ async fn posts(db: &PgPool, me: Uuid, ids: &[Uuid]) -> AppResult<Vec<FeedPost>> 
     .into_iter()
     .map(|r| FeedPost {
         mine: r.author_id == me,
+        author_badge: None,
         author: Walker {
             id: r.author_id,
             first_name: r.first_name,
@@ -254,6 +258,12 @@ async fn posts(db: &PgPool, me: Uuid, ids: &[Uuid]) -> AppResult<Vec<FeedPost>> 
         created_at: r.created_at,
     })
     .collect();
+    let authors: Vec<Uuid> = rows.iter().map(|p| p.author.id).collect();
+    let badges = badges_of(db, &authors).await?;
+    for post in &mut rows {
+        post.author_badge =
+            badges.iter().find(|(id, _)| *id == post.author.id).and_then(|(_, b)| b.first().cloned());
+    }
     rows.sort_by_key(|p| ids.iter().position(|id| *id == p.id));
     Ok(rows)
 }

@@ -185,8 +185,8 @@ async fn add_friend(
         None => {
             let status = if by_invite { "accepted" } else { "pending" };
             let since = sqlx::query_scalar!(
-                "INSERT INTO friendships (user_id, friend_id, status, accepted_at)
-                 VALUES ($1, $2, $3, CASE WHEN $3 = 'accepted' THEN now() END)
+                "INSERT INTO friendships (user_id, friend_id, status, accepted_at, via_invite)
+                 VALUES ($1, $2, $3, CASE WHEN $3 = 'accepted' THEN now() END, $3 = 'accepted')
                  RETURNING COALESCE(accepted_at, created_at) AS \"since!\"",
                 user_id,
                 friend_id,

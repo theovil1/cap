@@ -39,6 +39,7 @@ Interactive documentation is served at `/docs` (OpenAPI at `/openapi.json`).
 | `GET /feed` | Activity of me, my friends and the walkers I follow: arrivals, stages, medals, routes published |
 | `PATCH`, `DELETE /posts/{id}`, `POST`, `DELETE /posts/{id}/bravo` | My word on a post, or delete it; Bravo |
 | `GET`, `POST /posts/{id}/comments`, `DELETE /comments/{id}` | Comments (deleted by their author or the post author) |
+| `PUT`, `DELETE /admin/users/{id}/badges/{badge}` | Admins: give or take back a badge (team, certified, developer, github, supporter with a tier, beta, moderator, club); founder, organizer, route maker and ambassador come by themselves |
 | `GET /live` (WebSocket) | Send `progress` (session distance) or `stop`; receive rivals' `position` and `stop` |
 | `POST /sessions` | Upload a session, idempotent on `local_id`, rejected above 20 km/h; returns the stages it unlocked |
 | `GET /sessions` | Session history |

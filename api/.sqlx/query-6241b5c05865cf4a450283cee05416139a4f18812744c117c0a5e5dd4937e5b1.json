@@ -1,0 +1,25 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO friendships (user_id, friend_id, status, accepted_at, via_invite)\n                 VALUES ($1, $2, $3, CASE WHEN $3 = 'accepted' THEN now() END, $3 = 'accepted')\n                 RETURNING COALESCE(accepted_at, created_at) AS \"since!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "since!",
+        "type_info": "Timestamptz",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "6241b5c05865cf4a450283cee05416139a4f18812744c117c0a5e5dd4937e5b1"
+}

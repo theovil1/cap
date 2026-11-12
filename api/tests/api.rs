@@ -1331,3 +1331,57 @@ async fn world_and_country_rankings(db: PgPool) {
         .await
         .assert_status(StatusCode::BAD_REQUEST);
 }
+
+#[sqlx::test(migrator = "cap_api::MIGRATOR")]
+async fn badges_given_and_earned(db: PgPool) {
+    let server = server(db.clone()).await;
+    let theo = register(&server, "theo").await;
+    let lilou = register(&server, "lilou").await;
+    let lilou_id = lilou["user"]["id"].as_str().unwrap();
+
+    // Only admins give badges, and only the ones given by hand.
+    server
+        .put(&format!("/admin/users/{lilou_id}/badges/certified"))
+        .add_header("authorization", bearer(&theo))
+        .json(&json!({}))
+        .await
+        .assert_status(StatusCode::FORBIDDEN);
+    sqlx::query("UPDATE users SET is_admin = true WHERE username = 'theo'").execute(&db).await.unwrap();
+    server
+        .put(&format!("/admin/users/{lilou_id}/badges/founder"))
+        .add_header("authorization", bearer(&theo))
+        .json(&json!({}))
+        .await
+        .assert_status(StatusCode::BAD_REQUEST);
+    for (badge, body) in [("supporter", json!({ "tier": 2 })), ("certified", json!({}))] {
+        server
+            .put(&format!("/admin/users/{lilou_id}/badges/{badge}"))
+            .add_header("authorization", bearer(&theo))
+            .json(&body)
+            .await
+            .assert_status(StatusCode::NO_CONTENT);
+    }
+
+    // Rarest first; founding members are worked out from the sign-up date.
+    let profile: Value = server
+        .get(&format!("/users/{lilou_id}/profile"))
+        .add_header("authorization", bearer(&theo))
+        .await
+        .json();
+    let kinds: Vec<&str> =
+        profile["badges"].as_array().unwrap().iter().map(|b| b["kind"].as_str().unwrap()).collect();
+    assert_eq!(kinds, ["certified", "supporter", "founder"]);
+    assert_eq!(profile["badges"][1]["tier"], 2);
+
+    server
+        .delete(&format!("/admin/users/{lilou_id}/badges/certified"))
+        .add_header("authorization", bearer(&theo))
+        .await
+        .assert_status(StatusCode::NO_CONTENT);
+    let after: Value = server
+        .get(&format!("/users/{lilou_id}/profile"))
+        .add_header("authorization", bearer(&theo))
+        .await
+        .json();
+    assert_eq!(after["badges"][0]["kind"], "supporter");
+}

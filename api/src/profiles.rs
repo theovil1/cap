@@ -13,6 +13,7 @@ use uuid::Uuid;
 
 use crate::{
     auth::AuthUser,
+    badges::{Badge, badges_of},
     error::{AppError, AppResult, ErrorBody},
     geo::Place,
     leaderboards::streaks,
@@ -61,6 +62,8 @@ pub struct UnderWay {
 #[derive(Serialize, ToSchema)]
 pub struct PublicProfile {
     walker: Walker,
+    /// Rarest first; only `certified` goes next to the name.
+    badges: Vec<Badge>,
     home_city: Option<String>,
     country: String,
     #[serde(with = "time::serde::rfc3339")]
@@ -137,7 +140,9 @@ async fn get_profile(
     let private = user.visibility == "friends" && relation != "friend" && relation != "me";
     let under_way = if private { None } else { under_way(db, id).await? };
 
+    let badges = badges_of(db, &[id]).await?.pop().map(|(_, b)| b).unwrap_or_default();
     Ok(Json(PublicProfile {
+        badges,
         walker: Walker {
             id: user.id,
             first_name: user.first_name,

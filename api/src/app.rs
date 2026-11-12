@@ -15,7 +15,7 @@ use utoipa_axum::router::OpenApiRouter;
 use utoipa_scalar::{Scalar, Servable};
 
 use crate::{
-    account, auth, events, feed, friends, geo, history, journeys, leaderboards, live, profiles,
+    account, auth, badges, events, feed, friends, geo, history, journeys, leaderboards, live, profiles,
     public_routes, races, sessions, state::AppState, users,
 };
 
@@ -34,6 +34,7 @@ use crate::{
         (name = "events", description = "Scheduled journeys: sign up, common start, live standings"),
         (name = "profiles", description = "Public profiles and following"),
         (name = "feed", description = "Activity feed: posts, Bravos, comments"),
+        (name = "badges", description = "Profile badges given by admins"),
         (name = "races", description = "Races between friends (live positions on the /live WebSocket)"),
         (name = "sessions", description = "Treadmill sessions"),
     )
@@ -71,6 +72,7 @@ fn api_router() -> OpenApiRouter<AppState> {
         .merge(events::router())
         .merge(profiles::router())
         .merge(feed::router())
+        .merge(badges::router())
         .merge(races::router())
         .merge(sessions::router())
         .merge(history::router())
