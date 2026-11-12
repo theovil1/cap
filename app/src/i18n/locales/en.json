@@ -190,7 +190,13 @@
     "share": "Share",
     "shareText": "I just walked {{km}} {{unit}} in {{minutes}} min with Cap.",
     "racePlace": "You are {{place}} of {{count}}",
-    "seeRace": "See"
+    "seeRace": "See",
+    "ended": "Session done",
+    "wellDone": "Nice session, {{name}}",
+    "duration": "Duration",
+    "stageReached": "Stage reached: {{name}}",
+    "finish": "Done",
+    "mapProgress": "{{walked}} of {{total}} {{unit}} · {{percent}} %"
   },
   "rankings": {
     "week": "Week",

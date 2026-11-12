@@ -86,3 +86,42 @@ export function SpeedChart({
     </Svg>
   );
 }
+
+/** Average of each of `count` equal slices of `values` (fewer when values are fewer). */
+export function bins(values: number[], count: number): number[] {
+  const n = Math.min(count, values.length);
+  return Array.from({ length: n }, (_, i) => {
+    const slice = values.slice(
+      Math.floor((i * values.length) / n),
+      Math.floor(((i + 1) * values.length) / n),
+    );
+    return slice.reduce((a, b) => a + b, 0) / slice.length;
+  });
+}
+
+/** iPad summary: the speed as a row of bars, faster is taller and stronger. */
+export function SpeedBars({ speeds, height = 64 }: { speeds: number[]; height?: number }) {
+  const colors = useColors();
+  const values = bins(speeds, 9);
+  const max = Math.max(...values, 0.1);
+  const min = Math.min(...values);
+  return (
+    <View style={{ height, flexDirection: 'row', alignItems: 'flex-end', gap: 8 }}>
+      {values.map((v, i) => {
+        const level = max - min > 0 ? (v - min) / (max - min) : 1;
+        return (
+          <View
+            key={i}
+            style={{
+              flex: 1,
+              height: height * (0.45 + 0.55 * level),
+              borderRadius: 8,
+              backgroundColor: colors.accent,
+              opacity: 0.55 + 0.45 * level,
+            }}
+          />
+        );
+      })}
+    </View>
+  );
+}

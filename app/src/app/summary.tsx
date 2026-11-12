@@ -1,5 +1,5 @@
 import { Redirect, router, useLocalSearchParams } from 'expo-router';
-import { Flag, Share as ShareIcon, Sparkle, Swords, X } from 'lucide-react-native';
+import { Check, Flag, Flame, Share as ShareIcon, Sparkle, Swords, X } from 'lucide-react-native';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ScrollView, Share, StyleSheet, Text, View } from 'react-native';
@@ -8,7 +8,14 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '@/api/auth';
 import { useActiveJourney, useJourney, useJourneys } from '@/api/queries';
 import type { Stage } from '@/api/types';
-import { formatKm, formatNumber, formatPace, formatRank, formatSpeed } from '@/i18n/format';
+import {
+  formatDate,
+  formatKm,
+  formatNumber,
+  formatPace,
+  formatRank,
+  formatSpeed,
+} from '@/i18n/format';
 import { journeyTitle } from '@/journey/names';
 import { useRacers } from '@/live/use-racers';
 import { paceMinPerKm } from '@/journey/progress';
@@ -17,8 +24,10 @@ import { useDayStats } from '@/session/stats';
 import { getSession, pendingSessions } from '@/session/store';
 import { fonts, useColors } from '@/theme';
 import { HOME } from '@/ui/routes';
-import { SpeedChart } from '@/ui/charts';
-import { Button, Card, Figure, GlassButton, Label } from '@/ui/primitives';
+import { SpeedBars, SpeedChart } from '@/ui/charts';
+import { useWide } from '@/ui/layout';
+import { Button, Card, Figure, Glass, GlassButton, Label } from '@/ui/primitives';
+import { StatTile } from '@/ui/stats';
 
 /** Playful comparisons, picked by distance (identity: "équivalence ludique"). */
 const EQUIVALENCES = [
@@ -50,6 +59,7 @@ export default function SummaryScreen() {
   const { data: journeys = [] } = useJourneys();
   const races = journeys.filter((j) => j.kind === 'race' && j.status !== 'waiting' && j.joined);
   const [chartWidth, setChartWidth] = useState(0);
+  const wide = useWide();
 
   if (!session) return <Redirect href={HOME} />;
 
@@ -81,6 +91,137 @@ export default function SummaryScreen() {
     Share.share({
       message: t('summary.shareText', { km: formatKm(session.distanceM, 2), minutes }),
     });
+  const stageText = stage
+    ? `${
+        newCounty
+          ? t('summary.newCounty', { county: stage.county })
+          : t('summary.stageKm', { km: formatKm(stage.at_m), start: summary?.start_town ?? '' })
+      }${next ? ` ${t('summary.nextStage', { name: next.name })}` : ''}`
+    : '';
+  const goalText = `${
+    reached
+      ? t('summary.goalReached', { steps: formatNumber(day.todaySteps) })
+      : t('summary.goalLeft', { steps: formatNumber(goal - day.todaySteps) })
+  } ${t(`summary.fun.${fun.key}`, { count: fun.count })}`;
+
+  if (wide) {
+    const total = detail?.route_distance_m ?? 0;
+    const walkedM = afterM || (detail?.distance_m ?? 0);
+    return (
+      <View style={[styles.wide, { backgroundColor: colors.inset }]}>
+        {detail && (
+          <RouteMap
+            path={detail.path}
+            walkedM={walkedM}
+            mode="card"
+            initial={user?.first_name}
+            padding={{ right: 440 }}
+            style={StyleSheet.absoluteFill}
+          />
+        )}
+        {detail && (
+          <Glass style={[styles.mapTitle, { top: insets.top + 16 }]}>
+            <Text style={[styles.mapTitleText, { color: colors.text }]} numberOfLines={1}>
+              {journeyTitle(detail)}
+            </Text>
+            <Text style={[styles.mapTitleDetail, { color: colors.textSecondary }]}>
+              {t('summary.mapProgress', {
+                walked: formatKm(walkedM),
+                total: formatKm(total, 0),
+                percent: formatNumber(Math.floor((100 * walkedM) / (total || 1))),
+              })}
+            </Text>
+          </Glass>
+        )}
+        <View
+          style={[
+            styles.panel,
+            { backgroundColor: colors.surface, top: insets.top + 16, bottom: insets.bottom + 16 },
+          ]}
+        >
+          <ScrollView contentContainerStyle={styles.panelContent}>
+            <View style={styles.panelTop}>
+              <View style={styles.inline}>
+                <Check size={16} color={colors.success} strokeWidth={2.4} />
+                <Text style={[styles.kicker, { color: colors.success }]}>{t('summary.ended')}</Text>
+              </View>
+              <Text style={[styles.date, { color: colors.textSecondary }]}>
+                {formatDate(new Date(), { weekday: 'long', day: 'numeric', month: 'long' })}
+              </Text>
+            </View>
+            <View style={{ gap: 6 }}>
+              <Label style={styles.hello}>
+                {t('summary.wellDone', { name: user?.first_name ?? '' })}
+              </Label>
+              <Figure value={formatKm(session.distanceM, 2)} unit={t('units.km')} size={104} />
+            </View>
+            <View style={styles.tiles}>
+              <StatTile label={t('summary.duration')} value={formatMinutes(minutes)} />
+              <StatTile label={t('session.steps')} value={formatNumber(session.steps)} />
+              <StatTile
+                label={t('session.speed')}
+                value={formatSpeed(avgSpeed)}
+                unit={t('units.kmh')}
+              />
+            </View>
+            {session.speeds.length >= 2 && (
+              <View style={[styles.bars, { backgroundColor: colors.inset }]}>
+                <View style={styles.chartHeader}>
+                  <Label>{t('session.speed')}</Label>
+                  <Text style={[styles.axis, { color: colors.textMuted }]}>
+                    {[0, 1 / 4, 1 / 2, 1].map((f) => Math.round(minutes * f)).join(' · ')} min
+                  </Text>
+                </View>
+                <SpeedBars speeds={session.speeds} />
+              </View>
+            )}
+            {races.map((race) => (
+              <RacePlace key={race.id} id={race.id} />
+            ))}
+            {stage && (
+              <View style={[styles.note, { backgroundColor: colors.blueSoft }]}>
+                <View style={[styles.noteIcon, { backgroundColor: colors.blue }]}>
+                  <Flag size={20} color="#FFFFFF" strokeWidth={2.2} />
+                </View>
+                <View style={{ flex: 1, gap: 3 }}>
+                  <Text style={[styles.noteTitle, { color: colors.text }]}>
+                    {t('summary.stageReached', { name: stage.name })}
+                  </Text>
+                  <Text style={[styles.noteText, { color: colors.textSecondary }]}>
+                    {stageText}
+                  </Text>
+                </View>
+              </View>
+            )}
+            <View style={[styles.note, { backgroundColor: colors.successSoft }]}>
+              <Flame size={17} color={colors.success} strokeWidth={2.2} />
+              <Text style={[styles.noteText, styles.flex, { color: colors.text }]}>{goalText}</Text>
+            </View>
+            {!session.result && (
+              <Text style={[styles.pending, { color: colors.textMuted }]}>
+                {t('summary.pendingSync')}
+              </Text>
+            )}
+          </ScrollView>
+          <View style={styles.actions}>
+            <Button
+              tone="light"
+              title={t('summary.share')}
+              icon={<ShareIcon size={18} color={colors.text} />}
+              onPress={share}
+              style={styles.flex}
+            />
+            <Button
+              tone="dark"
+              title={t('summary.finish')}
+              onPress={() => router.dismissTo(HOME)}
+              style={styles.flexWide}
+            />
+          </View>
+        </View>
+      </View>
+    );
+  }
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
@@ -243,7 +384,57 @@ function RacePlace({ id }: { id: string }) {
   );
 }
 
+/** "1 h 21" or "42 min". */
+function formatMinutes(minutes: number): string {
+  if (minutes < 60) return `${minutes} min`;
+  return `${Math.floor(minutes / 60)} h ${String(minutes % 60).padStart(2, '0')}`;
+}
+
 const styles = StyleSheet.create({
+  wide: { flex: 1 },
+  mapTitle: {
+    position: 'absolute',
+    left: 28,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    height: 48,
+    paddingHorizontal: 20,
+  },
+  mapTitleText: { fontFamily: fonts.textSemiBold, fontSize: 15 },
+  mapTitleDetail: { fontFamily: fonts.text, fontSize: 13, fontVariant: ['tabular-nums'] },
+  panel: {
+    position: 'absolute',
+    right: 20,
+    width: 412,
+    borderRadius: 30,
+    borderCurve: 'continuous',
+    overflow: 'hidden',
+  },
+  panelContent: { gap: 14, padding: 26, paddingBottom: 12 },
+  panelTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  date: { fontFamily: fonts.text, fontSize: 13.5, textTransform: 'capitalize' },
+  hello: { fontSize: 15 },
+  bars: { gap: 12, padding: 16, borderRadius: 20 },
+  note: { flexDirection: 'row', alignItems: 'center', gap: 14, padding: 16, borderRadius: 20 },
+  noteIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  noteTitle: { fontFamily: fonts.textSemiBold, fontSize: 15 },
+  noteText: { fontFamily: fonts.text, fontSize: 13, lineHeight: 19 },
+  flex: { flex: 1 },
+  flexWide: { flex: 1.5 },
+  actions: {
+    flexDirection: 'row',
+    gap: 12,
+    paddingHorizontal: 26,
+    paddingBottom: 26,
+    paddingTop: 8,
+  },
   race: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 14 },
   raceIcon: {
     width: 40,
