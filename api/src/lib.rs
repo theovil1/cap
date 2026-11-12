@@ -7,6 +7,7 @@ pub mod error;
 pub mod friends;
 pub mod geo;
 pub mod journeys;
+pub mod leaderboards;
 pub mod sessions;
 pub mod stages;
 pub mod state;

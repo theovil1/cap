@@ -533,6 +533,65 @@ async fn friends_by_username_and_invite_link(db: PgPool) {
 }
 
 #[sqlx::test(migrator = "cap_api::MIGRATOR")]
+async fn leaderboards_rank_friends(db: PgPool) {
+    let server = server(db).await;
+    let theo = register(&server, "theo").await;
+    let lilou = register(&server, "lilou").await;
+    let max = register(&server, "max").await;
+    let code: Value = server.get("/friends/invite").add_header("authorization", bearer(&theo)).await.json();
+    server
+        .post("/friends")
+        .add_header("authorization", bearer(&lilou))
+        .json(&json!({ "invite_code": code["code"] }))
+        .await
+        .assert_status_ok();
+    for (auth, metres) in [(&theo, 300.0), (&lilou, 500.0), (&max, 900.0)] {
+        server
+            .post("/sessions")
+            .add_header("authorization", bearer(auth))
+            .json(&session(Uuid::now_v7(), metres, 600))
+            .await
+            .assert_status(StatusCode::CREATED);
+    }
+
+    for period in ["week", "month"] {
+        let board: Value = server
+            .get("/leaderboards")
+            .add_query_param("period", period)
+            .add_header("authorization", bearer(&theo))
+            .await
+            .json();
+        // Max is not a friend: only Lilou and Théo are ranked.
+        let entries = board["entries"].as_array().unwrap();
+        assert_eq!(entries.len(), 2, "{period}");
+        assert_eq!(entries[0]["username"], "lilou");
+        assert_eq!(entries[0]["rank"], 1);
+        assert_eq!(entries[0]["value"], 500.0);
+        assert_eq!(entries[1]["me"], true);
+        assert_eq!(entries[1]["rank"], 2);
+        assert!(board["starts_on"].as_str().unwrap() <= board["ends_on"].as_str().unwrap());
+    }
+
+    let streak: Value = server
+        .get("/leaderboards")
+        .add_query_param("period", "streak")
+        .add_header("authorization", bearer(&theo))
+        .await
+        .json();
+    assert_eq!(streak["entries"][0]["value"], 1.0);
+    assert_eq!(streak["entries"][0]["rank"], 1);
+    assert_eq!(streak["entries"][1]["rank"], 1, "ties share a rank");
+    assert_eq!(streak["entries"][0]["best"], 1);
+
+    server
+        .get("/leaderboards")
+        .add_query_param("period", "year")
+        .add_header("authorization", bearer(&theo))
+        .await
+        .assert_status(StatusCode::BAD_REQUEST);
+}
+
+#[sqlx::test(migrator = "cap_api::MIGRATOR")]
 async fn delete_account(db: PgPool) {
     let server = server(db.clone()).await;
     let auth = register(&server, "theo").await;

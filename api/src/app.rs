@@ -14,7 +14,7 @@ use utoipa::{
 use utoipa_axum::router::OpenApiRouter;
 use utoipa_scalar::{Scalar, Servable};
 
-use crate::{auth, friends, geo, journeys, sessions, state::AppState, users};
+use crate::{auth, friends, geo, journeys, leaderboards, sessions, state::AppState, users};
 
 #[derive(OpenApi)]
 #[openapi(
@@ -25,6 +25,7 @@ use crate::{auth, friends, geo, journeys, sessions, state::AppState, users};
         (name = "users", description = "Current user"),
         (name = "geo", description = "Geocoding"),
         (name = "friends", description = "Friends and invite links"),
+        (name = "leaderboards", description = "Rankings between friends"),
         (name = "journeys", description = "Routes and journeys"),
         (name = "sessions", description = "Treadmill sessions"),
     )
@@ -54,6 +55,7 @@ fn api_router() -> OpenApiRouter<AppState> {
         .merge(auth::router())
         .merge(users::router())
         .merge(friends::router())
+        .merge(leaderboards::router())
         .merge(geo::router())
         .merge(journeys::router())
         .merge(sessions::router())
