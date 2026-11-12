@@ -1,5 +1,5 @@
 import { router } from 'expo-router';
-import { ChevronRight, Ellipsis, Flag, Plus, Swords } from 'lucide-react-native';
+import { ChevronRight, Ellipsis, Flag, Swords } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 import { ActionSheetIOS, Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 
@@ -8,10 +8,11 @@ import type { JourneySummary } from '@/api/types';
 import { formatDate, formatKm, formatNumber } from '@/i18n/format';
 import { journeyTitle } from '@/journey/names';
 import { fonts, useColors } from '@/theme';
-import { TabScreen } from '@/ui/layout';
-import { Button, Card, ProgressBar } from '@/ui/primitives';
+import { SectionHeader } from '@/ui/controls';
+import { Card, ProgressBar } from '@/ui/primitives';
 
-export default function JourneysScreen() {
+/** My journeys on the home screen: invitations, races to start, under way, finished. */
+export function MyJourneys() {
   const { t } = useTranslation();
   const colors = useColors();
   const { data: journeys = [] } = useJourneys();
@@ -21,12 +22,11 @@ export default function JourneysScreen() {
   const finished = journeys.filter((j) => j.status === 'finished');
 
   return (
-    <TabScreen>
-      <Text style={[styles.title, { color: colors.text }]}>{t('journeys.title')}</Text>
-      <Button
-        title={t('journeys.new')}
-        icon={<Plus size={20} color="#FFFFFF" />}
-        onPress={() => router.push('/new-journey')}
+    <View style={styles.list}>
+      <SectionHeader
+        title={t('journeys.title')}
+        action={t('journeys.new')}
+        onAction={() => router.push('/new-journey')}
       />
       {invitations.length > 0 && (
         <Section title={t('journeys.invitations')} journeys={invitations} />
@@ -37,15 +37,15 @@ export default function JourneysScreen() {
       {journeys.length === 0 && (
         <Text style={[styles.empty, { color: colors.textSecondary }]}>{t('journeys.empty')}</Text>
       )}
-    </TabScreen>
+    </View>
   );
 }
 
 function Section({ title, journeys }: { title: string; journeys: JourneySummary[] }) {
   const colors = useColors();
   return (
-    <View style={{ gap: 10, marginTop: 8 }}>
-      <Text style={[styles.section, { color: colors.textSecondary }]}>{title}</Text>
+    <View style={styles.section}>
+      <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>{title}</Text>
       {journeys.map((j) => (
         <JourneyRow key={j.id} journey={j} />
       ))}
@@ -161,9 +161,10 @@ function JourneyRow({ journey }: { journey: JourneySummary }) {
 }
 
 const styles = StyleSheet.create({
-  title: { fontFamily: fonts.display, fontSize: 31, letterSpacing: -0.9, marginBottom: 4 },
-  section: { fontFamily: fonts.textSemiBold, fontSize: 13 },
-  empty: { fontFamily: fonts.text, fontSize: 15, textAlign: 'center', marginTop: 24 },
+  list: { gap: 12, marginTop: 10 },
+  section: { gap: 10 },
+  sectionTitle: { fontFamily: fonts.textSemiBold, fontSize: 13 },
+  empty: { fontFamily: fonts.text, fontSize: 15, textAlign: 'center', marginTop: 8 },
   row: { padding: 16, gap: 8 },
   rowTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10 },
   name: { flex: 1, fontFamily: fonts.display, fontSize: 18 },

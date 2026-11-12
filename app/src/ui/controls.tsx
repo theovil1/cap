@@ -74,10 +74,13 @@ export function Chip({
   on,
   onPress,
   small,
+  disabled,
 }: {
   label: string;
   on?: boolean;
   onPress: () => void;
+  /** Not available yet: dimmed, no touch. */
+  disabled?: boolean;
   /** 32 high, for a second row of filters. */
   small?: boolean;
 }) {
@@ -85,10 +88,12 @@ export function Chip({
   return (
     <Pressable
       onPress={onPress}
+      disabled={disabled}
       accessibilityRole="button"
-      accessibilityState={{ selected: !!on }}
+      accessibilityState={{ selected: !!on, disabled: !!disabled }}
       style={[
         styles.chip,
+        disabled && styles.disabled,
         { height: small ? 32 : size.chip },
         on
           ? { backgroundColor: colors.inverse, borderColor: colors.inverse }
@@ -385,6 +390,7 @@ const styles = StyleSheet.create({
   segments: { flexDirection: 'row', gap: 4 },
   segment: { flex: 1, height: 6, borderRadius: 99 },
   tnum: { fontVariant: ['tabular-nums'] },
+  disabled: { opacity: 0.45 },
   section: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline' },
   sectionTitle: { fontFamily: fonts.display, fontSize: 19, letterSpacing: -0.38 },
 });

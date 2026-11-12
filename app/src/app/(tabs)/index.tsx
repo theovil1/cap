@@ -6,6 +6,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useAuth } from '@/api/auth';
 import { useActiveJourney } from '@/api/queries';
 import { formatDate, formatKm, formatNumber } from '@/i18n/format';
+import { MyJourneys } from '@/journey/my-journeys';
 import { journeyTitle } from '@/journey/names';
 import { nextStage, stepsFor } from '@/journey/progress';
 import { RouteMap } from '@/map/route-map';
@@ -109,6 +110,7 @@ export default function HomeScreen() {
           <TreadmillBanner />
         </View>
       </View>
+      <MyJourneys />
     </TabScreen>
   );
 }

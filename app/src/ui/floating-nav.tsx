@@ -1,13 +1,5 @@
 import type { BottomTabBarProps } from 'expo-router/tabs';
-import {
-  Compass,
-  House,
-  Route,
-  Trophy,
-  UserRound,
-  UsersRound,
-  type LucideIcon,
-} from 'lucide-react-native';
+import { Compass, House, UserRound, UsersRound, type LucideIcon } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -19,8 +11,6 @@ import { useWide } from './layout';
 
 const ICONS: Record<string, LucideIcon> = {
   index: House,
-  journeys: Route,
-  rankings: Trophy,
   explore: Compass,
   community: UsersRound,
   profile: UserRound,

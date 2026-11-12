@@ -5,9 +5,9 @@
   },
   "nav": {
     "index": "Home",
-    "journeys": "Journeys",
-    "rankings": "Rankings",
-    "profile": "Profile"
+    "profile": "Profile",
+    "explore": "Explore",
+    "community": "Community"
   },
   "welcome": {
     "title": "Every step on the treadmill takes you closer to a real town.",
@@ -68,7 +68,7 @@
     "sessionRunning": "Session running, tap to see the map"
   },
   "journeys": {
-    "title": "Journeys",
+    "title": "My journeys",
     "new": "New journey",
     "active": "In progress",
     "history": "Finished",
@@ -198,7 +198,11 @@
     "gapMonth": "{{km}} {{unit}} by the end of the month and you move up to {{place}}.",
     "streakStart": "Walk today to start your streak.",
     "streakHint_one": "{{count}} day in a row. Your record: {{best}}.",
-    "streakHint_other": "{{count}} days in a row. Your record: {{best}}."
+    "streakHint_other": "{{count}} days in a row. Your record: {{best}}.",
+    "myPlace": "Your place among friends",
+    "world": "World",
+    "country": "Country",
+    "friends": "Friends"
   },
   "friends": {
     "title": "Friends",
@@ -395,5 +399,33 @@
     "again": "Try again",
     "byHand": "Set by hand (cm)",
     "odd": "This value looks odd (30 to 150 cm expected). Try again."
+  },
+  "community": {
+    "feed": "Feed",
+    "rankings": "Rankings",
+    "feedSoon": "The feed is coming soon",
+    "feedSoonText": "Your friends' arrivals, stages and Bravos will show up here."
+  },
+  "explore": {
+    "routes": "Routes",
+    "planned": "Scheduled",
+    "searchRoutes": "A city, a route, a walker",
+    "searchPlanned": "An event, a city, a friend",
+    "plannedIntro": "Everyone starts at the same time, on the same route. First to arrive wins.",
+    "soon": "Coming soon",
+    "soonRoutes": "Routes shared by the community are on their way. Meanwhile, create yours with the + button.",
+    "soonPlanned": "Scheduled journeys, with sign-up and a shared start, are coming soon.",
+    "filters": {
+      "popular": "Popular",
+      "near": "Near you",
+      "new": "New",
+      "short": "Short",
+      "mountain": "Mountains",
+      "sea": "Seaside",
+      "castles": "Castles",
+      "all": "All",
+      "mine": "My sign-ups",
+      "friends": "With friends"
+    }
   }
 }

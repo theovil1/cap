@@ -5,9 +5,9 @@
   },
   "nav": {
     "index": "Accueil",
-    "journeys": "Trajets",
-    "rankings": "Classements",
-    "profile": "Profil"
+    "profile": "Profil",
+    "explore": "Explorer",
+    "community": "Communauté"
   },
   "welcome": {
     "title": "Chaque pas sur le tapis te rapproche d'une vraie ville.",
@@ -68,7 +68,7 @@
     "sessionRunning": "Séance en cours, touche pour voir la carte"
   },
   "journeys": {
-    "title": "Trajets",
+    "title": "Mes trajets",
     "new": "Nouveau trajet",
     "active": "En cours",
     "history": "Terminés",
@@ -198,7 +198,11 @@
     "gapMonth": "{{km}} {{unit}} d'ici la fin du mois et tu passes {{place}}.",
     "streakStart": "Fais une séance aujourd'hui pour lancer ta série.",
     "streakHint_one": "{{count}} jour d'affilée. Ton record : {{best}}.",
-    "streakHint_other": "{{count}} jours d'affilée. Ton record : {{best}}."
+    "streakHint_other": "{{count}} jours d'affilée. Ton record : {{best}}.",
+    "myPlace": "Ta place entre amis",
+    "world": "Monde",
+    "country": "Pays",
+    "friends": "Amis"
   },
   "friends": {
     "title": "Amis",
@@ -395,5 +399,33 @@
     "again": "Recommencer",
     "byHand": "Régler à la main (cm)",
     "odd": "Cette valeur semble étrange (entre 30 et 150 cm attendus). Réessaie."
+  },
+  "community": {
+    "feed": "Fil",
+    "rankings": "Classements",
+    "feedSoon": "Le fil arrive bientôt",
+    "feedSoonText": "Les arrivées, les étapes et les Bravo de tes amis s'afficheront ici."
+  },
+  "explore": {
+    "routes": "Trajets",
+    "planned": "Planifiés",
+    "searchRoutes": "Une ville, un trajet, un marcheur",
+    "searchPlanned": "Un événement, une ville, un ami",
+    "plannedIntro": "Tout le monde part à la même heure, sur le même trajet. Le premier arrivé gagne.",
+    "soon": "Bientôt ici",
+    "soonRoutes": "Les trajets publiés par la communauté arrivent. En attendant, crée le tien avec le bouton +.",
+    "soonPlanned": "Les trajets planifiés, avec inscription et départ commun, arrivent bientôt.",
+    "filters": {
+      "popular": "Populaires",
+      "near": "Près de chez toi",
+      "new": "Nouveaux",
+      "short": "Courts",
+      "mountain": "Montagne",
+      "sea": "Bord de mer",
+      "castles": "Châteaux",
+      "all": "Tous",
+      "mine": "Mes inscriptions",
+      "friends": "Avec mes amis"
+    }
   }
 }
