@@ -1,0 +1,124 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT j.kind, j.title, r.distance_m, r.end_lat, r.end_lon, jp.rank,\n                    COALESCE(j.starts_at, j.created_at) AS \"started!\",\n                    (SELECT name FROM route_stages WHERE route_id = r.id ORDER BY position LIMIT 1) AS start_town,\n                    (SELECT name FROM route_stages WHERE route_id = r.id ORDER BY position DESC LIMIT 1) AS end_town,\n                    (SELECT count(*) FROM route_stages WHERE route_id = r.id AND position > 0) AS \"stages!\",\n                    (SELECT count(*) FROM session_allocations a JOIN sessions s ON s.id = a.session_id\n                     WHERE a.journey_id = j.id AND s.user_id = $2 AND a.distance_m > 0) AS \"sessions!\"\n             FROM journeys j JOIN routes r ON r.id = j.route_id\n             JOIN journey_participants jp ON jp.journey_id = j.id AND jp.user_id = $2\n             WHERE j.id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "kind",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "journeys",
+            "name": "kind"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "title",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "journeys",
+            "name": "title"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "distance_m",
+        "type_info": "Float8",
+        "origin": {
+          "Table": {
+            "table": "routes",
+            "name": "distance_m"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "end_lat",
+        "type_info": "Float8",
+        "origin": {
+          "Table": {
+            "table": "routes",
+            "name": "end_lat"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "end_lon",
+        "type_info": "Float8",
+        "origin": {
+          "Table": {
+            "table": "routes",
+            "name": "end_lon"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "rank",
+        "type_info": "Int4",
+        "origin": {
+          "Table": {
+            "table": "journey_participants",
+            "name": "rank"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "started!",
+        "type_info": "Timestamptz",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 7,
+        "name": "start_town",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 8,
+        "name": "end_town",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 9,
+        "name": "stages!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 10,
+        "name": "sessions!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      true,
+      false,
+      false,
+      false,
+      true,
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  "hash": "01d2f2004faf76456efa84de14ce4067074a67a7e3caba6140fc05c655234311"
+}

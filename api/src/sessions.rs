@@ -14,7 +14,7 @@ use uuid::Uuid;
 use crate::{
     auth::AuthUser,
     error::{AppError, AppResult, ErrorBody},
-    races,
+    feed, races,
     stages::Stage,
     state::AppState,
 };
@@ -201,6 +201,15 @@ async fn upload_session(
         .await?;
         allocations.push(allocation);
     }
+    let passed: Vec<feed::Passed> = allocations
+        .iter()
+        .map(|a| feed::Passed {
+            journey_id: a.journey_id,
+            arrived: a.arrived,
+            stage_id: a.unlocked_stages.last().map(|s| s.id),
+        })
+        .collect();
+    feed::after_session(&mut tx, user_id, body.distance_m, &passed).await?;
     tx.commit().await?;
 
     Ok((StatusCode::CREATED, Json(SessionResult { id: session_id, created: true, allocations })))

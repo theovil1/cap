@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE posts SET text = NULLIF($3, '') WHERE id = $1 AND author_id = $2",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "bff8e2b92a455f4700edac77bedce16ba95c2c43b92064f8483cbe785589c462"
+}

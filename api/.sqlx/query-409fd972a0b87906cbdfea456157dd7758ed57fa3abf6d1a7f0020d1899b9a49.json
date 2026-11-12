@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT EXISTS (SELECT 1 FROM posts WHERE author_id = $1 AND kind = 'medal'\n               AND data->>'medal' = 'streak' AND (data->>'days')::int = $2\n               AND created_at > now() - interval '2 days') AS \"e!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "e!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Int4"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "409fd972a0b87906cbdfea456157dd7758ed57fa3abf6d1a7f0020d1899b9a49"
+}

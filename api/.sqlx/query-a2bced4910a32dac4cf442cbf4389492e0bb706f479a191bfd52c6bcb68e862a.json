@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT EXISTS (SELECT 1 FROM posts p JOIN users u ON u.id = p.author_id WHERE p.id = $2 AND NOT p.hidden\n           AND (p.author_id = $1 OR EXISTS (SELECT 1 FROM friendships f WHERE f.status = 'accepted'\n                AND ((f.user_id = $1 AND f.friend_id = p.author_id) OR (f.friend_id = $1 AND f.user_id = p.author_id)))\n                OR (u.visibility = 'everyone' AND EXISTS (\n                    SELECT 1 FROM follows f WHERE f.follower_id = $1 AND f.followee_id = p.author_id))))\n         AS \"ok!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "ok!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "a2bced4910a32dac4cf442cbf4389492e0bb706f479a191bfd52c6bcb68e862a"
+}

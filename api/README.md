@@ -36,6 +36,9 @@ Interactive documentation is served at `/docs` (OpenAPI at `/openapi.json`).
 | `GET /events/{id}/live` | Live standings: leaders, friends, my place and my place ten minutes ago, dots for the others |
 | `GET /users/{id}/profile` | A walker's profile: totals, streaks, finished journeys, the journey under way (friends only when the profile is), followers, friends in common |
 | `POST`, `DELETE /users/{id}/follow` | Follow a walker (one way, besides friends) or stop |
+| `GET /feed` | Activity of me, my friends and the walkers I follow: arrivals, stages, medals, routes published |
+| `PATCH`, `DELETE /posts/{id}`, `POST`, `DELETE /posts/{id}/bravo` | My word on a post, or delete it; Bravo |
+| `GET`, `POST /posts/{id}/comments`, `DELETE /comments/{id}` | Comments (deleted by their author or the post author) |
 | `GET /live` (WebSocket) | Send `progress` (session distance) or `stop`; receive rivals' `position` and `stop` |
 | `POST /sessions` | Upload a session, idempotent on `local_id`, rejected above 20 km/h; returns the stages it unlocked |
 | `GET /sessions` | Session history |

@@ -335,7 +335,12 @@ async fn publish(
     )
     .execute(&state.db)
     .await?;
-    Ok((StatusCode::CREATED, Json(detail(&state.db, me, id).await?)))
+    let detail = detail(&state.db, me, id).await?;
+    // Routes for friends only stay out of the followers' feed.
+    if detail.card.visibility == "everyone" {
+        crate::feed::published(&state.db, me, id, &detail.card.title, detail.card.distance_m).await?;
+    }
+    Ok((StatusCode::CREATED, Json(detail)))
 }
 
 /// Browse public routes: popular, new or near a place, with a search and filters.
@@ -634,8 +639,22 @@ pub async fn hide_if_reported(db: &PgPool, target_type: &str, target_id: Uuid) -
     )
     .fetch_one(db)
     .await?;
-    if count >= HIDE_AFTER_REPORTS && target_type == "route" {
-        sqlx::query!("UPDATE public_routes SET hidden = true WHERE id = $1", target_id).execute(db).await?;
+    if count < HIDE_AFTER_REPORTS {
+        return Ok(());
+    }
+    match target_type {
+        "route" => {
+            sqlx::query!("UPDATE public_routes SET hidden = true WHERE id = $1", target_id)
+                .execute(db)
+                .await?;
+        }
+        "post" => {
+            sqlx::query!("UPDATE posts SET hidden = true WHERE id = $1", target_id).execute(db).await?;
+        }
+        "comment" => {
+            sqlx::query!("UPDATE comments SET hidden = true WHERE id = $1", target_id).execute(db).await?;
+        }
+        _ => {}
     }
     Ok(())
 }

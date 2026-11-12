@@ -1190,3 +1190,100 @@ async fn public_profiles_and_following(db: PgPool) {
         .json();
     assert_eq!(after["followers"], 0);
 }
+
+/// Makes two walkers friends (a request, then its acceptance).
+async fn befriend(server: &TestServer, a: &Value, b: &Value) {
+    server
+        .post("/friends")
+        .add_header("authorization", bearer(a))
+        .json(&json!({ "username": b["user"]["username"] }))
+        .await
+        .assert_status_success();
+    let a_id = a["user"]["id"].as_str().unwrap();
+    server
+        .post(&format!("/friends/{a_id}/accept"))
+        .add_header("authorization", bearer(b))
+        .await
+        .assert_status_success();
+}
+
+#[sqlx::test(migrator = "cap_api::MIGRATOR")]
+async fn feed_with_bravos_and_comments(db: PgPool) {
+    let server = server(db.clone()).await;
+    let theo = register(&server, "theo").await;
+    let lilou = register(&server, "lilou").await;
+    let marc = register(&server, "marc").await;
+    befriend(&server, &theo, &lilou).await;
+
+    // Lilou reaches the end of a journey: an arrival in her friends' feed.
+    create_journey(&server, &lilou).await;
+    server
+        .post("/sessions")
+        .add_header("authorization", bearer(&lilou))
+        .json(&session(Uuid::now_v7(), 500.0, 600))
+        .await
+        .assert_status(StatusCode::CREATED);
+    let feed: Value = server.get("/feed").add_header("authorization", bearer(&theo)).await.json();
+    assert_eq!(feed[0]["kind"], "arrived");
+    assert_eq!(feed[0]["author"]["username"], "lilou");
+    assert_eq!(feed[0]["data"]["sessions"], 1);
+    let post = feed[0]["id"].as_str().unwrap().to_owned();
+    // Marc neither follows nor is a friend: nothing for him.
+    let empty: Value = server.get("/feed").add_header("authorization", bearer(&marc)).await.json();
+    assert_eq!(empty.as_array().unwrap().len(), 0);
+
+    // Her word, a Bravo and a comment.
+    let edited: Value = server
+        .patch(&format!("/posts/{post}"))
+        .add_header("authorization", bearer(&lilou))
+        .json(&json!({ "text": "Merci pour les encouragements !" }))
+        .await
+        .json();
+    assert_eq!(edited["text"], "Merci pour les encouragements !");
+    let bravo: Value =
+        server.post(&format!("/posts/{post}/bravo")).add_header("authorization", bearer(&theo)).await.json();
+    assert_eq!(bravo["bravos"], 1);
+    assert_eq!(bravo["i_bravo"], true);
+    let comments = server
+        .post(&format!("/posts/{post}/comments"))
+        .add_header("authorization", bearer(&theo))
+        .json(&json!({ "text": "Bravo, quelle régularité" }))
+        .await;
+    comments.assert_status(StatusCode::CREATED);
+    let comments: Value = comments.json();
+    assert_eq!(comments[0]["author"]["username"], "theo");
+    server
+        .post(&format!("/posts/{post}/bravo"))
+        .add_header("authorization", bearer(&marc))
+        .await
+        .assert_status(StatusCode::NOT_FOUND);
+
+    // Following her puts her posts in Marc's feed too.
+    let lilou_id = lilou["user"]["id"].as_str().unwrap();
+    server
+        .post(&format!("/users/{lilou_id}/follow"))
+        .add_header("authorization", bearer(&marc))
+        .await
+        .assert_status(StatusCode::NO_CONTENT);
+    let followed: Value = server.get("/feed").add_header("authorization", bearer(&marc)).await.json();
+    assert_eq!(followed[0]["id"], post.as_str());
+    assert_eq!(followed[0]["comments"], 1);
+
+    // Three reports hide a comment.
+    let comment = comments[0]["id"].as_str().unwrap();
+    for name in ["ines", "nadia", "paul"] {
+        let walker = register(&server, name).await;
+        server
+            .post("/reports")
+            .add_header("authorization", bearer(&walker))
+            .json(&json!({ "target_type": "comment", "target_id": comment }))
+            .await
+            .assert_status(StatusCode::NO_CONTENT);
+    }
+    let hidden: Value = server
+        .get(&format!("/posts/{post}/comments"))
+        .add_header("authorization", bearer(&theo))
+        .await
+        .json();
+    assert_eq!(hidden.as_array().unwrap().len(), 0);
+}
