@@ -1,5 +1,5 @@
 import { Camera, GeoJSONSource, Layer, Map, ViewAnnotation } from '@maplibre/maplibre-react-native';
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import {
   StyleSheet,
   Text,
@@ -63,6 +63,8 @@ export function RouteMap({
   const { height: screenH } = useWindowDimensions();
   // While a finger is on the map the camera holds still; a pinch keeps following.
   const [touching, setTouching] = useState(false);
+  // Read by the map events, which may arrive before the next render.
+  const gesture = useRef(false);
   const [followZoom, setFollowZoom] = useState(FOLLOW_ZOOM);
   // Long routes are lightened for the overview; the session keeps every point.
   const shown = useMemo(() => (mode === 'overview' ? simplify(path, 60) : path), [path, mode]);
@@ -161,11 +163,13 @@ export function RouteMap({
       doubleTapZoom={interactive}
       onRegionWillChange={(event) => {
         if (mode === 'follow' && following && event.nativeEvent.userInteraction) {
+          gesture.current = true;
           setTouching(true);
         }
       }}
       onRegionDidChange={(event) => {
-        if (!touching) return;
+        if (!gesture.current) return;
+        gesture.current = false;
         setTouching(false);
         const { zoom } = event.nativeEvent;
         if (Math.abs(zoom - followZoom) > 0.05) setFollowZoom(zoom);

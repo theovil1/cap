@@ -43,12 +43,12 @@ export function Sheet({
   const glide = (toValue: number) =>
     Animated.spring(translate, {
       toValue,
-      useNativeDriver: true,
+      useNativeDriver: false,
       bounciness: 0,
       speed: 18,
     }).start();
-  // One animation per snap: with the native driver, a second spring started
-  // on top would restart from a stale value and make the sheet flicker.
+  // One animation per snap. The JS driver keeps the value in sync, so a new
+  // spring (content resized mid-way) starts from where the sheet really is.
   const snapTo = (i: number) => {
     if (i === index) glide(offsetOf(i));
     else setIndex(i);
@@ -63,7 +63,7 @@ export function Sheet({
   useEffect(() => {
     Animated.spring(translate, {
       toValue: offset,
-      useNativeDriver: true,
+      useNativeDriver: false,
       bounciness: 0,
       speed: 18,
     }).start();
