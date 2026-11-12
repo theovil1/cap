@@ -305,7 +305,8 @@
     "strideTitle": "Stride",
     "measureOnTreadmill": "Measure on the treadmill",
     "treadmillConnected": "Connected",
-    "treadmill": "Treadmill"
+    "treadmill": "Treadmill",
+    "seeMine": "See my profile"
   },
   "units": {
     "km": "{{unit}}",
@@ -561,5 +562,24 @@
         "short": "Give it a name"
       }
     }
+  },
+  "me": {
+    "since": "since {{date}}",
+    "edit": "Edit",
+    "invite": "Invite",
+    "medals": "Medals",
+    "underWay": "Under way",
+    "underWayTitle": "Under way: {{title}}",
+    "progress": "{{walked}} of {{total}} {{unit}} · {{percent}} %",
+    "noJourney": "No journey under way.",
+    "activity": "Activity",
+    "noActivity": "Your arrivals and stages will show here.",
+    "activityArrived": "Finished {{title}}",
+    "activityStage": "Passed the {{name}} stage",
+    "activityStreak_one": "{{count}} day streak",
+    "activityStreak_other": "{{count}} day streak",
+    "friends_one": "{{count}} friend on Cap",
+    "friends_other": "{{count}} friends on Cap",
+    "shareText": "{{name}} on Cap: {{km}} km walked on the treadmill and {{count}} medals."
   }
 }

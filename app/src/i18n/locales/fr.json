@@ -305,7 +305,8 @@
     "strideTitle": "Foulée",
     "measureOnTreadmill": "Mesurer sur le tapis",
     "treadmillConnected": "Connecté",
-    "treadmill": "Tapis"
+    "treadmill": "Tapis",
+    "seeMine": "Voir mon profil"
   },
   "units": {
     "km": "{{unit}}",
@@ -561,5 +562,24 @@
         "short": "Donner un nom"
       }
     }
+  },
+  "me": {
+    "since": "depuis {{date}}",
+    "edit": "Modifier",
+    "invite": "Inviter",
+    "medals": "Médailles",
+    "underWay": "En cours",
+    "underWayTitle": "En cours : {{title}}",
+    "progress": "{{walked}} sur {{total}} {{unit}} · {{percent}} %",
+    "noJourney": "Aucun trajet en cours.",
+    "activity": "Activité",
+    "noActivity": "Tes arrivées et tes étapes s'afficheront ici.",
+    "activityArrived": "A terminé {{title}}",
+    "activityStage": "A passé l'étape {{name}}",
+    "activityStreak_one": "Série de {{count}} jour",
+    "activityStreak_other": "Série de {{count}} jours",
+    "friends_one": "{{count}} ami sur Cap",
+    "friends_other": "{{count}} amis sur Cap",
+    "shareText": "{{name}} sur Cap : {{km}} km marchés sur le tapis et {{count}} médailles."
   }
 }

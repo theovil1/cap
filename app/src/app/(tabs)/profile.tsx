@@ -93,15 +93,23 @@ export default function ProfileScreen() {
   return (
     <TabScreen>
       <View style={styles.header}>
-        <Avatar name={user.first_name} size={64} photo={user.avatar_url} />
-        <View style={{ flex: 1 }}>
-          <Text style={[styles.name, { color: colors.text }]} numberOfLines={1}>
-            {user.first_name}
-          </Text>
-          <Text style={[styles.sub, { color: colors.textSecondary }]}>
-            {t('profile.walkedSince', { km: formatKm(walkedM, 0), since })}
-          </Text>
-        </View>
+        <Pressable
+          onPress={() => router.push('/me')}
+          accessibilityRole="button"
+          accessibilityHint={t('profile.seeMine')}
+          style={[styles.row, styles.flex]}
+        >
+          <Avatar name={user.first_name} size={64} photo={user.avatar_url} />
+          <View style={{ flex: 1 }}>
+            <Text style={[styles.name, { color: colors.text }]} numberOfLines={1}>
+              {user.first_name}
+            </Text>
+            <Text style={[styles.sub, { color: colors.textSecondary }]}>
+              {t('profile.walkedSince', { km: formatKm(walkedM, 0), since })}
+            </Text>
+            <Text style={[styles.link, { color: colors.blueText }]}>{t('profile.seeMine')} ›</Text>
+          </View>
+        </Pressable>
         {settings}
       </View>
       <GoalCard user={user} />
@@ -142,6 +150,12 @@ function Identity({ user, walkedM, since }: { user: UserProfile; walkedM: number
           unit={t('profile.daysShort')}
         />
       </View>
+      <Button
+        tone="light"
+        size="medium"
+        title={t('profile.seeMine')}
+        onPress={() => router.push('/me')}
+      />
     </Card>
   );
 }
