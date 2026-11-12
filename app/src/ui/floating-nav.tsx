@@ -1,5 +1,13 @@
 import type { BottomTabBarProps } from 'expo-router/tabs';
-import { House, Route, Trophy, UserRound, type LucideIcon } from 'lucide-react-native';
+import {
+  Compass,
+  House,
+  Route,
+  Trophy,
+  UserRound,
+  UsersRound,
+  type LucideIcon,
+} from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -13,6 +21,8 @@ const ICONS: Record<string, LucideIcon> = {
   index: House,
   journeys: Route,
   rankings: Trophy,
+  explore: Compass,
+  community: UsersRound,
   profile: UserRound,
 };
 
@@ -30,7 +40,7 @@ export function FloatingNav({ state, navigateToTab }: BottomTabBarProps) {
         styles.wrapper,
         wide
           ? { top: insets.top + 10, alignItems: 'center' }
-          : { bottom: Math.max(insets.bottom, 12) + 8 },
+          : { bottom: Math.max(insets.bottom - 8, 12) },
       ]}
     >
       <Glass style={[styles.bar, { shadowColor: colors.shadow }, wide && styles.barWide]}>
@@ -50,12 +60,12 @@ export function FloatingNav({ state, navigateToTab }: BottomTabBarProps) {
                 styles.tab,
                 wide && styles.tabWide,
                 focused && {
-                  backgroundColor: colors.dark ? 'rgba(255,255,255,0.08)' : 'rgba(21,22,26,0.06)',
+                  backgroundColor: colors.dark ? colors.inset : 'rgba(21,22,26,0.06)',
                 },
               ]}
             >
               <Icon
-                size={22}
+                size={wide ? 18 : 22}
                 color={focused ? colors.accent : color}
                 strokeWidth={focused ? 2 : 1.7}
               />
@@ -63,6 +73,7 @@ export function FloatingNav({ state, navigateToTab }: BottomTabBarProps) {
                 style={[
                   styles.label,
                   { color, fontFamily: focused ? fonts.textSemiBold : fonts.textMedium },
+                  wide && styles.labelWide,
                 ]}
               >
                 {t(`nav.${route.name}`)}
@@ -94,6 +105,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 3,
   },
-  tabWide: { flex: 0, width: 108, height: 50, flexDirection: 'row', gap: 8 },
+  tabWide: { flex: 0, height: 44, paddingHorizontal: 18, flexDirection: 'row', gap: 8 },
   label: { fontSize: 10.5 },
+  labelWide: { fontSize: 14 },
 });

@@ -13,20 +13,28 @@ import {
 } from 'react-native';
 
 import { API_URL } from '@/api/client';
-import { fonts, useColors } from '@/theme';
+import { fonts, useColors, useShadows } from '@/theme';
+import { avatarTones, radius, size as sizes } from '@/tokens';
 
-export function Card({ children, style }: { children: ReactNode; style?: StyleProp<ViewStyle> }) {
+export function Card({
+  children,
+  style,
+  small,
+}: {
+  children: ReactNode;
+  style?: StyleProp<ViewStyle>;
+  /** List cards (22) rather than the feed and home cards (24). */
+  small?: boolean;
+}) {
   const colors = useColors();
+  const shadows = useShadows();
   return (
     <View
       style={[
         styles.card,
-        {
-          backgroundColor: colors.surface,
-          borderColor: colors.border,
-          shadowColor: colors.dark ? '#000' : '#15161A',
-          shadowOpacity: colors.dark ? 0 : 0.06,
-        },
+        { backgroundColor: colors.surface, borderColor: colors.border },
+        small && { borderRadius: radius.cardSmall },
+        shadows.card,
         style,
       ]}
     >
@@ -58,6 +66,7 @@ export function Glass({ children, style }: { children: ReactNode; style?: StyleP
   );
 }
 
+/** Round glass button over the map or a photo (48). */
 export function GlassButton({
   icon,
   onPress,
@@ -67,9 +76,41 @@ export function GlassButton({
   onPress: () => void;
   label: string;
 }) {
+  const shadows = useShadows();
   return (
     <Pressable onPress={onPress} accessibilityRole="button" accessibilityLabel={label} hitSlop={6}>
-      <Glass style={styles.glassButton}>{icon}</Glass>
+      <Glass style={[styles.glassButton, shadows.floating]}>{icon}</Glass>
+    </Pressable>
+  );
+}
+
+/** Round surface button of a screen header: +, back, share, notifications (44). */
+export function RoundButton({
+  icon,
+  onPress,
+  label,
+  plain,
+}: {
+  icon: ReactNode;
+  onPress: () => void;
+  label: string;
+  /** No background: the back arrow of the onboarding. */
+  plain?: boolean;
+}) {
+  const colors = useColors();
+  return (
+    <Pressable
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      hitSlop={6}
+      style={({ pressed }) => [
+        styles.roundButton,
+        !plain && { backgroundColor: colors.surface, borderColor: colors.border, borderWidth: 1 },
+        { opacity: pressed ? 0.7 : 1 },
+      ]}
+    >
+      {icon}
     </Pressable>
   );
 }
@@ -108,7 +149,8 @@ export function Figure({
       {unit ? (
         <Text
           style={{
-            fontSize: Math.max(12, size * 0.32),
+            fontFamily: fonts.textSemiBold,
+            fontSize: Math.max(11, Math.round(size * 0.32)),
             color: color ?? colors.textSecondary,
             letterSpacing: 0,
           }}
@@ -126,13 +168,25 @@ export function Label({ children, style }: { children: ReactNode; style?: StyleP
   return <Text style={[styles.label, { color: colors.textSecondary }, style]}>{children}</Text>;
 }
 
-type ButtonTone = 'blue' | 'accent' | 'dark';
+type ButtonTone = 'blue' | 'accent' | 'dark' | 'light';
+type ButtonSize = 'large' | 'medium' | 'small';
 
+const BUTTON_SIZES = {
+  large: { height: sizes.cta, borderRadius: radius.cta, fontSize: 16 },
+  medium: { height: sizes.button, borderRadius: radius.button, fontSize: 15 },
+  small: { height: sizes.smallButton, borderRadius: radius.small, fontSize: 14 },
+};
+
+/**
+ * Call to action. `dark` is the inverted one (black by day, light at night),
+ * `light` the white one with a border ("Continuer avec un e-mail", "Défier").
+ */
 export function Button({
   title,
   onPress,
   icon,
   tone = 'blue',
+  size = 'large',
   loading,
   disabled,
   style,
@@ -141,13 +195,19 @@ export function Button({
   onPress: () => void;
   icon?: ReactNode;
   tone?: ButtonTone;
+  size?: ButtonSize;
   loading?: boolean;
   disabled?: boolean;
   style?: StyleProp<ViewStyle>;
 }) {
   const colors = useColors();
-  const background = { blue: colors.blue, accent: colors.accent, dark: colors.text }[tone];
-  const foreground = { blue: '#FFFFFF', accent: colors.onAccent, dark: colors.background }[tone];
+  const [background, foreground, border] = {
+    blue: [colors.blue, '#FFFFFF', colors.blue],
+    accent: [colors.accent, colors.onAccent, colors.accent],
+    dark: [colors.inverse, colors.onInverse, colors.inverse],
+    light: [colors.surface, colors.text, colors.border],
+  }[tone];
+  const { fontSize, ...box } = BUTTON_SIZES[size];
   return (
     <Pressable
       onPress={onPress}
@@ -155,12 +215,24 @@ export function Button({
       accessibilityRole="button"
       style={({ pressed }) => [
         styles.button,
-        { backgroundColor: background, opacity: disabled ? 0.45 : pressed ? 0.85 : 1 },
+        box,
+        {
+          backgroundColor: background,
+          borderColor: border,
+          opacity: disabled ? 0.45 : pressed ? 0.85 : 1,
+        },
         style,
       ]}
     >
       {loading ? <ActivityIndicator color={foreground} /> : icon}
-      <Text style={[styles.buttonText, { color: foreground }]}>{title}</Text>
+      <Text
+        style={[
+          styles.buttonText,
+          { color: foreground, fontSize, letterSpacing: size === 'large' ? -0.16 : 0 },
+        ]}
+      >
+        {title}
+      </Text>
     </Pressable>
   );
 }
@@ -212,30 +284,56 @@ export function ProgressBar({
   );
 }
 
+/** Stable avatar colour for a walker without a photo (blue, green, purple, pink, gold, ochre). */
+export function avatarTone(seed: string): { background: string; foreground: string } {
+  let hash = 0;
+  for (const char of seed) hash = (hash * 31 + char.charCodeAt(0)) | 0;
+  const background = avatarTones[Math.abs(hash) % avatarTones.length];
+  return { background, foreground: background === '#E8A317' ? '#2A1A00' : '#FFFFFF' };
+}
+
 export function Avatar({
   name,
   size = 44,
   tone = 'accent',
+  seed,
   photo,
+  ring,
 }: {
   name: string;
   size?: number;
   /** `avatar_url` from the API: the photo replaces the initial. */
   photo?: string | null;
-  /** Rankings: the leader in accent, the second in blue, the others plain. */
-  tone?: 'accent' | 'blue' | 'plain';
+  /**
+   * `accent` for me, `walker` for everyone else (a colour from `seed`),
+   * `blue` and `plain` for the older screens.
+   */
+  tone?: 'accent' | 'blue' | 'plain' | 'walker';
+  /** Usually the user id, so a walker keeps the same colour everywhere. */
+  seed?: string;
+  /** Colour of the 3 point ring that separates stacked avatars. */
+  ring?: string;
 }) {
   const colors = useColors();
+  const walker = avatarTone(seed ?? name);
   const [background, foreground] = {
     accent: [colors.accent, colors.onAccent],
     blue: [colors.blue, '#FFFFFF'],
     plain: [colors.inset, colors.text],
+    walker: [walker.background, walker.foreground],
   }[tone];
+  const box = {
+    width: size,
+    height: size,
+    borderRadius: 999,
+    backgroundColor: background,
+    ...(ring ? { borderWidth: 3, borderColor: ring } : {}),
+  };
   if (photo) {
     return (
       <Image
         source={{ uri: photo.startsWith('http') ? photo : `${API_URL}${photo}` }}
-        style={{ width: size, height: size, borderRadius: 999, backgroundColor: background }}
+        style={box}
         contentFit="cover"
         transition={150}
         accessibilityIgnoresInvertColors
@@ -243,17 +341,14 @@ export function Avatar({
     );
   }
   return (
-    <View
-      style={{
-        width: size,
-        height: size,
-        borderRadius: 999,
-        backgroundColor: background,
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}
-    >
-      <Text style={{ fontFamily: fonts.display, fontSize: size * 0.39, color: foreground }}>
+    <View style={[box, styles.center]}>
+      <Text
+        style={{
+          fontFamily: fonts.display,
+          fontSize: Math.round((ring ? size - 6 : size) * 0.39),
+          color: foreground,
+        }}
+      >
         {name.trim().charAt(0).toUpperCase()}
       </Text>
     </View>
@@ -261,25 +356,32 @@ export function Avatar({
 }
 
 const styles = StyleSheet.create({
-  card: {
-    borderRadius: 24,
-    borderWidth: 1,
-    shadowOffset: { width: 0, height: 6 },
-    shadowRadius: 20,
-    borderCurve: 'continuous',
-  },
+  card: { borderRadius: radius.card, borderWidth: 1, borderCurve: 'continuous' },
   glass: { borderRadius: 999, borderWidth: 1, overflow: 'hidden' },
-  glassButton: { width: 48, height: 48, alignItems: 'center', justifyContent: 'center' },
+  glassButton: {
+    width: sizes.roundButton,
+    height: sizes.roundButton,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  roundButton: {
+    width: sizes.button,
+    height: sizes.button,
+    borderRadius: 999,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  center: { alignItems: 'center', justifyContent: 'center' },
   figure: { fontFamily: fonts.display, fontVariant: ['tabular-nums'] },
   label: { fontFamily: fonts.textSemiBold, fontSize: 13 },
   button: {
-    height: 56,
-    borderRadius: 20,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 10,
+    paddingHorizontal: 18,
+    borderWidth: 1,
     borderCurve: 'continuous',
   },
-  buttonText: { fontFamily: fonts.textSemiBold, fontSize: 16.5 },
+  buttonText: { fontFamily: fonts.textSemiBold },
 });

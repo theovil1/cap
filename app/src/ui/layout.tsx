@@ -11,6 +11,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useColors } from '@/theme';
 
+import { Grain } from './grain';
+
 /** iPad in landscape (or any large screen): two columns and the nav bar on top. */
 export function useWide(): boolean {
   const { width, height } = useWindowDimensions();
@@ -37,19 +39,22 @@ export function TabScreen({
   const colors = useColors();
   const space = useNavSpace();
   return (
-    <ScrollView
-      style={{ backgroundColor: colors.background }}
-      contentContainerStyle={[
-        styles.content,
-        { paddingTop: space.top, paddingBottom: space.bottom },
-      ]}
-    >
-      <View style={[styles.column, style]}>{children}</View>
-    </ScrollView>
+    <View style={[styles.screen, { backgroundColor: colors.background }]}>
+      <Grain />
+      <ScrollView
+        contentContainerStyle={[
+          styles.content,
+          { paddingTop: space.top, paddingBottom: space.bottom },
+        ]}
+      >
+        <View style={[styles.column, style]}>{children}</View>
+      </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  screen: { flex: 1, overflow: 'hidden' },
   content: { paddingHorizontal: 19 },
   column: { width: '100%', maxWidth: 760, alignSelf: 'center', gap: 12 },
 });

@@ -7,7 +7,7 @@ iPhone and iPad app that moves a pawn along a real walking route (e.g. Romoranti
 Read them before starting a step. `docs/` is git-ignored except `docs/github/`.
 
 - `docs/Cap, cahier des charges.md`: specification (features, architecture, data model, steps). Written in French.
-- `docs/captures/*.png` and `docs/sources/*.dc.html`: validated mockups, iPhone and iPad, light and dark. Take exact colours and sizes from the HTML sources.
+- `docs/design/maquettes/`: current mockups (start with `LISEZMOI.md`), iPhone and iPad, light and dark, plus badge and medal boards. Take exact values from `sources/*.dc.html`; tokens live in `app/src/tokens.ts`. `docs/captures` and `docs/sources` are the first, older set.
 - `tools/ble-probe/README.md`: Zipro Luma Bluetooth protocol (versioned).
 
 ## Stack (imposed)

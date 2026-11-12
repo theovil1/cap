@@ -1,6 +1,6 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { fonts, useColors } from '@/theme';
+import { fonts, useColors, useShadows } from '@/theme';
 
 /** Segmented control, as in the mockups (sessions per week, map mood...). */
 export function Segment<T extends string | number>({
@@ -13,6 +13,7 @@ export function Segment<T extends string | number>({
   onChange: (value: T) => void;
 }) {
   const colors = useColors();
+  const shadows = useShadows();
   return (
     <View
       style={[styles.segment, { backgroundColor: colors.inset }]}
@@ -26,7 +27,10 @@ export function Segment<T extends string | number>({
             onPress={() => onChange(option.value)}
             accessibilityRole="radio"
             accessibilityState={{ selected: on }}
-            style={[styles.segmentItem, on && { backgroundColor: colors.surface }]}
+            style={[
+              styles.segmentItem,
+              on && { backgroundColor: colors.segmentThumb, ...shadows.card },
+            ]}
           >
             <Text style={[styles.segmentText, { color: on ? colors.text : colors.textSecondary }]}>
               {option.label}
@@ -47,5 +51,5 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  segmentText: { fontFamily: fonts.textSemiBold, fontSize: 14.5 },
+  segmentText: { fontFamily: fonts.textSemiBold, fontSize: 14 },
 });
