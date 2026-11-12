@@ -21,6 +21,8 @@ import {
 } from '@/journey/route';
 import { fonts, useColors } from '@/theme';
 
+import { useSmoothDistance } from '@/journey/smooth';
+
 import { useMapStyle } from './style';
 
 /**
@@ -45,6 +47,8 @@ type Props = {
   following?: boolean;
   /** Called when the walker drags the map away (a pinch only zooms). */
   onUserMove?: () => void;
+  /** Treadmill speed: in `follow` mode the pawn keeps walking between frames. */
+  speedMps?: number;
 };
 
 export function RouteMap({
@@ -57,6 +61,7 @@ export function RouteMap({
   style,
   following = true,
   onUserMove,
+  speedMps = 0,
 }: Props) {
   const colors = useColors();
   const mapStyle = useMapStyle();
@@ -70,7 +75,6 @@ export function RouteMap({
   const shown = useMemo(() => (mode === 'overview' ? simplify(path, 60) : path), [path, mode]);
   const { walked, left } = useMemo(() => splitAt(shown, walkedM), [shown, walkedM]);
   const pawn = positionAt(path, walkedM);
-  const heading = headingAt(path, walkedM);
 
   const lines = useMemo<GeoJSON.FeatureCollection>(
     () => ({
@@ -120,26 +124,7 @@ export function RouteMap({
           duration: 800,
         }
       : mode === 'follow'
-        ? following && !touching
-          ? {
-              // No camera padding here: see followCenter.
-              center: followCenter(
-                pawn,
-                { heading, zoom: followZoom, pitch: FOLLOW_PITCH, height: screenH },
-                {
-                  top: padding?.top ?? 0,
-                  bottom: padding?.bottom ?? 0,
-                  right: padding?.right ?? 0,
-                },
-              ),
-              zoom: followZoom,
-              pitch: FOLLOW_PITCH,
-              bearing: heading,
-              padding: { top: 0, bottom: 0, left: 0, right: 0 },
-              duration: 900,
-              easing: 'linear' as const,
-            }
-          : {}
+        ? null
         : {
             center: pawn,
             zoom: 15.2,
@@ -180,7 +165,20 @@ export function RouteMap({
         else onUserMove?.();
       }}
     >
-      <Camera {...camera} />
+      {camera ? (
+        <Camera {...camera} />
+      ) : (
+        <FollowCamera
+          path={path}
+          walkedM={walkedM}
+          speedMps={speedMps}
+          active={following && !touching}
+          zoom={followZoom}
+          screenH={screenH}
+          padding={padding}
+          initial={initial ?? ''}
+        />
+      )}
       <GeoJSONSource id="route" data={lines}>
         <Layer
           id="route-left"
@@ -220,10 +218,71 @@ export function RouteMap({
           />
         </GeoJSONSource>
       )}
-      <ViewAnnotation id="pawn" lngLat={pawn} anchor="center">
-        <Pawn initial={initial ?? ''} />
-      </ViewAnnotation>
+      {camera && (
+        <ViewAnnotation id="pawn" lngLat={pawn} anchor="center">
+          <Pawn initial={initial ?? ''} />
+        </ViewAnnotation>
+      )}
     </Map>
+  );
+}
+
+/**
+ * Camera and pawn of the live session. They refresh about 30 times a second
+ * from the smoothed distance, apart from the rest of the map.
+ */
+function FollowCamera({
+  path,
+  walkedM,
+  speedMps,
+  active,
+  zoom,
+  screenH,
+  padding,
+  initial,
+}: {
+  path: RoutePoint[];
+  walkedM: number;
+  speedMps: number;
+  active: boolean;
+  zoom: number;
+  screenH: number;
+  padding?: Props['padding'];
+  initial: string;
+}) {
+  const shownM = useSmoothDistance(walkedM, speedMps);
+  const pawn = positionAt(path, shownM);
+  const heading = headingAt(path, shownM);
+  const moving = speedMps > 0;
+  return (
+    <>
+      <Camera
+        {...(active
+          ? {
+              // No camera padding here: see followCenter.
+              center: followCenter(
+                pawn,
+                { heading, zoom, pitch: FOLLOW_PITCH, height: screenH },
+                {
+                  top: padding?.top ?? 0,
+                  bottom: padding?.bottom ?? 0,
+                  right: padding?.right ?? 0,
+                },
+              ),
+              zoom,
+              pitch: FOLLOW_PITCH,
+              bearing: heading,
+              padding: { top: 0, bottom: 0, left: 0, right: 0 },
+              // Short steps while walking, a smooth glide when recentring.
+              duration: moving ? 120 : 900,
+              easing: 'linear' as const,
+            }
+          : {})}
+      />
+      <ViewAnnotation id="pawn" lngLat={pawn} anchor="center">
+        <Pawn initial={initial} />
+      </ViewAnnotation>
+    </>
   );
 }
 

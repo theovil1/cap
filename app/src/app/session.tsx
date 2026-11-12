@@ -226,6 +226,7 @@ export default function SessionScreen() {
           path={detail.path}
           walkedM={walked}
           mode="follow"
+          speedMps={live ? speed / 3.6 : 0}
           following={following}
           onUserMove={() => setFollowing(false)}
           initial={user?.first_name}
