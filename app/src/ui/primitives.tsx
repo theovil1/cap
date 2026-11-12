@@ -1,4 +1,5 @@
 import { GlassView, isLiquidGlassAvailable } from 'expo-glass-effect';
+import { Image } from 'expo-image';
 import type { ReactNode } from 'react';
 import {
   ActivityIndicator,
@@ -11,6 +12,7 @@ import {
   type ViewStyle,
 } from 'react-native';
 
+import { API_URL } from '@/api/client';
 import { fonts, useColors } from '@/theme';
 
 export function Card({ children, style }: { children: ReactNode; style?: StyleProp<ViewStyle> }) {
@@ -214,9 +216,12 @@ export function Avatar({
   name,
   size = 44,
   tone = 'accent',
+  photo,
 }: {
   name: string;
   size?: number;
+  /** `avatar_url` from the API: the photo replaces the initial. */
+  photo?: string | null;
   /** Rankings: the leader in accent, the second in blue, the others plain. */
   tone?: 'accent' | 'blue' | 'plain';
 }) {
@@ -226,6 +231,17 @@ export function Avatar({
     blue: [colors.blue, '#FFFFFF'],
     plain: [colors.inset, colors.text],
   }[tone];
+  if (photo) {
+    return (
+      <Image
+        source={{ uri: photo.startsWith('http') ? photo : `${API_URL}${photo}` }}
+        style={{ width: size, height: size, borderRadius: 999, backgroundColor: background }}
+        contentFit="cover"
+        transition={150}
+        accessibilityIgnoresInvertColors
+      />
+    );
+  }
   return (
     <View
       style={{

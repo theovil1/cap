@@ -9,7 +9,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '@/api/auth';
 import { keys, useCreateRace, useFriends, useSessions, useStartJourney } from '@/api/queries';
 import type { RouteDetail } from '@/api/types';
-import { formatDate, formatKm, formatNumber, shortPlace } from '@/i18n/format';
+import { formatDate, formatKm, shortPlace } from '@/i18n/format';
 import { DEFAULT_SESSION_M, estimateArrival } from '@/journey/progress';
 import { MapKindButton } from '@/map/map-kind-button';
 import { RouteMap } from '@/map/route-map';
@@ -134,7 +134,7 @@ export default function PreviewScreen() {
               {stage.name || (i === 0 ? first : last)}
             </Text>
             <Text style={[styles.stageKm, { color: colors.textMuted }]}>
-              {formatNumber(stage.at_m / 1000)} {t('units.km')}
+              {formatKm(stage.at_m)} {t('units.km')}
             </Text>
           </View>
         ))}

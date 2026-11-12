@@ -1,4 +1,19 @@
+import { getAppearance, onUnitsChange } from '@/settings/appearance';
+
 import i18n from '.';
+
+const KM_PER_MILE = 1.609344;
+const miles = () => getAppearance().units === 'mi';
+
+/** Labels in texts (`{{unit}}`, `{{speedUnit}}`) follow the profile; screens redraw. */
+export function setDistanceUnits(units: 'km' | 'mi') {
+  const variables =
+    units === 'mi' ? { unit: 'mi', speedUnit: 'mph' } : { unit: 'km', speedUnit: 'km/h' };
+  const interpolation = i18n.options.interpolation ?? {};
+  interpolation.defaultVariables = variables;
+  i18n.options.interpolation = interpolation;
+  i18n.changeLanguage(i18n.language);
+}
 
 const locale = () => i18n.language;
 
@@ -9,10 +24,15 @@ export function formatNumber(value: number, digits = 0): string {
   });
 }
 
-/** Kilometres from metres: one decimal under 100 km, none above. */
+/** Kilometres (or miles) from metres: one decimal under 100, none above. */
 export function formatKm(meters: number, digits?: number): string {
-  const km = meters / 1000;
-  return formatNumber(km, digits ?? (km < 100 ? 1 : 0));
+  const value = meters / 1000 / (miles() ? KM_PER_MILE : 1);
+  return formatNumber(value, digits ?? (value < 100 ? 1 : 0));
+}
+
+/** A speed given in km/h, shown in km/h or mph. */
+export function formatSpeed(kmh: number, digits = 1): string {
+  return formatNumber(kmh / (miles() ? KM_PER_MILE : 1), digits);
 }
 
 /** `38:12` or `1:04:09`. */
@@ -27,7 +47,7 @@ export function formatDuration(totalS: number): string {
 /** Pace as `14:17`, from minutes per km. */
 export function formatPace(minPerKm: number | null): string {
   if (minPerKm === null || !Number.isFinite(minPerKm)) return '--:--';
-  const totalS = Math.round(minPerKm * 60);
+  const totalS = Math.round(minPerKm * (miles() ? KM_PER_MILE : 1) * 60);
   return `${Math.floor(totalS / 60)}:${String(totalS % 60).padStart(2, '0')}`;
 }
 
@@ -65,3 +85,5 @@ export function formatDate(date: Date, options: Intl.DateTimeFormatOptions): str
 export function shortPlace(label: string): string {
   return label.split(',')[0].trim();
 }
+
+onUnitsChange(setDistanceUnits);

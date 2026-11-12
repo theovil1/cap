@@ -1,4 +1,5 @@
 {
   "CFBundleDisplayName": "Cap",
-  "NSBluetoothAlwaysUsageDescription": "Cap uses Bluetooth to read speed and distance from your treadmill."
+  "NSBluetoothAlwaysUsageDescription": "Cap uses Bluetooth to read speed and distance from your treadmill.",
+  "NSPhotoLibraryUsageDescription": "Cap uses your photos to set your profile picture."
 }

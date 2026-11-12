@@ -9,6 +9,8 @@ export type StoredSession = FinishedSession & {
   steps: number;
   journeyIds: string[] | null;
   result: SessionResult | null;
+  /** Added by hand: never counts in races (specification). */
+  manual?: boolean;
 };
 
 let db: SQLiteDatabase | null = null;
@@ -78,6 +80,16 @@ export function saveFinished(session: Omit<StoredSession, 'result'>): void {
     );
     database().runSync('DELETE FROM live_session');
   });
+}
+
+/** Stores a session added by hand; the live session, if any, keeps going. */
+export function saveManual(session: Omit<StoredSession, 'result' | 'manual'>): void {
+  database().runSync(
+    'INSERT OR IGNORE INTO sessions (local_id, started_at, data) VALUES (?, ?, ?)',
+    session.localId,
+    session.startedAt,
+    JSON.stringify({ ...session, manual: true }),
+  );
 }
 
 export function markSynced(localId: string, result: SessionResult): void {

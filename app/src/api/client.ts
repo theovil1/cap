@@ -87,7 +87,14 @@ async function refresh(): Promise<boolean> {
   return refreshing;
 }
 
-type RequestOptions = { method?: string; body?: unknown; query?: Record<string, string | number> };
+type RequestOptions = {
+  method?: string;
+  body?: unknown;
+  query?: Record<string, string | number>;
+  /** Raw bytes sent as is (profile photo), with their type. */
+  raw?: ArrayBuffer;
+  contentType?: string;
+};
 
 /** Calls the API with the access token, refreshing it once when it has expired. */
 export async function api<T>(
@@ -100,12 +107,13 @@ export async function api<T>(
     : '';
   const headers: Record<string, string> = { accept: 'application/json' };
   if (options.body !== undefined) headers['content-type'] = 'application/json';
+  if (options.raw) headers['content-type'] = options.contentType ?? 'application/octet-stream';
   if (session?.accessToken) headers.authorization = `Bearer ${session.accessToken}`;
 
   const response = await fetch(`${API_URL}${path}${query}`, {
     method: options.method ?? 'GET',
     headers,
-    body: options.body === undefined ? undefined : JSON.stringify(options.body),
+    body: options.raw ?? (options.body === undefined ? undefined : JSON.stringify(options.body)),
   });
   if (response.status === 401 && session && !retried && !path.startsWith('/auth/')) {
     if (await refresh()) return api<T>(path, options, true);

@@ -13,7 +13,7 @@ import {
   useStartRace,
 } from '@/api/queries';
 import type { JourneyDetail } from '@/api/types';
-import { formatAgo, formatKm, formatNumber, formatRank } from '@/i18n/format';
+import { formatAgo, formatKm, formatNumber, formatRank, formatSpeed } from '@/i18n/format';
 import { journeyTitle } from '@/journey/names';
 import { DEFAULT_SESSION_M } from '@/journey/progress';
 import type { Racer } from '@/live/race';
@@ -276,7 +276,7 @@ function Standings({ race, list, me }: { race: JourneyDetail; list: Racer[]; me?
                 <View style={styles.inline}>
                   <View style={[styles.liveDot, { backgroundColor: colors.success }]} />
                   <Text style={[styles.status, { color: colors.success }]}>
-                    {t('race.live', { speed: formatNumber(r.speedKmh, 1) })}
+                    {t('race.live', { speed: formatSpeed(r.speedKmh) })}
                   </Text>
                 </View>
               ) : (

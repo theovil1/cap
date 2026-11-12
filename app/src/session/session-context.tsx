@@ -70,11 +70,12 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     strideCm.current = user?.stride_cm ?? null;
   }, [user]);
-  // The walker may already be on the live view: never open a second one on top.
+  // The walker may already be on the live view (never open a second one on top),
+  // or measuring their stride, which needs the belt to move.
   const pathname = usePathname();
   const onSessionScreen = useRef(false);
   useEffect(() => {
-    onSessionScreen.current = pathname === '/session';
+    onSessionScreen.current = pathname === '/session' || pathname === '/stride';
   }, [pathname]);
 
   const sync = useCallback(async () => {

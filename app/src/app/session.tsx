@@ -18,7 +18,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useAuth } from '@/api/auth';
 import { useActiveJourney } from '@/api/queries';
-import { formatDuration, formatKm, formatNumber, formatPace } from '@/i18n/format';
+import { formatDuration, formatKm, formatNumber, formatPace, formatSpeed } from '@/i18n/format';
 import { nextStage, paceMinPerKm, stepsFor } from '@/journey/progress';
 import { rivalPawns, useRacers } from '@/live/use-racers';
 import { MapKindButton } from '@/map/map-kind-button';
@@ -82,7 +82,7 @@ export default function SessionScreen() {
       <Gauge key="pace" size={15} color={colors.textSecondary} />,
       t('session.pace'),
       formatPace(paceMinPerKm(speed)),
-      '/km',
+      t('units.pace'),
     ],
     [
       <TrendingUp key="incline" size={15} color={colors.textSecondary} />,
@@ -124,10 +124,10 @@ export default function SessionScreen() {
           />
           {minimal ? (
             <Text style={[styles.status, { color: colors.text }]} numberOfLines={1}>
-              {formatNumber(sessionM / 1000, 2)} {t('units.km')}
+              {formatKm(sessionM, 2)} {t('units.km')}
               {'  ·  '}
               <Text style={{ color: colors.accentText }}>
-                {formatNumber(speed, 1)} {t('units.kmh')}
+                {formatSpeed(speed)} {t('units.kmh')}
               </Text>
             </Text>
           ) : (
@@ -150,11 +150,7 @@ export default function SessionScreen() {
       >
         <View style={{ gap: 8, flexShrink: 1 }}>
           <Label>{t('session.today')}</Label>
-          <Figure
-            value={formatNumber(sessionM / 1000, 2)}
-            unit={t('units.km')}
-            size={wide ? 120 : 82}
-          />
+          <Figure value={formatKm(sessionM, 2)} unit={t('units.km')} size={wide ? 120 : 82} />
         </View>
         <SpeedBlock
           wide={wide}
@@ -341,14 +337,14 @@ function SpeedBlock({
     return (
       <View style={[styles.speedWide, { backgroundColor: colors.dark ? '#2A1A12' : '#FFE9DF' }]}>
         <Text style={[styles.tileLabel, { color: colors.text, fontSize: 15 }]}>{label}</Text>
-        <Figure value={formatNumber(speed, 1)} unit={unit} size={44} color={colors.accentText} />
+        <Figure value={formatSpeed(speed)} unit={unit} size={44} color={colors.accentText} />
       </View>
     );
   }
   return (
     <View style={{ alignItems: 'flex-end', gap: 6, paddingBottom: 6 }}>
       <Label>{label}</Label>
-      <Figure value={formatNumber(speed, 1)} unit={unit} size={32} color={colors.accentText} />
+      <Figure value={formatSpeed(speed)} unit={unit} size={32} color={colors.accentText} />
     </View>
   );
 }

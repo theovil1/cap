@@ -8,7 +8,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '@/api/auth';
 import { useActiveJourney, useJourney, useJourneys } from '@/api/queries';
 import type { Stage } from '@/api/types';
-import { formatKm, formatNumber, formatPace, formatRank } from '@/i18n/format';
+import { formatKm, formatNumber, formatPace, formatRank, formatSpeed } from '@/i18n/format';
 import { journeyTitle } from '@/journey/names';
 import { useRacers } from '@/live/use-racers';
 import { paceMinPerKm } from '@/journey/progress';
@@ -110,11 +110,7 @@ export default function SummaryScreen() {
               {t('summary.done', { minutes })}
             </Text>
           </View>
-          <Figure
-            value={`+${formatNumber(session.distanceM / 1000, 2)}`}
-            unit={t('units.km')}
-            size={84}
-          />
+          <Figure value={`+${formatKm(session.distanceM, 2)}`} unit={t('units.km')} size={84} />
           <Text style={[styles.lead, { color: colors.textSecondary }]}>
             {reached
               ? t('summary.goalReached', { steps: formatNumber(day.todaySteps) })
@@ -165,7 +161,7 @@ export default function SummaryScreen() {
               <View style={styles.chartHeader}>
                 <Label>{t('summary.speedDuring')}</Label>
                 <Text style={[styles.avg, { color: colors.text }]}>
-                  {t('summary.average', { speed: formatNumber(avgSpeed, 1) })}
+                  {t('summary.average', { speed: formatSpeed(avgSpeed) })}
                 </Text>
               </View>
               <View onLayout={(e) => setChartWidth(e.nativeEvent.layout.width)}>
@@ -184,7 +180,7 @@ export default function SummaryScreen() {
           <View style={styles.tiles}>
             {[
               [t('session.steps'), formatNumber(session.steps), undefined],
-              [t('session.pace'), formatPace(paceMinPerKm(avgSpeed)), '/km'],
+              [t('session.pace'), formatPace(paceMinPerKm(avgSpeed)), t('units.pace')],
               [t('session.incline'), formatNumber(session.avgInclinePct, 1), '%'],
             ].map(([label, value, unit]) => (
               <View key={label} style={[styles.tile, { backgroundColor: colors.inset }]}>

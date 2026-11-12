@@ -16,6 +16,12 @@ export type UserProfile = {
   daily_step_goal: number;
   sessions_per_week: number;
   language: 'fr' | 'en';
+  app_color: 'orange' | 'blue' | 'green' | 'purple' | 'pink';
+  map_mood: 'auto' | 'day' | 'night';
+  units: 'km' | 'mi';
+  notifications: boolean;
+  /** `everyone`: found by the start of the username; `friends`: exact username or link only. */
+  visibility: 'everyone' | 'friends';
   created_at: string;
 };
 

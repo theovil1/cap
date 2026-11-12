@@ -14,7 +14,7 @@ function toUpload(session: StoredSession): SessionUpload {
     duration_s: session.durationS,
     steps: session.steps,
     avg_incline_pct: session.avgInclinePct,
-    source: 'treadmill',
+    source: session.manual ? 'manual' : 'treadmill',
     journey_ids: session.journeyIds ?? undefined,
   };
 }

@@ -9,7 +9,9 @@ import {
   type ReactNode,
 } from 'react';
 
+import i18n from '@/i18n';
 import { clearAll, getValue, setValue } from '@/session/store';
+import { syncAppearance } from '@/settings/appearance';
 import { syncPending } from '@/session/sync';
 
 import {
@@ -38,10 +40,22 @@ type Auth = {
   signInWithApple: (identityToken: string, firstName: string | null) => Promise<void>;
   setUser: (user: UserProfile) => void;
   signOut: () => Promise<void>;
+  /** Deletes the account and everything in it on the server (GDPR), then signs out. */
+  deleteAccount: () => Promise<void>;
 };
 
 const AuthContext = createContext<Auth | null>(null);
 const PROFILE_KEY = 'profile';
+
+/** Colours, map, units and language follow the profile. */
+function applySettings(profile: UserProfile) {
+  syncAppearance({
+    app_color: profile.app_color ?? 'orange',
+    map_mood: profile.map_mood ?? 'auto',
+    units: profile.units ?? 'km',
+  });
+  if (profile.language && i18n.language !== profile.language) i18n.changeLanguage(profile.language);
+}
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const queryClient = useQueryClient();
@@ -53,6 +67,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const setUser = useCallback((profile: UserProfile) => {
     setValue(PROFILE_KEY, profile);
     setUserState(profile);
+    applySettings(profile);
+  }, []);
+  // The stored profile sets colours and language from the first screen.
+  useEffect(() => {
+    const stored = getValue<UserProfile>(PROFILE_KEY);
+    if (stored) applySettings(stored);
   }, []);
 
   const forget = useCallback(() => {
@@ -115,6 +135,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             body: { refresh_token: refreshToken },
           }).catch(() => {});
         }
+        await clearSession();
+        forget();
+      },
+      deleteAccount: async () => {
+        await api('/me', { method: 'DELETE' });
         await clearSession();
         forget();
       },
