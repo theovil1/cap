@@ -90,7 +90,8 @@ async function refresh(): Promise<boolean> {
 type RequestOptions = {
   method?: string;
   body?: unknown;
-  query?: Record<string, string | number>;
+  /** Undefined values are left out. */
+  query?: Record<string, string | number | undefined>;
   /** Raw bytes sent as is (profile photo), with their type. */
   raw?: ArrayBuffer;
   contentType?: string;
@@ -103,7 +104,12 @@ export async function api<T>(
   retried = false,
 ): Promise<T> {
   const query = options.query
-    ? '?' + new URLSearchParams(Object.entries(options.query).map(([k, v]) => [k, String(v)]))
+    ? '?' +
+      new URLSearchParams(
+        Object.entries(options.query)
+          .filter(([, v]) => v !== undefined)
+          .map(([k, v]) => [k, String(v)]),
+      )
     : '';
   const headers: Record<string, string> = { accept: 'application/json' };
   if (options.body !== undefined) headers['content-type'] = 'application/json';

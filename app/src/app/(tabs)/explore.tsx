@@ -1,9 +1,10 @@
 import { router } from 'expo-router';
-import { CalendarDays, Compass, Plus } from 'lucide-react-native';
+import { CalendarDays, Plus } from 'lucide-react-native';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Text } from 'react-native';
+import { ActionSheetIOS, Text } from 'react-native';
 
+import { ROUTE_FILTERS, RoutesExplorer, type RouteFilter } from '@/community/routes-explorer';
 import { useColors } from '@/theme';
 import { type } from '@/tokens';
 import { Chip, ChipRow, SearchBar, Tabs } from '@/ui/controls';
@@ -12,29 +13,37 @@ import { RoundButton } from '@/ui/primitives';
 
 type Part = 'routes' | 'planned';
 
-const FILTERS: Record<Part, string[]> = {
-  routes: ['popular', 'near', 'new', 'short', 'mountain', 'sea', 'castles'],
-  planned: ['all', 'mine', 'friends'],
-};
+const PLANNED_FILTERS = ['all', 'mine', 'friends'] as const;
 
-/**
- * Explore tab: public routes and scheduled journeys. The lists come with the
- * community API; until then the screen keeps its shape with an empty state.
- */
+/** Explore tab: public routes and scheduled journeys. */
 export default function ExploreScreen() {
   const { t } = useTranslation();
   const colors = useColors();
   const [part, setPart] = useState<Part>('routes');
-  const [filter, setFilter] = useState<Record<Part, string>>({ routes: 'popular', planned: 'all' });
+  const [routeFilter, setRouteFilter] = useState<RouteFilter>('popular');
+  const [plannedFilter, setPlannedFilter] = useState<string>('all');
   const [search, setSearch] = useState('');
+
+  // New journey, or publish one of mine for the community.
+  const add = () =>
+    ActionSheetIOS.showActionSheetWithOptions(
+      {
+        options: [t('journeys.new'), t('publish.title'), t('journeys.cancel')],
+        cancelButtonIndex: 2,
+      },
+      (index) => {
+        if (index === 0) router.push('/new-journey');
+        if (index === 1) router.push('/publish');
+      },
+    );
 
   return (
     <TabScreen>
       <ScreenHeader title={t('nav.explore')}>
         <RoundButton
           icon={<Plus size={20} color={colors.text} strokeWidth={2} />}
-          onPress={() => router.push('/new-journey')}
-          label={t('journeys.new')}
+          onPress={add}
+          label={t('explore.add')}
         />
       </ScreenHeader>
       <Tabs
@@ -51,31 +60,38 @@ export default function ExploreScreen() {
         placeholder={t(part === 'routes' ? 'explore.searchRoutes' : 'explore.searchPlanned')}
       />
       <ChipRow>
-        {FILTERS[part].map((key) => (
-          <Chip
-            key={key}
-            label={t(`explore.filters.${key}`)}
-            on={filter[part] === key}
-            onPress={() => setFilter((current) => ({ ...current, [part]: key }))}
-          />
-        ))}
+        {part === 'routes'
+          ? ROUTE_FILTERS.map((key) => (
+              <Chip
+                key={key}
+                label={t(`explore.filters.${key}`)}
+                on={routeFilter === key}
+                onPress={() => setRouteFilter(key)}
+              />
+            ))
+          : PLANNED_FILTERS.map((key) => (
+              <Chip
+                key={key}
+                label={t(`explore.filters.${key}`)}
+                on={plannedFilter === key}
+                onPress={() => setPlannedFilter(key)}
+              />
+            ))}
       </ChipRow>
-      {part === 'planned' && (
-        <Text style={[type.subhead, { color: colors.textSecondary }]}>
-          {t('explore.plannedIntro')}
-        </Text>
+      {part === 'routes' ? (
+        <RoutesExplorer search={search} filter={routeFilter} />
+      ) : (
+        <>
+          <Text style={[type.subhead, { color: colors.textSecondary }]}>
+            {t('explore.plannedIntro')}
+          </Text>
+          <EmptyState
+            icon={<CalendarDays size={22} color={colors.accentText} />}
+            title={t('explore.soon')}
+            text={t('explore.soonPlanned')}
+          />
+        </>
       )}
-      <EmptyState
-        icon={
-          part === 'routes' ? (
-            <Compass size={22} color={colors.accentText} />
-          ) : (
-            <CalendarDays size={22} color={colors.accentText} />
-          )
-        }
-        title={t('explore.soon')}
-        text={t(part === 'routes' ? 'explore.soonRoutes' : 'explore.soonPlanned')}
-      />
     </TabScreen>
   );
 }

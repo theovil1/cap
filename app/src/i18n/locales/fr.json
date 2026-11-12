@@ -463,6 +463,28 @@
       "all": "Tous",
       "mine": "Mes inscriptions",
       "friends": "Avec mes amis"
+    },
+    "add": "Ajouter",
+    "walkers_one": "{{n}} marcheur",
+    "walkers_other": "{{n}} marcheurs",
+    "stages_one": "{{count}} étape",
+    "stages_other": "{{count}} étapes",
+    "ofTheWeek": "Trajet de la semaine",
+    "arrival": "Arrivée · {{place}}",
+    "nearNoPlace": "Où es-tu ?",
+    "nearNoPlaceText": "Crée ton premier trajet : Cap cherchera autour de son départ.",
+    "noResult": "Aucun trajet trouvé",
+    "noResultText": "Essaie une autre ville ou un autre mot.",
+    "empty": "Aucun trajet publié",
+    "emptyText": "Publie le tien avec le bouton + : tu seras le premier sur la carte.",
+    "lists": {
+      "popular": "Les plus suivis",
+      "near": "Près de chez toi",
+      "new": "Nouveaux",
+      "short": "Courts",
+      "mountain": "Montagne",
+      "sea": "Bord de mer",
+      "castles": "Châteaux"
     }
   },
   "arrival": {
@@ -581,5 +603,60 @@
     "friends_one": "{{count}} ami sur Cap",
     "friends_other": "{{count}} amis sur Cap",
     "shareText": "{{name}} sur Cap : {{km}} km marchés sur le tapis et {{count}} médailles."
+  },
+  "publicRoute": {
+    "gone": "Ce trajet n'est plus publié.",
+    "by": "Publié par {{name}} · {{stages}}",
+    "walkers": "Marcheurs",
+    "finished": "Terminé",
+    "times_one": "fois",
+    "times_other": "fois",
+    "fastest": "Les plus rapides",
+    "walkingTime": "en temps de marche",
+    "noFinisher": "Personne ne l'a encore fini. Sois le premier !",
+    "start": "Démarrer ce trajet",
+    "onIt": "Tu es dessus",
+    "alreadyStarted": "Tu es déjà sur ce trajet.",
+    "startAt": "Départ · {{place}}",
+    "endAt": "Arrivée · {{place}}",
+    "path": "Parcours",
+    "more": "Plus",
+    "photos": "Photos du trajet",
+    "unpublish": "Retirer la publication",
+    "unpublishTitle": "Retirer ce trajet ?",
+    "unpublishBody": "Il disparaît de l'Explorer. Ceux qui marchent dessus continuent.",
+    "report": "Signaler ce trajet",
+    "reported": "Merci, on va regarder.",
+    "shareText": "{{title}}, {{km}} km à pied, sur Cap."
+  },
+  "publish": {
+    "title": "Publier un trajet",
+    "editTitle": "Photos du trajet",
+    "noRoute": "Crée d'abord un trajet : tu pourras ensuite le publier pour la communauté.",
+    "titleLabel": "Titre",
+    "titleRule": "Le titre fait entre 3 et 80 caractères.",
+    "description": "Description",
+    "descriptionPlaceholder": "Ce qu'on voit en chemin, la meilleure saison...",
+    "visibleBy": "Visible par",
+    "everyone": "Tout le monde",
+    "friends": "Mes amis",
+    "themes": "Thèmes",
+    "tags": {
+      "countryside": "Campagne",
+      "castles": "Châteaux",
+      "river": "Rivières",
+      "mountain": "Montagne",
+      "sea": "Bord de mer",
+      "city": "Villes"
+    },
+    "photos": "Photos",
+    "photosHint": "Sans photo, Cap montre la vue du ciel du départ et de l'arrivée.",
+    "kinds": {
+      "start": "Départ",
+      "end": "Arrivée",
+      "path": "Parcours"
+    },
+    "facts": "{{km}} km · {{stages}} · à pied, sûr",
+    "submit": "Publier"
   }
 }

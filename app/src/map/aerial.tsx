@@ -23,13 +23,17 @@ export function AerialView({
   lat,
   lon,
   size,
+  width = size,
+  height = size,
   zoom = 15,
   style,
 }: {
   lat: number;
   lon: number;
-  /** Width and height of the square shown, in points. */
-  size: number;
+  /** Side of a square view, in points; or give `width` and `height`. */
+  size?: number;
+  width?: number;
+  height?: number;
   zoom?: number;
   style?: StyleProp<ViewStyle>;
 }) {
@@ -37,9 +41,12 @@ export function AerialView({
   const center = worldPixel(lat, lon, zoom);
   const tileX = Math.floor(center.x / TILE);
   const tileY = Math.floor(center.y / TILE);
-  const tiles = [-1, 0, 1].flatMap((dy) => [-1, 0, 1].map((dx) => [tileX + dx, tileY + dy]));
+  // Enough tiles around the centre to fill the view.
+  const reach = Math.ceil(Math.max(width ?? 0, height ?? 0) / 2 / TILE) + 1;
+  const range = Array.from({ length: 2 * reach + 1 }, (_, i) => i - reach);
+  const tiles = range.flatMap((dy) => range.map((dx) => [tileX + dx, tileY + dy]));
   return (
-    <View style={[{ width: size, height: size, overflow: 'hidden' }, style]}>
+    <View style={[{ width, height, overflow: 'hidden' }, style]}>
       {tiles.map(([x, y]) => (
         <Image
           key={`${x}-${y}`}
@@ -51,7 +58,10 @@ export function AerialView({
           cachePolicy="disk"
           style={[
             styles.tile,
-            { left: size / 2 + x * TILE - center.x, top: size / 2 + y * TILE - center.y },
+            {
+              left: (width ?? 0) / 2 + x * TILE - center.x,
+              top: (height ?? 0) / 2 + y * TILE - center.y,
+            },
           ]}
         />
       ))}

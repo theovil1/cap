@@ -463,6 +463,28 @@
       "all": "All",
       "mine": "My sign-ups",
       "friends": "With friends"
+    },
+    "add": "Add",
+    "walkers_one": "{{n}} walker",
+    "walkers_other": "{{n}} walkers",
+    "stages_one": "{{count}} stage",
+    "stages_other": "{{count}} stages",
+    "ofTheWeek": "Route of the week",
+    "arrival": "Arrival · {{place}}",
+    "nearNoPlace": "Where are you?",
+    "nearNoPlaceText": "Create your first journey: Cap will look around its start.",
+    "noResult": "No route found",
+    "noResultText": "Try another town or another word.",
+    "empty": "No route published yet",
+    "emptyText": "Publish yours with the + button: you will be the first on the map.",
+    "lists": {
+      "popular": "Most followed",
+      "near": "Near you",
+      "new": "New",
+      "short": "Short",
+      "mountain": "Mountains",
+      "sea": "Seaside",
+      "castles": "Castles"
     }
   },
   "arrival": {
@@ -581,5 +603,60 @@
     "friends_one": "{{count}} friend on Cap",
     "friends_other": "{{count}} friends on Cap",
     "shareText": "{{name}} on Cap: {{km}} km walked on the treadmill and {{count}} medals."
+  },
+  "publicRoute": {
+    "gone": "This route is no longer published.",
+    "by": "Published by {{name}} · {{stages}}",
+    "walkers": "Walkers",
+    "finished": "Finished",
+    "times_one": "time",
+    "times_other": "times",
+    "fastest": "Fastest",
+    "walkingTime": "by walking time",
+    "noFinisher": "Nobody finished it yet. Be the first!",
+    "start": "Start this route",
+    "onIt": "You are on it",
+    "alreadyStarted": "You are already on this route.",
+    "startAt": "Start · {{place}}",
+    "endAt": "Arrival · {{place}}",
+    "path": "On the way",
+    "more": "More",
+    "photos": "Route photos",
+    "unpublish": "Unpublish",
+    "unpublishTitle": "Unpublish this route?",
+    "unpublishBody": "It leaves the Explorer. Walkers on it carry on.",
+    "report": "Report this route",
+    "reported": "Thanks, we will have a look.",
+    "shareText": "{{title}}, {{km}} km on foot, on Cap."
+  },
+  "publish": {
+    "title": "Publish a route",
+    "editTitle": "Route photos",
+    "noRoute": "Create a journey first: you can then publish it for the community.",
+    "titleLabel": "Title",
+    "titleRule": "The title is 3 to 80 characters.",
+    "description": "Description",
+    "descriptionPlaceholder": "What you see on the way, the best season...",
+    "visibleBy": "Visible to",
+    "everyone": "Everyone",
+    "friends": "My friends",
+    "themes": "Themes",
+    "tags": {
+      "countryside": "Countryside",
+      "castles": "Castles",
+      "river": "Rivers",
+      "mountain": "Mountains",
+      "sea": "Seaside",
+      "city": "Towns"
+    },
+    "photos": "Photos",
+    "photosHint": "Without photos, Cap shows the start and the arrival from the sky.",
+    "kinds": {
+      "start": "Start",
+      "end": "Arrival",
+      "path": "On the way"
+    },
+    "facts": "{{km}} km · {{stages}} · on foot, safe",
+    "submit": "Publish"
   }
 }

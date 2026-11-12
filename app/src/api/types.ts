@@ -75,6 +75,8 @@ export type JourneySummary = {
   distance_m: number;
   /** Sessions that counted for this journey (sent since the API of 12 Nov 2026). */
   sessions?: number;
+  /** The public route it was started from, or published as. */
+  public_route_id?: string | null;
   arrived_at: string | null;
   created_at: string;
 };
@@ -176,3 +178,52 @@ export type Leaderboard = {
   ends_on: string;
   entries: LeaderboardEntry[];
 };
+
+/** A walker as shown next to what they did. */
+export type Walker = {
+  id: string;
+  first_name: string;
+  username: string;
+  avatar_url: string | null;
+};
+
+export type RoutePhoto = { kind: 'start' | 'end' | 'path'; url: string };
+
+export type PublicRouteCard = {
+  id: string;
+  route_id: string;
+  title: string;
+  description: string;
+  author: Walker;
+  visibility: 'everyone' | 'friends';
+  tags: string[];
+  start: Place;
+  end: Place;
+  start_town: string | null;
+  end_town: string | null;
+  distance_m: number;
+  stages: number;
+  walkers: number;
+  finished: number;
+  photos: RoutePhoto[];
+  featured: boolean;
+  created_at: string;
+};
+
+export type Fastest = {
+  rank: number;
+  walker: Walker;
+  walking_s: number;
+  sessions: number;
+  arrived_at: string;
+};
+
+export type PublicRouteDetail = PublicRouteCard & {
+  path: RoutePoint[];
+  stage_list: Stage[];
+  fastest: Fastest[];
+  my_journey_id: string | null;
+  mine: boolean;
+};
+
+export type PublicRouteSort = 'popular' | 'new' | 'near';
