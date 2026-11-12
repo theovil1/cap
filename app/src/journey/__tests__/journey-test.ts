@@ -1,4 +1,5 @@
 import { ideasFrom } from '../ideas';
+import { medalsFor } from '../medals';
 import { estimateArrival, nextStage, stepsFor, streaks } from '../progress';
 import { followCenter, headingAt, positionAt, simplify, splitAt, type RoutePoint } from '../route';
 
@@ -101,5 +102,30 @@ describe('ideas', () => {
       [...ideas.map((i) => i.distanceM)].sort((a, b) => a - b),
     );
     expect(ideas.at(-1)!.distanceM).toBeGreaterThan(200_000);
+  });
+});
+
+describe('medals', () => {
+  const journey = (id: string, extra: object) =>
+    ({ id, kind: 'solo', rank: null, arrived_at: null, ...extra }) as never;
+
+  it('gives finished journeys, levels and the next distance to win', () => {
+    const medals = medalsFor({
+      journeys: [
+        journey('a', { arrived_at: '2026-10-01T10:00:00Z' }),
+        journey('b', { kind: 'race', rank: 2, arrived_at: '2026-11-01T10:00:00Z' }),
+        journey('c', {}),
+      ],
+      totalM: 312_000,
+      bestStreak: 12,
+    });
+    expect(medals.map((m) => [m.kind, m.metal])).toEqual([
+      ['race', 'silver'],
+      ['journey', 'gold'],
+      ['distance', 'bronze'],
+      ['streak', 'bronze'],
+      ['distance', 'locked'],
+    ]);
+    expect(medals.at(-1)).toMatchObject({ km: 500, progress: 0.624 });
   });
 });

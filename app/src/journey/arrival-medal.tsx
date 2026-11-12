@@ -14,6 +14,7 @@ export function ArrivalMedal({
   lon,
   distance,
   width,
+  zoom = 15,
   label,
 }: {
   lat: number;
@@ -21,6 +22,8 @@ export function ArrivalMedal({
   /** "201 KM". */
   distance: string;
   width: number;
+  /** Smaller medals show a wider area. */
+  zoom?: number;
   label: string;
 }) {
   // The medal is drawn in a 132 x 170 box starting at x = -6; the disc is at (60, 108), r 36.
@@ -42,9 +45,11 @@ export function ArrivalMedal({
           },
         ]}
       >
-        <AerialView lat={lat} lon={lon} size={radius * 2} />
+        <AerialView lat={lat} lon={lon} size={radius * 2} zoom={zoom} />
         <View style={[StyleSheet.absoluteFill, styles.shade]} />
-        <Text style={[styles.distance, { fontSize: Math.max(9, 9 * k) }]}>{distance}</Text>
+        {width >= 100 ? (
+          <Text style={[styles.distance, { fontSize: 9 * k }]}>{distance}</Text>
+        ) : null}
       </View>
     </View>
   );

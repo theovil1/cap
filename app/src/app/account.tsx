@@ -20,7 +20,9 @@ import { useAuth } from '@/api/auth';
 import { api, ApiError } from '@/api/client';
 import { useUpdateProfile, type ProfilePatch } from '@/api/profile';
 import type { UserProfile } from '@/api/types';
+import { SettingsWide } from '@/account/settings-wide';
 import { fonts, useColors } from '@/theme';
+import { useWide } from '@/ui/layout';
 import { Avatar, GlassButton } from '@/ui/primitives';
 
 const COUNTRIES = ['FR', 'BE', 'CH', 'LU', 'CA'] as const;
@@ -32,6 +34,7 @@ export default function AccountScreen() {
   const { user, setUser, signOut, deleteAccount } = useAuth();
   const update = useUpdateProfile();
   const [busy, setBusy] = useState(false);
+  const wide = useWide();
   if (!user) return null;
 
   const failed = (error: unknown) => {
@@ -144,10 +147,110 @@ export default function AccountScreen() {
       },
     ]);
 
+  const removePhoto = async () => {
+    setBusy(true);
+    try {
+      setUser(await api<UserProfile>('/me/avatar', { method: 'DELETE' }));
+    } catch (error) {
+      failed(error);
+    } finally {
+      setBusy(false);
+    }
+  };
+
   const number = (text: string, min: number, max: number) => {
     const value = Number.parseInt(text, 10);
     return Number.isFinite(value) && value >= min && value <= max ? value : null;
   };
+
+  const languageRow = (
+    <Row
+      label={t('account.language')}
+      value={t(`account.languages.${user.language}`)}
+      onPress={() =>
+        choose(
+          t('account.language'),
+          (['fr', 'en'] as const).map((l) => ({ value: l, label: t(`account.languages.${l}`) })),
+          (language) => save({ language }),
+        )
+      }
+    />
+  );
+  const unitsRow = (
+    <Row
+      label={t('account.units')}
+      value={t(`account.unitNames.${user.units}`)}
+      onPress={() =>
+        choose(
+          t('account.units'),
+          (['km', 'mi'] as const).map((u) => ({ value: u, label: t(`account.unitNames.${u}`) })),
+          (units) => save({ units }),
+        )
+      }
+    />
+  );
+  const notificationsRow = (
+    <Row label={t('account.notifications')}>
+      <Switch value={user.notifications} onValueChange={(on) => save({ notifications: on })} />
+    </Row>
+  );
+  const visibilityRow = (
+    <Row
+      label={t('account.visibility')}
+      value={t(`account.visibilities.${user.visibility}`)}
+      onPress={() =>
+        choose(
+          t('account.visibilityHint'),
+          (['everyone', 'friends'] as const).map((v) => ({
+            value: v,
+            label: t(`account.visibilities.${v}`),
+          })),
+          (visibility) => save({ visibility }),
+        )
+      }
+    />
+  );
+
+  if (wide) {
+    return (
+      <SettingsWide
+        user={user}
+        busy={busy}
+        onPhoto={changePhoto}
+        onRemovePhoto={removePhoto}
+        onCountry={(pick) =>
+          choose(
+            t('account.country'),
+            COUNTRIES.map((c) => ({ value: c, label: t(`account.countries.${c}`) })),
+            pick,
+          )
+        }
+        onSave={save}
+        onSignOut={signOut}
+        onDelete={confirmDelete}
+        sections={{
+          appearance: (
+            <Group>
+              {languageRow}
+              {unitsRow}
+            </Group>
+          ),
+          treadmill: (
+            <Group>
+              <Row label={t('settings.treadmills')} onPress={() => router.push('/treadmill')} />
+            </Group>
+          ),
+          notifications: <Group>{notificationsRow}</Group>,
+          privacy: (
+            <Group>
+              {visibilityRow}
+              <Row label={t('account.export')} onPress={exportData} />
+            </Group>
+          ),
+        }}
+      />
+    );
+  }
 
   return (
     <ScrollView
@@ -252,54 +355,14 @@ export default function AccountScreen() {
         </Group>
 
         <Group title={t('account.preferences')}>
-          <Row
-            label={t('account.language')}
-            value={t(`account.languages.${user.language}`)}
-            onPress={() =>
-              choose(
-                t('account.language'),
-                (['fr', 'en'] as const).map((l) => ({
-                  value: l,
-                  label: t(`account.languages.${l}`),
-                })),
-                (language) => save({ language }),
-              )
-            }
-          />
-          <Row
-            label={t('account.units')}
-            value={t(`account.unitNames.${user.units}`)}
-            onPress={() =>
-              choose(
-                t('account.units'),
-                (['km', 'mi'] as const).map((u) => ({
-                  value: u,
-                  label: t(`account.unitNames.${u}`),
-                })),
-                (units) => save({ units }),
-              )
-            }
-          />
-          <Row label={t('account.notifications')}>
-            <Switch
-              value={user.notifications}
-              onValueChange={(on) => save({ notifications: on })}
-            />
-          </Row>
-          <Row
-            label={t('account.visibility')}
-            value={t(`account.visibilities.${user.visibility}`)}
-            onPress={() =>
-              choose(
-                t('account.visibilityHint'),
-                (['everyone', 'friends'] as const).map((v) => ({
-                  value: v,
-                  label: t(`account.visibilities.${v}`),
-                })),
-                (visibility) => save({ visibility }),
-              )
-            }
-          />
+          {languageRow}
+          {unitsRow}
+          {notificationsRow}
+          {visibilityRow}
+        </Group>
+
+        <Group>
+          <Row label={t('settings.treadmills')} onPress={() => router.push('/treadmill')} />
         </Group>
 
         <Group>

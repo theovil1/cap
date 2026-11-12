@@ -151,7 +151,8 @@
       "connected": "{{name}} · live",
       "reconnecting": "Connection lost, reconnecting…"
     },
-    "unknownName": "Treadmill"
+    "unknownName": "Treadmill",
+    "none": "No treadmill"
   },
   "session": {
     "today": "Today",
@@ -295,7 +296,16 @@
       "auto": "Auto",
       "day": "Day",
       "night": "Night"
-    }
+    },
+    "total": "Total",
+    "finished": "Journeys done",
+    "bestStreak": "Best streak",
+    "daysShort": "d",
+    "stepsAndKm": "steps · ≈ {{km}} {{unit}}",
+    "strideTitle": "Stride",
+    "measureOnTreadmill": "Measure on the treadmill",
+    "treadmillConnected": "Connected",
+    "treadmill": "Treadmill"
   },
   "units": {
     "km": "{{unit}}",
@@ -476,5 +486,80 @@
     "newJourney": "Choose a new journey",
     "newMedal": "New medal",
     "medalOf": "{{from}} → {{to}} · gold"
+  },
+  "medals": {
+    "progress": "{{percent}} % won",
+    "streak_one": "{{count}} day streak",
+    "streak_other": "{{count}} day streak",
+    "days_one": "{{count}} D",
+    "days_other": "{{count}} D",
+    "place": "{{place}} in the race",
+    "placeUnit": "PLACE",
+    "finished": "DONE",
+    "title": "My medals",
+    "none": "Your first medal waits at 100 km."
+  },
+  "settings": {
+    "title": "Settings",
+    "sections": {
+      "account": "My account",
+      "appearance": "Appearance",
+      "treadmill": "My treadmills",
+      "notifications": "Notifications",
+      "privacy": "Privacy"
+    },
+    "version": "Cap {{version}}",
+    "removePhoto": "Remove",
+    "placeNote": "Your country and city are used for rankings and journey ideas. Never your exact position.",
+    "treadmills": "Manage my treadmills"
+  },
+  "treadmillSetup": {
+    "progress": "Add a treadmill · {{step}} of {{total}}",
+    "searching": "Looking for the treadmill…",
+    "fitshow": "FitShow module · Bluetooth FTMS",
+    "ftms": "Bluetooth FTMS treadmill",
+    "receiving": "Receiving",
+    "speedFound": "Speed found",
+    "distanceFound": "Distance found",
+    "inclineFound": "Incline found",
+    "detected": "Detected speed",
+    "question": "Does your console show {{speed}} {{speedUnit}} too?",
+    "yes": "Yes, it does",
+    "no": "No",
+    "consoleTitle": "Speed on the console",
+    "consoleHint": "Type the speed your treadmill shows, in {{speedUnit}}.",
+    "odd": "This gap is too large for a correction. Check the speed on the console.",
+    "nameLabel": "Treadmill name",
+    "namePlaceholder": "My treadmill",
+    "corrected": "Your distances will be corrected by {{percent}} %.",
+    "continue": "Continue",
+    "done": "Save the treadmill",
+    "steps": {
+      "1": {
+        "title": "Switch your treadmill on",
+        "text": "Put the phone near the treadmill and switch it on. Cap looks for it over Bluetooth.",
+        "short": "Switch it on"
+      },
+      "2": {
+        "title": "Finding the signal",
+        "text": "Cap listens to treadmills that speak Bluetooth FTMS, the standard of connected treadmills.",
+        "short": "Find the signal"
+      },
+      "3": {
+        "title": "Reading the data",
+        "text": "Walk a few steps: Cap checks it gets the speed, the distance and the incline.",
+        "short": "Read the data"
+      },
+      "4": {
+        "title": "Let's check together",
+        "text": "Set your treadmill to {{speed}} {{speedUnit}}. Cap compares with what it gets over Bluetooth.",
+        "short": "Check the speed"
+      },
+      "5": {
+        "title": "Give it a name",
+        "text": "You will see this name in Cap instead of the Bluetooth one.",
+        "short": "Give it a name"
+      }
+    }
   }
 }

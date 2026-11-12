@@ -16,6 +16,7 @@ import { useAuth } from '@/api/auth';
 import type { JourneySummary } from '@/api/types';
 import { sendProgress, sendStop, setLiveWanted } from '@/live/live-client';
 import { stepsFor } from '@/journey/progress';
+import { calibrated, factorFor, getSavedTreadmill } from '@/treadmill/calibration';
 import { TreadmillConnection, type ConnectionSnapshot } from '@/treadmill/connection';
 import type { TreadmillData } from '@/treadmill/ftms';
 
@@ -75,7 +76,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const onSessionScreen = useRef(false);
   useEffect(() => {
-    onSessionScreen.current = pathname === '/session' || pathname === '/stride';
+    onSessionScreen.current = ['/session', '/stride', '/treadmill'].includes(pathname);
   }, [pathname]);
 
   const sync = useCallback(async () => {
@@ -120,9 +121,21 @@ export function SessionProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (status !== 'signedIn') return;
+    // The Bluetooth name of the treadmill, for its saved name and speed correction.
+    let hardwareName: string | null = null;
     const treadmill = new TreadmillConnection({
-      onStatus: setConnection,
-      onData: (frame) => {
+      onStatus: (snapshot) => {
+        hardwareName = snapshot.deviceName;
+        const saved = getSavedTreadmill();
+        setConnection({
+          ...snapshot,
+          hardwareName,
+          deviceName:
+            saved && saved.deviceName === hardwareName ? saved.label : snapshot.deviceName,
+        });
+      },
+      onData: (raw) => {
+        const frame = calibrated(raw, factorFor(hardwareName));
         const now = Date.now();
         setData(frame);
         const wasRecording = recorder.current.live !== null;

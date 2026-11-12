@@ -151,7 +151,8 @@
       "connected": "{{name}} · en direct",
       "reconnecting": "Connexion perdue, reconnexion…"
     },
-    "unknownName": "Tapis"
+    "unknownName": "Tapis",
+    "none": "Aucun tapis"
   },
   "session": {
     "today": "Aujourd'hui",
@@ -295,7 +296,16 @@
       "auto": "Auto",
       "day": "Jour",
       "night": "Nuit"
-    }
+    },
+    "total": "Total",
+    "finished": "Trajets finis",
+    "bestStreak": "Série record",
+    "daysShort": "j",
+    "stepsAndKm": "pas · ≈ {{km}} {{unit}}",
+    "strideTitle": "Foulée",
+    "measureOnTreadmill": "Mesurer sur le tapis",
+    "treadmillConnected": "Connecté",
+    "treadmill": "Tapis"
   },
   "units": {
     "km": "{{unit}}",
@@ -476,5 +486,80 @@
     "newJourney": "Choisir un nouveau trajet",
     "newMedal": "Nouvelle médaille",
     "medalOf": "{{from}} → {{to}} · or"
+  },
+  "medals": {
+    "progress": "{{percent}} % gagné",
+    "streak_one": "Série de {{count}} jour",
+    "streak_other": "Série de {{count}} jours",
+    "days_one": "{{count}} J",
+    "days_other": "{{count}} J",
+    "place": "{{place}} de la course",
+    "placeUnit": "PLACE",
+    "finished": "FINI",
+    "title": "Mes médailles",
+    "none": "Ta première médaille t'attend à 100 km."
+  },
+  "settings": {
+    "title": "Réglages",
+    "sections": {
+      "account": "Mon compte",
+      "appearance": "Apparence",
+      "treadmill": "Mes tapis",
+      "notifications": "Notifications",
+      "privacy": "Confidentialité"
+    },
+    "version": "Cap {{version}}",
+    "removePhoto": "Retirer",
+    "placeNote": "Ton pays et ta ville servent aux classements et aux idées de trajets. Jamais ta position exacte.",
+    "treadmills": "Gérer mes tapis"
+  },
+  "treadmillSetup": {
+    "progress": "Ajouter un tapis · {{step}} sur {{total}}",
+    "searching": "Recherche du tapis…",
+    "fitshow": "Module FitShow · Bluetooth FTMS",
+    "ftms": "Tapis Bluetooth FTMS",
+    "receiving": "Reçoit",
+    "speedFound": "Vitesse trouvée",
+    "distanceFound": "Distance trouvée",
+    "inclineFound": "Pente trouvée",
+    "detected": "Vitesse détectée",
+    "question": "Ta console affiche aussi {{speed}} {{speedUnit}} ?",
+    "yes": "Oui, c'est ça",
+    "no": "Non",
+    "consoleTitle": "Vitesse sur la console",
+    "consoleHint": "Tape la vitesse affichée par ton tapis, en {{speedUnit}}.",
+    "odd": "Cet écart est trop grand pour une correction. Vérifie la vitesse sur la console.",
+    "nameLabel": "Nom du tapis",
+    "namePlaceholder": "Mon tapis",
+    "corrected": "Tes distances seront corrigées de {{percent}} %.",
+    "continue": "Continuer",
+    "done": "Enregistrer le tapis",
+    "steps": {
+      "1": {
+        "title": "Allume ton tapis",
+        "text": "Pose le téléphone près du tapis et allume-le. Cap le cherche en Bluetooth.",
+        "short": "Allumer le tapis"
+      },
+      "2": {
+        "title": "On cherche le signal",
+        "text": "Cap écoute les tapis qui parlent le Bluetooth FTMS, le standard des tapis connectés.",
+        "short": "Trouver le signal"
+      },
+      "3": {
+        "title": "On lit les données",
+        "text": "Marche quelques pas : Cap vérifie qu'il reçoit la vitesse, la distance et la pente.",
+        "short": "Lire les données"
+      },
+      "4": {
+        "title": "On vérifie ensemble",
+        "text": "Règle ton tapis sur {{speed}} {{speedUnit}}. Cap compare avec ce qu'il reçoit en Bluetooth.",
+        "short": "Vérifier la vitesse"
+      },
+      "5": {
+        "title": "Donne-lui un nom",
+        "text": "C'est ce nom que tu verras dans Cap, à la place du nom Bluetooth.",
+        "short": "Donner un nom"
+      }
+    }
   }
 }

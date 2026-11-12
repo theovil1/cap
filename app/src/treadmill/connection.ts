@@ -18,7 +18,13 @@ export type ConnectionStatus =
   | 'connected'
   | 'reconnecting';
 
-export type ConnectionSnapshot = { status: ConnectionStatus; deviceName: string | null };
+export type ConnectionSnapshot = {
+  status: ConnectionStatus;
+  /** Name to show: the one chosen in the wizard, else the Bluetooth name. */
+  deviceName: string | null;
+  /** Bluetooth name, e.g. `FS-A1B2` (set by the session context). */
+  hardwareName?: string | null;
+};
 
 type Listeners = {
   onStatus: (snapshot: ConnectionSnapshot) => void;
