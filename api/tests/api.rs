@@ -995,3 +995,124 @@ async fn public_routes_from_publication_to_reports(db: PgPool) {
     let list: Value = server.get("/public-routes").add_header("authorization", bearer(&lilou)).await.json();
     assert_eq!(list.as_array().unwrap().len(), 1);
 }
+
+/// A published route of `auth`, for scheduled journeys.
+async fn published_route(server: &TestServer, auth: &Value) -> String {
+    let route = create_route(server, auth).await;
+    let published: Value = server
+        .post("/public-routes")
+        .add_header("authorization", bearer(auth))
+        .json(&json!({ "route_id": route["id"], "title": "Le Marathon d'hiver" }))
+        .await
+        .json();
+    published["id"].as_str().unwrap().to_owned()
+}
+
+#[sqlx::test(migrator = "cap_api::MIGRATOR")]
+async fn scheduled_journeys_from_sign_up_to_standings(db: PgPool) {
+    let server = server(db.clone()).await;
+    let theo = register(&server, "theo").await;
+    let lilou = register(&server, "lilou").await;
+    let route_id = published_route(&server, &theo).await;
+    let format = &time::format_description::well_known::Rfc3339;
+    let at =
+        |minutes: i64| (OffsetDateTime::now_utc() + time::Duration::minutes(minutes)).format(format).unwrap();
+
+    // The start is at least ten minutes away, the end an hour after it.
+    server
+        .post("/events")
+        .add_header("authorization", bearer(&theo))
+        .json(&json!({ "public_route_id": route_id, "title": "Marathon", "starts_at": at(1), "ends_at": at(120) }))
+        .await
+        .assert_status(StatusCode::BAD_REQUEST);
+    let event = server
+        .post("/events")
+        .add_header("authorization", bearer(&theo))
+        .json(&json!({ "public_route_id": route_id, "title": "Le Marathon d'hiver",
+                       "starts_at": at(30), "ends_at": at(24 * 60) }))
+        .await;
+    event.assert_status(StatusCode::CREATED);
+    let event: Value = event.json();
+    let id = event["id"].as_str().unwrap().to_owned();
+    assert_eq!(event["state"], "upcoming");
+    assert_eq!(event["registered"], 1, "the organiser walks it");
+
+    // Lilou signs up; the journey waits for its start and is not under way yet.
+    let signed: Value = server
+        .post(&format!("/events/{id}/register"))
+        .add_header("authorization", bearer(&lilou))
+        .await
+        .json();
+    assert_eq!(signed["me_registered"], true);
+    assert_eq!(signed["registered"], 2);
+    let mine: Value =
+        server.get("/events?filter=mine").add_header("authorization", bearer(&lilou)).await.json();
+    assert_eq!(mine[0]["id"], id.as_str());
+    let journeys: Value = server.get("/journeys").add_header("authorization", bearer(&lilou)).await.json();
+    assert_eq!(journeys[0]["kind"], "event");
+    assert_eq!(journeys[0]["status"], "waiting");
+
+    // The start comes (moved back in time here); sessions since then count.
+    sqlx::query("UPDATE journeys SET starts_at = now() - interval '1 hour', created_at = now() - interval '2 hours' WHERE id = $1::uuid")
+        .bind(&id)
+        .execute(&db)
+        .await
+        .unwrap();
+    sqlx::query(
+        "UPDATE journey_participants SET joined_at = now() - interval '1 hour' WHERE journey_id = $1::uuid",
+    )
+    .bind(&id)
+    .execute(&db)
+    .await
+    .unwrap();
+    server
+        .post("/sessions")
+        .add_header("authorization", bearer(&lilou))
+        .json(&session(Uuid::now_v7(), 100.0, 90))
+        .await
+        .assert_status(StatusCode::CREATED);
+    let live: Value =
+        server.get(&format!("/events/{id}/live")).add_header("authorization", bearer(&theo)).await.json();
+    assert_eq!(live["registered"], 2);
+    assert_eq!(live["leaders"][0]["walker"]["username"], "lilou");
+    assert_eq!(live["leaders"][0]["distance_m"], 100.0);
+    assert_eq!(live["me"]["rank"], 2);
+    let card: Value =
+        server.get(&format!("/events/{id}")).add_header("authorization", bearer(&theo)).await.json();
+    assert_eq!(card["state"], "live");
+
+    // Arriving: first place. A manual session never counts.
+    server
+        .post("/sessions")
+        .add_header("authorization", bearer(&theo))
+        .json(&json!({ "local_id": Uuid::now_v7(), "started_at": at(-20), "ended_at": at(-10),
+                       "distance_m": 1000.0, "duration_s": 600, "source": "manual" }))
+        .await
+        .assert_status(StatusCode::CREATED);
+    server
+        .post("/sessions")
+        .add_header("authorization", bearer(&lilou))
+        .json(&session(Uuid::now_v7(), 500.0, 600))
+        .await
+        .assert_status(StatusCode::CREATED);
+    let live: Value =
+        server.get(&format!("/events/{id}/live")).add_header("authorization", bearer(&theo)).await.json();
+    assert!(live["leaders"][0]["arrived_at"].is_string());
+    assert_eq!(live["leaders"][1]["distance_m"], 0.0);
+
+    // After the end nobody signs up any more, and the journey is over.
+    sqlx::query("UPDATE journeys SET ends_at = now() - interval '1 minute' WHERE id = $1::uuid")
+        .bind(&id)
+        .execute(&db)
+        .await
+        .unwrap();
+    let late = register(&server, "marc").await;
+    server
+        .post(&format!("/events/{id}/register"))
+        .add_header("authorization", bearer(&late))
+        .await
+        .assert_status(StatusCode::CONFLICT);
+    let card: Value =
+        server.get(&format!("/events/{id}")).add_header("authorization", bearer(&theo)).await.json();
+    assert_eq!(card["state"], "ended");
+}

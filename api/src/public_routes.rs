@@ -254,7 +254,7 @@ async fn visible_ids(db: &PgPool, me: Uuid, query: &ListQuery) -> AppResult<Vec<
 }
 
 /// Whether the current user may see this public route (hidden ones: only the author).
-async fn can_see(db: &PgPool, me: Uuid, id: Uuid) -> AppResult<bool> {
+pub async fn can_see(db: &PgPool, me: Uuid, id: Uuid) -> AppResult<bool> {
     Ok(sqlx::query_scalar!(
         "SELECT EXISTS (SELECT 1 FROM public_routes p WHERE p.id = $2
            AND (p.author_id = $1 OR (NOT p.hidden AND (p.visibility = 'everyone' OR EXISTS (

@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT public_route_id AS \"public_route_id!\" FROM journeys WHERE id = $1 AND kind = 'event'",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "public_route_id!",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "journeys",
+            "name": "public_route_id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      true
+    ]
+  },
+  "hash": "9015082b72b7514014ec1e7b17179d5c0812dcefce2b6ce6ae902757d1bd6dc8"
+}

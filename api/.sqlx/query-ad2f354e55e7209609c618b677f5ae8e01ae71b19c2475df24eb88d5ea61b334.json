@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT j.id, j.kind, p.distance_m, r.distance_m AS route_distance_m\n         FROM journey_participants p\n         JOIN journeys j ON j.id = p.journey_id\n         JOIN routes r ON r.id = j.route_id\n         WHERE p.user_id = $1 AND j.status = 'active' AND p.arrived_at IS NULL AND p.joined_at IS NOT NULL\n           AND ($2::uuid[] IS NULL OR j.id = ANY($2))\n           AND (j.kind = 'solo' OR ($3 = 'treadmill' AND $4 >= j.starts_at))\n         ORDER BY j.created_at\n         FOR UPDATE OF p",
+  "query": "SELECT j.id, j.kind, p.distance_m, r.distance_m AS route_distance_m\n         FROM journey_participants p\n         JOIN journeys j ON j.id = p.journey_id\n         JOIN routes r ON r.id = j.route_id\n         WHERE p.user_id = $1 AND j.status = 'active' AND p.arrived_at IS NULL AND p.joined_at IS NOT NULL\n           AND ($2::uuid[] IS NULL OR j.id = ANY($2))\n           AND (j.kind = 'solo' OR ($3 = 'treadmill' AND $4 >= j.starts_at\n                AND (j.kind <> 'event' OR ($4 >= p.joined_at AND $4 < j.ends_at))))\n         ORDER BY j.created_at\n         FOR UPDATE OF p",
   "describe": {
     "columns": [
       {
@@ -63,5 +63,5 @@
       false
     ]
   },
-  "hash": "ab72021fc48334ecfefaa137b1e1f17547d7ab512cb46efbdaf6f943bd0a6b25"
+  "hash": "ad2f354e55e7209609c618b677f5ae8e01ae71b19c2475df24eb88d5ea61b334"
 }

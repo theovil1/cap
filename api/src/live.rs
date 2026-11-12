@@ -75,6 +75,12 @@ impl LiveHub {
         })
     }
 
+    /// Whether a walker sent fresh news of a session under way.
+    pub fn is_walking(&self, user_id: Uuid) -> bool {
+        let walking = self.walking.lock().unwrap_or_else(PoisonError::into_inner);
+        walking.get(&user_id).is_some_and(|w| w.at.elapsed() <= FRESH)
+    }
+
     /// Records a progress message; false when it is not credible.
     fn update(&self, user_id: Uuid, started_at: OffsetDateTime, session_m: f64, speed_kmh: f64) -> bool {
         let now = OffsetDateTime::now_utc();

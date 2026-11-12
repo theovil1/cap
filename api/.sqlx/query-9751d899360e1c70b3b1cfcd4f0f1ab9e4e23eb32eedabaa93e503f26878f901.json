@@ -1,0 +1,30 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT j.id FROM journeys j JOIN public_routes pr ON pr.id = j.public_route_id JOIN routes r ON r.id = j.route_id\n         WHERE j.kind = 'event' AND NOT pr.hidden\n           AND (pr.visibility = 'everyone' OR pr.author_id = $1 OR j.created_by = $1 OR EXISTS (\n                SELECT 1 FROM friendships f WHERE f.status = 'accepted'\n                  AND ((f.user_id = $1 AND f.friend_id = pr.author_id) OR (f.friend_id = $1 AND f.user_id = pr.author_id))))\n           AND (j.status <> 'finished' OR EXISTS (SELECT 1 FROM journey_participants p\n                WHERE p.journey_id = j.id AND p.user_id = $1) AND j.ends_at > now() - interval '30 days')\n           AND ($2 <> 'mine' OR j.created_by = $1 OR EXISTS (SELECT 1 FROM journey_participants p\n                WHERE p.journey_id = j.id AND p.user_id = $1 AND p.joined_at IS NOT NULL))\n           AND ($2 <> 'friends' OR EXISTS (SELECT 1 FROM journey_participants p JOIN friendships f\n                ON f.status = 'accepted' AND ((f.user_id = $1 AND f.friend_id = p.user_id) OR (f.friend_id = $1 AND f.user_id = p.user_id))\n                WHERE p.journey_id = j.id AND p.joined_at IS NOT NULL))\n           AND ($3::text IS NULL OR j.title ILIKE $3 OR r.start_label ILIKE $3 OR r.end_label ILIKE $3)\n         ORDER BY CASE j.status WHEN 'active' THEN 0 WHEN 'waiting' THEN 1 ELSE 2 END, j.starts_at\n         LIMIT 50",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "journeys",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "9751d899360e1c70b3b1cfcd4f0f1ab9e4e23eb32eedabaa93e503f26878f901"
+}

@@ -1,0 +1,12 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE journeys SET status = CASE WHEN ends_at <= now() THEN 'finished' ELSE 'active' END\n         WHERE kind = 'event' AND status <> 'finished' AND (starts_at <= now() AND status = 'waiting' OR ends_at <= now())",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": []
+  },
+  "hash": "9ccf390e2a9032013a0f91fcde2fb062cfd8d1ed7d58a995ade0954b123104f4"
+}

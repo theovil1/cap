@@ -31,6 +31,9 @@ Interactive documentation is served at `/docs` (OpenAPI at `/openapi.json`).
 | `PUT`, `DELETE /public-routes/{id}/photos/{kind}`, `GET` (no token) | Start, end or path photo (JPEG or PNG, 2 MB at most) |
 | `POST /reports` | Report a route, post, comment or walker; three reports hide a route or a post |
 | `GET /admin/reports`, `PATCH /admin/public-routes/{id}` | Admins: open reports; hide, show or feature a route |
+| `POST /events`, `GET /events` | Schedule a journey on a public route (title, start, end); list them, under way first (`filter`: `all`, `mine`, `friends`) |
+| `GET /events/{id}`, `POST`, `DELETE /events/{id}/register` | A scheduled journey; sign up (until its end, late walkers start from zero) or leave |
+| `GET /events/{id}/live` | Live standings: leaders, friends, my place and my place ten minutes ago, dots for the others |
 | `GET /live` (WebSocket) | Send `progress` (session distance) or `stop`; receive rivals' `position` and `stop` |
 | `POST /sessions` | Upload a session, idempotent on `local_id`, rejected above 20 km/h; returns the stages it unlocked |
 | `GET /sessions` | Session history |

@@ -5,6 +5,7 @@ pub mod app;
 pub mod auth;
 pub mod config;
 pub mod error;
+pub mod events;
 pub mod friends;
 pub mod geo;
 pub mod history;

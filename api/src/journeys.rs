@@ -83,6 +83,11 @@ pub struct JourneySummary {
     sessions: i64,
     /// The public route it was started from, or published as.
     public_route_id: Option<Uuid>,
+    /// Title of a scheduled journey.
+    title: Option<String>,
+    /// End of a scheduled journey.
+    #[serde(with = "time::serde::rfc3339::option")]
+    ends_at: Option<OffsetDateTime>,
     #[serde(with = "time::serde::rfc3339::option")]
     arrived_at: Option<OffsetDateTime>,
     #[serde(with = "time::serde::rfc3339")]
@@ -236,7 +241,7 @@ async fn list_journeys(
     AuthUser(user_id): AuthUser,
 ) -> AppResult<Json<Vec<JourneySummary>>> {
     let rows = sqlx::query!(
-        "SELECT j.id, j.kind, j.status, j.created_at, j.public_route_id, r.id AS route_id,
+        "SELECT j.id, j.kind, j.status, j.created_at, j.public_route_id, j.title, j.ends_at, r.id AS route_id,
                 r.start_label, r.start_lat, r.start_lon, r.end_label, r.end_lat, r.end_lon,
                 r.distance_m AS route_distance_m, p.distance_m, p.arrived_at,
                 (p.joined_at IS NOT NULL) AS \"joined!\", (j.created_by = $1) AS \"mine!\", j.starts_at, p.rank,
@@ -260,6 +265,8 @@ async fn list_journeys(
             .map(|r| JourneySummary {
                 sessions: r.sessions,
                 public_route_id: r.public_route_id,
+                title: r.title,
+                ends_at: r.ends_at,
                 id: r.id,
                 kind: r.kind,
                 status: r.status,
@@ -359,7 +366,7 @@ pub(crate) async fn fetch_detail(
     journey_id: Uuid,
 ) -> AppResult<JourneyDetail> {
     let r = sqlx::query!(
-        "SELECT j.id, j.kind, j.status, j.created_at, j.public_route_id, r.id AS route_id,
+        "SELECT j.id, j.kind, j.status, j.created_at, j.public_route_id, j.title, j.ends_at, r.id AS route_id,
                 r.start_label, r.start_lat, r.start_lon, r.end_label, r.end_lat, r.end_lon,
                 r.distance_m AS route_distance_m, r.path, p.distance_m, p.arrived_at,
                 (p.joined_at IS NOT NULL) AS \"joined!\", (j.created_by = $1) AS \"mine!\", j.starts_at, p.rank,
@@ -411,6 +418,8 @@ pub(crate) async fn fetch_detail(
         summary: JourneySummary {
             sessions: r.sessions,
             public_route_id: r.public_route_id,
+            title: r.title,
+            ends_at: r.ends_at,
             id: r.id,
             kind: r.kind,
             status: r.status,

@@ -167,7 +167,8 @@ async fn upload_session(
         return Ok((StatusCode::OK, Json(existing_result(&state, user_id, body.local_id).await?)));
     };
 
-    // Manual sessions never count in races, nor sessions from before the start (specification).
+    crate::events::tick(&state.db).await?;
+    // Not counted: manual sessions in races, sessions before the start, before signing up or after the end.
     let targets = sqlx::query!(
         "SELECT j.id, j.kind, p.distance_m, r.distance_m AS route_distance_m
          FROM journey_participants p
@@ -175,7 +176,8 @@ async fn upload_session(
          JOIN routes r ON r.id = j.route_id
          WHERE p.user_id = $1 AND j.status = 'active' AND p.arrived_at IS NULL AND p.joined_at IS NOT NULL
            AND ($2::uuid[] IS NULL OR j.id = ANY($2))
-           AND (j.kind = 'solo' OR ($3 = 'treadmill' AND $4 >= j.starts_at))
+           AND (j.kind = 'solo' OR ($3 = 'treadmill' AND $4 >= j.starts_at
+                AND (j.kind <> 'event' OR ($4 >= p.joined_at AND $4 < j.ends_at))))
          ORDER BY j.created_at
          FOR UPDATE OF p",
         user_id,
@@ -188,60 +190,83 @@ async fn upload_session(
 
     let mut allocations = Vec::with_capacity(targets.len());
     for target in targets {
-        let added = body.distance_m.min(target.route_distance_m - target.distance_m).max(0.0);
-        let total_m = target.distance_m + added;
-        let arrived = total_m >= target.route_distance_m;
-        sqlx::query!(
-            "INSERT INTO session_allocations (session_id, journey_id, distance_m) VALUES ($1, $2, $3)",
-            session_id,
-            target.id,
-            added
+        let allocation = allocate(
+            &mut tx,
+            Ids { session: session_id, user: user_id, journey: target.id },
+            &target.kind,
+            target.distance_m,
+            target.route_distance_m,
+            body.distance_m,
         )
-        .execute(&mut *tx)
         .await?;
-        sqlx::query!(
-            "UPDATE journey_participants
-             SET distance_m = $3, arrived_at = CASE WHEN $4 THEN now() ELSE arrived_at END
-             WHERE journey_id = $1 AND user_id = $2",
-            target.id,
-            user_id,
-            total_m,
-            arrived
-        )
-        .execute(&mut *tx)
-        .await?;
-        if arrived && target.kind == "solo" {
-            sqlx::query!("UPDATE journeys SET status = 'finished' WHERE id = $1", target.id)
-                .execute(&mut *tx)
-                .await?;
-        } else if arrived {
-            races::record_arrival(&mut tx, target.id, user_id).await?;
-        }
-        sqlx::query!(
-            "INSERT INTO stage_unlocks (user_id, journey_id, stage_id, session_id)
-             SELECT $1, j.id, s.id, $3
-             FROM journeys j JOIN route_stages s ON s.route_id = j.route_id
-             WHERE j.id = $2 AND s.position > 0 AND s.at_m <= $4
-             ON CONFLICT DO NOTHING",
-            user_id,
-            target.id,
-            session_id,
-            total_m
-        )
-        .execute(&mut *tx)
-        .await?;
-        let unlocked_stages = unlocked_stages(&mut *tx, session_id, target.id).await?;
-        allocations.push(Allocation {
-            journey_id: target.id,
-            distance_m: added,
-            total_m,
-            arrived,
-            unlocked_stages,
-        });
+        allocations.push(allocation);
     }
     tx.commit().await?;
 
     Ok((StatusCode::CREATED, Json(SessionResult { id: session_id, created: true, allocations })))
+}
+
+/// The session, its walker and one journey it counts for.
+struct Ids {
+    session: Uuid,
+    user: Uuid,
+    journey: Uuid,
+}
+
+/// Adds a session's distance to one journey (capped at its destination):
+/// arrival, race place and stages passed.
+async fn allocate(
+    tx: &mut sqlx::PgConnection,
+    Ids { session: session_id, user: user_id, journey: journey_id }: Ids,
+    kind: &str,
+    done_m: f64,
+    route_m: f64,
+    session_m: f64,
+) -> AppResult<Allocation> {
+    let added = session_m.min(route_m - done_m).max(0.0);
+    let total_m = done_m + added;
+    let arrived = total_m >= route_m;
+    sqlx::query!(
+        "INSERT INTO session_allocations (session_id, journey_id, distance_m) VALUES ($1, $2, $3)",
+        session_id,
+        journey_id,
+        added
+    )
+    .execute(&mut *tx)
+    .await?;
+    sqlx::query!(
+        "UPDATE journey_participants
+         SET distance_m = $3, arrived_at = CASE WHEN $4 THEN now() ELSE arrived_at END
+         WHERE journey_id = $1 AND user_id = $2",
+        journey_id,
+        user_id,
+        total_m,
+        arrived
+    )
+    .execute(&mut *tx)
+    .await?;
+    if arrived && kind == "solo" {
+        sqlx::query!("UPDATE journeys SET status = 'finished' WHERE id = $1", journey_id)
+            .execute(&mut *tx)
+            .await?;
+    } else if arrived {
+        races::record_arrival(&mut *tx, journey_id, user_id).await?;
+    }
+    sqlx::query!(
+        "INSERT INTO stage_unlocks (user_id, journey_id, stage_id, session_id)
+         SELECT $1, j.id, s.id, $3
+         FROM journeys j JOIN route_stages s ON s.route_id = j.route_id
+         WHERE j.id = $2 AND s.position > 0 AND s.at_m <= $4
+         ON CONFLICT DO NOTHING",
+        user_id,
+        journey_id,
+        session_id,
+        total_m
+    )
+    .execute(&mut *tx)
+    .await?;
+    let unlocked_stages = unlocked_stages(&mut *tx, session_id, journey_id).await?;
+    Ok(Allocation { journey_id, distance_m: added, total_m, arrived, unlocked_stages })
 }
 
 async fn existing_result(state: &AppState, user_id: Uuid, local_id: Uuid) -> AppResult<SessionResult> {
