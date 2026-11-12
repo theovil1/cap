@@ -14,7 +14,7 @@ use utoipa::{
 use utoipa_axum::router::OpenApiRouter;
 use utoipa_scalar::{Scalar, Servable};
 
-use crate::{auth, geo, journeys, sessions, state::AppState, users};
+use crate::{auth, friends, geo, journeys, sessions, state::AppState, users};
 
 #[derive(OpenApi)]
 #[openapi(
@@ -24,6 +24,7 @@ use crate::{auth, geo, journeys, sessions, state::AppState, users};
         (name = "auth", description = "Accounts and tokens"),
         (name = "users", description = "Current user"),
         (name = "geo", description = "Geocoding"),
+        (name = "friends", description = "Friends and invite links"),
         (name = "journeys", description = "Routes and journeys"),
         (name = "sessions", description = "Treadmill sessions"),
     )
@@ -52,6 +53,7 @@ fn api_router() -> OpenApiRouter<AppState> {
     OpenApiRouter::with_openapi(ApiDoc::openapi())
         .merge(auth::router())
         .merge(users::router())
+        .merge(friends::router())
         .merge(geo::router())
         .merge(journeys::router())
         .merge(sessions::router())
@@ -67,6 +69,7 @@ pub fn router(state: AppState) -> Router {
     };
     Router::new()
         .route("/health", get(health))
+        .route("/invite/{code}", get(friends::invite_page))
         .merge(api)
         .merge(Scalar::with_url("/docs", openapi.clone()))
         .route("/openapi.json", get(move || async move { Json(openapi) }))

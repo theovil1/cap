@@ -11,6 +11,9 @@ Interactive documentation is served at `/docs` (OpenAPI at `/openapi.json`).
 | `POST /auth/register`, `/auth/login`, `/auth/apple` | Sign up or sign in, returns an access token (15 min) and a refresh token (60 days) |
 | `POST /auth/refresh`, `/auth/logout` | Rotate or revoke a refresh token (reuse of a revoked token logs the user out everywhere) |
 | `GET`, `PATCH`, `DELETE /me` | Profile, account deletion |
+| `GET /friends`, `POST /friends` | Friends and pending requests; ask by username or join through an invite code |
+| `POST /friends/{id}/accept`, `DELETE /friends/{id}` | Accept a request; remove a friend, decline or cancel a request |
+| `GET /friends/invite`, `/users/search` | Personal invite code (page at `/invite/{code}` opens the app), username search |
 | `GET /geocode`, `/reverse` | Address autocomplete, nearest address to a point (Photon) |
 | `POST /routes` | Compute a safe walking route (GraphHopper) and its stages, for a preview |
 | `POST /journeys` | Start a solo journey on a computed route |

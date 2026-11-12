@@ -1,0 +1,29 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE friendships SET status = 'accepted', accepted_at = now()\n                 WHERE user_id = $1 AND friend_id = $2 RETURNING accepted_at AS \"accepted_at!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "accepted_at!",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "friendships",
+            "name": "accepted_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      true
+    ]
+  },
+  "hash": "0a0ce041cc44ff57e19ce29dcf20d83f700e559caaccee98efa48eba88a80143"
+}

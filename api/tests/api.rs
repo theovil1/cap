@@ -441,6 +441,98 @@ async fn journeys_can_be_reset_and_deleted(db: PgPool) {
 }
 
 #[sqlx::test(migrator = "cap_api::MIGRATOR")]
+async fn friends_by_username_and_invite_link(db: PgPool) {
+    let server = server(db).await;
+    let theo = register(&server, "theo").await;
+    let lilou = register(&server, "lilou").await;
+    let max = register(&server, "max").await;
+    let lilou_id = lilou["user"]["id"].as_str().unwrap();
+
+    // Search by the start of a username shows how each user relates to you.
+    let found: Value = server
+        .get("/users/search")
+        .add_query_param("q", "@LIL")
+        .add_header("authorization", bearer(&theo))
+        .await
+        .json();
+    assert_eq!(found[0]["username"], "lilou");
+    assert_eq!(found[0]["relation"], "none");
+
+    // A request by username waits for an answer.
+    let sent: Value = server
+        .post("/friends")
+        .add_header("authorization", bearer(&theo))
+        .json(&json!({ "username": "lilou" }))
+        .await
+        .json();
+    assert_eq!(sent["status"], "pending");
+    let mine: Value = server.get("/friends").add_header("authorization", bearer(&theo)).await.json();
+    assert_eq!(mine["outgoing"][0]["username"], "lilou");
+    let hers: Value = server.get("/friends").add_header("authorization", bearer(&lilou)).await.json();
+    assert_eq!(hers["incoming"][0]["username"], "theo");
+
+    // Accepting turns it into a friendship on both sides.
+    let theo_id = theo["user"]["id"].as_str().unwrap();
+    server
+        .post(&format!("/friends/{theo_id}/accept"))
+        .add_header("authorization", bearer(&lilou))
+        .await
+        .assert_status(StatusCode::NO_CONTENT);
+    let mine: Value = server.get("/friends").add_header("authorization", bearer(&theo)).await.json();
+    assert_eq!(mine["friends"][0]["username"], "lilou");
+    assert_eq!(mine["outgoing"].as_array().unwrap().len(), 0);
+    let found: Value = server
+        .get("/users/search")
+        .add_query_param("q", "lil")
+        .add_header("authorization", bearer(&theo))
+        .await
+        .json();
+    assert_eq!(found[0]["relation"], "friend");
+
+    // Nobody befriends themselves or an unknown user.
+    server
+        .post("/friends")
+        .add_header("authorization", bearer(&theo))
+        .json(&json!({ "username": "theo" }))
+        .await
+        .assert_status(StatusCode::UNPROCESSABLE_ENTITY);
+    server
+        .post("/friends")
+        .add_header("authorization", bearer(&theo))
+        .json(&json!({ "username": "nobody" }))
+        .await
+        .assert_status_not_found();
+
+    // The invite link makes friends at once, and its page names the inviter.
+    let code: Value = server.get("/friends/invite").add_header("authorization", bearer(&theo)).await.json();
+    let code = code["code"].as_str().unwrap();
+    let again: Value = server.get("/friends/invite").add_header("authorization", bearer(&theo)).await.json();
+    assert_eq!(again["code"], code, "the link stays the same");
+    let page = server.get(&format!("/invite/{code}")).await;
+    page.assert_status_ok();
+    assert!(page.text().contains(&format!("cap://invite/{code}")));
+    server.get("/invite/unknown").await.assert_status_not_found();
+    let joined: Value = server
+        .post("/friends")
+        .add_header("authorization", bearer(&max))
+        .json(&json!({ "invite_code": code }))
+        .await
+        .json();
+    assert_eq!(joined["status"], "accepted");
+    let mine: Value = server.get("/friends").add_header("authorization", bearer(&theo)).await.json();
+    assert_eq!(mine["friends"].as_array().unwrap().len(), 2);
+
+    // Removing works from either side.
+    server
+        .delete(&format!("/friends/{lilou_id}"))
+        .add_header("authorization", bearer(&theo))
+        .await
+        .assert_status(StatusCode::NO_CONTENT);
+    let hers: Value = server.get("/friends").add_header("authorization", bearer(&lilou)).await.json();
+    assert_eq!(hers["friends"].as_array().unwrap().len(), 0);
+}
+
+#[sqlx::test(migrator = "cap_api::MIGRATOR")]
 async fn delete_account(db: PgPool) {
     let server = server(db.clone()).await;
     let auth = register(&server, "theo").await;

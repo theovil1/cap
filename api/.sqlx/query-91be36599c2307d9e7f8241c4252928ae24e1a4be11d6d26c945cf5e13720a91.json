@@ -1,0 +1,48 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT user_id, status, COALESCE(accepted_at, created_at) AS \"since!\" FROM friendships\n         WHERE LEAST(user_id, friend_id) = LEAST($1::uuid, $2::uuid)\n           AND GREATEST(user_id, friend_id) = GREATEST($1::uuid, $2::uuid)\n         FOR UPDATE",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "user_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "friendships",
+            "name": "user_id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "status",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "friendships",
+            "name": "status"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "since!",
+        "type_info": "Timestamptz",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      null
+    ]
+  },
+  "hash": "91be36599c2307d9e7f8241c4252928ae24e1a4be11d6d26c945cf5e13720a91"
+}

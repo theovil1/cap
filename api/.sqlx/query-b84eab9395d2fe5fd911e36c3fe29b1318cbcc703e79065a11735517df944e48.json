@@ -1,0 +1,29 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE users SET invite_code = COALESCE(invite_code, $2) WHERE id = $1\n         RETURNING invite_code AS \"invite_code!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "invite_code!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "users",
+            "name": "invite_code"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": [
+      true
+    ]
+  },
+  "hash": "b84eab9395d2fe5fd911e36c3fe29b1318cbcc703e79065a11735517df944e48"
+}
