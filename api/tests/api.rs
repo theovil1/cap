@@ -1116,3 +1116,77 @@ async fn scheduled_journeys_from_sign_up_to_standings(db: PgPool) {
         server.get(&format!("/events/{id}")).add_header("authorization", bearer(&theo)).await.json();
     assert_eq!(card["state"], "ended");
 }
+
+#[sqlx::test(migrator = "cap_api::MIGRATOR")]
+async fn public_profiles_and_following(db: PgPool) {
+    let server = server(db.clone()).await;
+    let theo = register(&server, "theo").await;
+    let lilou = register(&server, "lilou").await;
+    let lilou_id = lilou["user"]["id"].as_str().unwrap();
+    let theo_id = theo["user"]["id"].as_str().unwrap();
+
+    // Lilou walks a journey to the end, then starts another one.
+    create_journey(&server, &lilou).await;
+    server
+        .post("/sessions")
+        .add_header("authorization", bearer(&lilou))
+        .json(&session(Uuid::now_v7(), 500.0, 600))
+        .await
+        .assert_status(StatusCode::CREATED);
+    create_journey(&server, &lilou).await;
+
+    server
+        .post(&format!("/users/{theo_id}/follow"))
+        .add_header("authorization", bearer(&theo))
+        .await
+        .assert_status(StatusCode::BAD_REQUEST);
+    server
+        .post(&format!("/users/{lilou_id}/follow"))
+        .add_header("authorization", bearer(&theo))
+        .await
+        .assert_status(StatusCode::NO_CONTENT);
+    let profile: Value = server
+        .get(&format!("/users/{lilou_id}/profile"))
+        .add_header("authorization", bearer(&theo))
+        .await
+        .json();
+    assert_eq!(profile["walker"]["username"], "lilou");
+    assert_eq!(profile["relation"], "none");
+    assert_eq!(profile["i_follow"], true);
+    assert_eq!(profile["followers"], 1);
+    assert_eq!(profile["finished"], 1);
+    assert!(profile["total_m"].as_f64().unwrap() >= 500.0);
+    assert_eq!(profile["best_streak"], 1);
+    assert!(profile["under_way"]["path"].is_array());
+
+    // A profile for friends only keeps the journey under way to friends.
+    sqlx::query("UPDATE users SET visibility = 'friends' WHERE username = 'lilou'")
+        .execute(&db)
+        .await
+        .unwrap();
+    let private: Value = server
+        .get(&format!("/users/{lilou_id}/profile"))
+        .add_header("authorization", bearer(&theo))
+        .await
+        .json();
+    assert!(private["under_way"].is_null());
+    let mine: Value = server
+        .get(&format!("/users/{lilou_id}/profile"))
+        .add_header("authorization", bearer(&lilou))
+        .await
+        .json();
+    assert_eq!(mine["relation"], "me");
+    assert!(mine["under_way"].is_object());
+
+    server
+        .delete(&format!("/users/{lilou_id}/follow"))
+        .add_header("authorization", bearer(&theo))
+        .await
+        .assert_status(StatusCode::NO_CONTENT);
+    let after: Value = server
+        .get(&format!("/users/{lilou_id}/profile"))
+        .add_header("authorization", bearer(&theo))
+        .await
+        .json();
+    assert_eq!(after["followers"], 0);
+}

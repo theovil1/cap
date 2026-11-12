@@ -167,7 +167,7 @@ async fn streak_entries(state: &AppState, user_id: Uuid, today: Date) -> AppResu
 
 /// Days in a row with a treadmill session, ending today or yesterday (today
 /// may still come), and the longest run ever.
-fn streaks(mut days: Vec<Date>, today: Date) -> (i64, i64) {
+pub fn streaks(mut days: Vec<Date>, today: Date) -> (i64, i64) {
     days.sort_unstable();
     days.dedup();
     let (mut best, mut run) = (0, 0);

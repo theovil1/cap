@@ -34,6 +34,8 @@ Interactive documentation is served at `/docs` (OpenAPI at `/openapi.json`).
 | `POST /events`, `GET /events` | Schedule a journey on a public route (title, start, end); list them, under way first (`filter`: `all`, `mine`, `friends`) |
 | `GET /events/{id}`, `POST`, `DELETE /events/{id}/register` | A scheduled journey; sign up (until its end, late walkers start from zero) or leave |
 | `GET /events/{id}/live` | Live standings: leaders, friends, my place and my place ten minutes ago, dots for the others |
+| `GET /users/{id}/profile` | A walker's profile: totals, streaks, finished journeys, the journey under way (friends only when the profile is), followers, friends in common |
+| `POST`, `DELETE /users/{id}/follow` | Follow a walker (one way, besides friends) or stop |
 | `GET /live` (WebSocket) | Send `progress` (session distance) or `stop`; receive rivals' `position` and `stop` |
 | `POST /sessions` | Upload a session, idempotent on `local_id`, rejected above 20 km/h; returns the stages it unlocked |
 | `GET /sessions` | Session history |

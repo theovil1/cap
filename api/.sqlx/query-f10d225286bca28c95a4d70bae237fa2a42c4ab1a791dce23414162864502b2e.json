@@ -1,0 +1,29 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "WITH mine AS (\n             SELECT CASE WHEN user_id = $1 THEN friend_id ELSE user_id END AS id FROM friendships\n             WHERE status = 'accepted' AND (user_id = $1 OR friend_id = $1)),\n         theirs AS (\n             SELECT CASE WHEN user_id = $2 THEN friend_id ELSE user_id END AS id FROM friendships\n             WHERE status = 'accepted' AND (user_id = $2 OR friend_id = $2))\n         SELECT u.first_name FROM users u JOIN mine USING (id) JOIN theirs USING (id) ORDER BY lower(u.first_name)",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "first_name",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "users",
+            "name": "first_name"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "f10d225286bca28c95a4d70bae237fa2a42c4ab1a791dce23414162864502b2e"
+}

@@ -12,6 +12,7 @@ pub mod history;
 pub mod journeys;
 pub mod leaderboards;
 pub mod live;
+pub mod profiles;
 pub mod public_routes;
 pub mod races;
 pub mod sessions;
