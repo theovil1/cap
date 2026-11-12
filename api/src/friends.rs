@@ -268,7 +268,8 @@ async fn invite_code(
     Ok(Json(InviteCode { code }))
 }
 
-/// Users whose username starts with the query, with their link to the current user.
+/// Users whose username starts with the query (or is exactly it, for private profiles),
+/// with their link to the current user.
 #[utoipa::path(get, path = "/users/search", tag = "friends", security(("bearer" = [])),
     params(SearchQuery),
     responses((status = 200, body = Vec<UserMatch>)))]
@@ -290,7 +291,7 @@ async fn search_users(
          FROM users u
          LEFT JOIN friendships f
            ON (f.user_id = $1 AND f.friend_id = u.id) OR (f.user_id = u.id AND f.friend_id = $1)
-         WHERE starts_with(u.username, $2) AND u.id <> $1
+         WHERE u.id <> $1 AND (u.username = $2 OR (u.visibility = 'everyone' AND starts_with(u.username, $2)))
          ORDER BY length(u.username), u.username
          LIMIT 10",
         user_id,

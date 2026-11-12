@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT COALESCE(json_agg(s ORDER BY s.started_at), '[]') AS \"rows!\" FROM (\n             SELECT local_id, started_at, ended_at, distance_m, duration_s, steps,\n                    avg_speed_kmh, avg_incline_pct, source\n             FROM sessions WHERE user_id = $1) s",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "rows!",
+        "type_info": "Json",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "8f338c67f48d4af28b9a0bb95d26af5e7fb801ce4b7081fbd6e86806cdadae8f"
+}

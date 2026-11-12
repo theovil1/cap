@@ -36,6 +36,15 @@ pub struct UserProfile {
     pub daily_step_goal: i32,
     pub sessions_per_week: i32,
     pub language: String,
+    /// `orange`, `blue`, `green`, `purple` or `pink`.
+    pub app_color: String,
+    /// `auto` (by the time of day), `day` or `night`.
+    pub map_mood: String,
+    /// `km` or `mi`.
+    pub units: String,
+    pub notifications: bool,
+    /// `everyone` (found by the start of the username) or `friends` (exact username or link only).
+    pub visibility: String,
     #[serde(with = "time::serde::rfc3339")]
     pub created_at: OffsetDateTime,
 }
@@ -44,6 +53,14 @@ pub struct UserProfile {
 pub struct UpdateProfile {
     first_name: Option<String>,
     username: Option<String>,
+    email: Option<String>,
+    /// ISO 3166 code, e.g. `FR`.
+    country: Option<String>,
+    app_color: Option<String>,
+    map_mood: Option<String>,
+    units: Option<String>,
+    notifications: Option<bool>,
+    visibility: Option<String>,
     home_city: Option<String>,
     height_cm: Option<i32>,
     stride_cm: Option<i32>,
@@ -100,7 +117,8 @@ pub fn generate_username(first_name: &str) -> String {
 pub async fn fetch_profile(db: &PgPool, user_id: Uuid) -> AppResult<UserProfile> {
     let row = sqlx::query!(
         "SELECT id, email, first_name, username, avatar_url, country, home_city, height_cm,
-                stride_cm, daily_step_goal, sessions_per_week, language, created_at
+                stride_cm, daily_step_goal, sessions_per_week, language, app_color, map_mood, units,
+                notifications, visibility, created_at
          FROM users WHERE id = $1",
         user_id
     )
@@ -123,6 +141,11 @@ pub async fn fetch_profile(db: &PgPool, user_id: Uuid) -> AppResult<UserProfile>
         daily_step_goal: row.daily_step_goal,
         sessions_per_week: row.sessions_per_week,
         language: row.language,
+        app_color: row.app_color,
+        map_mood: row.map_mood,
+        units: row.units,
+        notifications: row.notifications,
+        visibility: row.visibility,
         created_at: row.created_at,
     })
 }
@@ -144,6 +167,11 @@ async fn update_me(
 ) -> AppResult<Json<UserProfile>> {
     let first_name = body.first_name.as_deref().map(validate_first_name).transpose()?;
     let username = body.username.as_deref().map(validate_username).transpose()?;
+    let email = body.email.as_deref().map(crate::auth::normalize_email).transpose()?;
+    let country = body.country.as_deref().map(str::trim).map(str::to_uppercase);
+    if country.as_deref().is_some_and(|c| c.len() != 2 || !c.bytes().all(|b| b.is_ascii_uppercase())) {
+        return Err(AppError::bad_request("invalid_country", "country must be a two-letter code"));
+    }
     if let Some(language) = &body.language
         && !["fr", "en"].contains(&language.as_str())
     {
@@ -158,7 +186,14 @@ async fn update_me(
             stride_cm = COALESCE($6, stride_cm),
             daily_step_goal = COALESCE($7, daily_step_goal),
             sessions_per_week = COALESCE($8, sessions_per_week),
-            language = COALESCE($9, language)
+            language = COALESCE($9, language),
+            email = COALESCE($10, email),
+            country = COALESCE($11, country),
+            app_color = COALESCE($12, app_color),
+            map_mood = COALESCE($13, map_mood),
+            units = COALESCE($14, units),
+            notifications = COALESCE($15, notifications),
+            visibility = COALESCE($16, visibility)
          WHERE id = $1",
         user_id,
         first_name,
@@ -169,6 +204,13 @@ async fn update_me(
         body.daily_step_goal,
         body.sessions_per_week,
         body.language,
+        email,
+        country,
+        body.app_color,
+        body.map_mood,
+        body.units,
+        body.notifications,
+        body.visibility,
     )
     .execute(&state.db)
     .await;
@@ -176,6 +218,9 @@ async fn update_me(
         Ok(_) => Ok(Json(fetch_profile(&state.db, user_id).await?)),
         Err(e) if is_unique_violation(&e, "users_username_key") => {
             Err(AppError::conflict("username_taken", "this username is already taken"))
+        }
+        Err(e) if is_unique_violation(&e, "users_email_key") => {
+            Err(AppError::conflict("email_taken", "an account already uses this email"))
         }
         Err(sqlx::Error::Database(db)) if db.is_check_violation() => {
             Err(AppError::bad_request("invalid_value", "a value is out of range"))

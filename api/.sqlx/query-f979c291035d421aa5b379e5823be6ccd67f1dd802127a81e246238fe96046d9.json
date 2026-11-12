@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT COALESCE(json_agg(x ORDER BY x.username), '[]') AS \"rows!\" FROM (\n             SELECT u.username, f.status, f.created_at, f.accepted_at\n             FROM friendships f\n             JOIN users u ON u.id = CASE WHEN f.user_id = $1 THEN f.friend_id ELSE f.user_id END\n             WHERE f.user_id = $1 OR f.friend_id = $1) x",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "rows!",
+        "type_info": "Json",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "f979c291035d421aa5b379e5823be6ccd67f1dd802127a81e246238fe96046d9"
+}

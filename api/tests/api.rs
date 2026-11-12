@@ -715,6 +715,101 @@ async fn races_from_invitation_to_finish(db: PgPool) {
 }
 
 #[sqlx::test(migrator = "cap_api::MIGRATOR")]
+async fn account_settings_photo_and_export(db: PgPool) {
+    let server = server(db).await;
+    let theo = register(&server, "theo").await;
+    register(&server, "lilou").await;
+    let theo_id = theo["user"]["id"].as_str().unwrap();
+
+    let me: Value = server
+        .patch("/me")
+        .add_header("authorization", bearer(&theo))
+        .json(&json!({ "app_color": "green", "map_mood": "night", "units": "mi", "notifications": false,
+            "visibility": "friends", "country": "be", "email": "Theo@Exemple.fr" }))
+        .await
+        .json();
+    assert_eq!(me["app_color"], "green");
+    assert_eq!(me["map_mood"], "night");
+    assert_eq!(me["units"], "mi");
+    assert_eq!(me["notifications"], false);
+    assert_eq!(me["country"], "BE");
+    assert_eq!(me["email"], "theo@exemple.fr");
+    for bad in [json!({ "app_color": "black" }), json!({ "country": "France" }), json!({ "email": "nope" })] {
+        server
+            .patch("/me")
+            .add_header("authorization", bearer(&theo))
+            .json(&bad)
+            .await
+            .assert_status_bad_request();
+    }
+    server
+        .patch("/me")
+        .add_header("authorization", bearer(&theo))
+        .json(&json!({ "email": "lilou@example.com" }))
+        .await
+        .assert_status(StatusCode::CONFLICT);
+
+    // A private profile is found by its exact username only.
+    let lilou = server
+        .post("/auth/login")
+        .json(&json!({ "email": "lilou@example.com", "password": "a long enough password" }))
+        .await;
+    let lilou: Value = lilou.json();
+    let prefix: Value = server
+        .get("/users/search")
+        .add_query_param("q", "the")
+        .add_header("authorization", bearer(&lilou))
+        .await
+        .json();
+    assert_eq!(prefix.as_array().unwrap().len(), 0);
+    let exact: Value = server
+        .get("/users/search")
+        .add_query_param("q", "theo")
+        .add_header("authorization", bearer(&lilou))
+        .await
+        .json();
+    assert_eq!(exact[0]["username"], "theo");
+
+    // Photo: stored, served with its type, then removed.
+    let jpeg = vec![0xFF, 0xD8, 0xFF, 0xE0, 0, 16, b'J', b'F', b'I', b'F'];
+    let me: Value = server
+        .put("/me/avatar")
+        .add_header("authorization", bearer(&theo))
+        .content_type("image/jpeg")
+        .bytes(jpeg.clone().into())
+        .await
+        .json();
+    let url = me["avatar_url"].as_str().unwrap();
+    assert!(url.starts_with(&format!("/avatars/{theo_id}?v=")));
+    let photo = server.get(&format!("/avatars/{theo_id}")).await;
+    photo.assert_status_ok();
+    assert_eq!(photo.header("content-type"), "image/jpeg");
+    assert_eq!(photo.as_bytes().to_vec(), jpeg);
+    server
+        .put("/me/avatar")
+        .add_header("authorization", bearer(&theo))
+        .content_type("image/jpeg")
+        .bytes(b"not an image".to_vec().into())
+        .await
+        .assert_status_bad_request();
+    let me: Value = server.delete("/me/avatar").add_header("authorization", bearer(&theo)).await.json();
+    assert!(me["avatar_url"].is_null());
+    server.get(&format!("/avatars/{theo_id}")).await.assert_status_not_found();
+
+    // Export: the profile and every session.
+    server
+        .post("/sessions")
+        .add_header("authorization", bearer(&theo))
+        .json(&session(Uuid::now_v7(), 300.0, 300))
+        .await
+        .assert_status(StatusCode::CREATED);
+    let export: Value = server.get("/me/export").add_header("authorization", bearer(&theo)).await.json();
+    assert_eq!(export["profile"]["username"], "theo");
+    assert_eq!(export["sessions"].as_array().unwrap().len(), 1);
+    assert_eq!(export["journeys"].as_array().unwrap().len(), 0);
+}
+
+#[sqlx::test(migrator = "cap_api::MIGRATOR")]
 async fn delete_account(db: PgPool) {
     let server = server(db.clone()).await;
     let auth = register(&server, "theo").await;

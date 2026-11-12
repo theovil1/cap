@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT COALESCE(json_agg(x ORDER BY x.created_at), '[]') AS \"rows!\" FROM (\n             SELECT j.kind, j.status, j.created_at, j.starts_at, r.start_label, r.end_label,\n                    r.distance_m AS route_distance_m, p.distance_m, p.arrived_at, p.rank\n             FROM journey_participants p\n             JOIN journeys j ON j.id = p.journey_id JOIN routes r ON r.id = j.route_id\n             WHERE p.user_id = $1) x",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "rows!",
+        "type_info": "Json",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "eae6ec08f035bd5776e186390238c6c27c3ddad717e191fbb3c923f5a0946e49"
+}

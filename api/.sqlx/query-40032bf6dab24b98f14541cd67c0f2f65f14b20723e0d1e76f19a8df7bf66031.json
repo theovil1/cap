@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT id, email, first_name, username, avatar_url, country, home_city, height_cm,\n                stride_cm, daily_step_goal, sessions_per_week, language, created_at\n         FROM users WHERE id = $1",
+  "query": "SELECT id, email, first_name, username, avatar_url, country, home_city, height_cm,\n                stride_cm, daily_step_goal, sessions_per_week, language, app_color, map_mood, units,\n                notifications, visibility, created_at\n         FROM users WHERE id = $1",
   "describe": {
     "columns": [
       {
@@ -137,6 +137,61 @@
       },
       {
         "ordinal": 12,
+        "name": "app_color",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "users",
+            "name": "app_color"
+          }
+        }
+      },
+      {
+        "ordinal": 13,
+        "name": "map_mood",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "users",
+            "name": "map_mood"
+          }
+        }
+      },
+      {
+        "ordinal": 14,
+        "name": "units",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "users",
+            "name": "units"
+          }
+        }
+      },
+      {
+        "ordinal": 15,
+        "name": "notifications",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "users",
+            "name": "notifications"
+          }
+        }
+      },
+      {
+        "ordinal": 16,
+        "name": "visibility",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "users",
+            "name": "visibility"
+          }
+        }
+      },
+      {
+        "ordinal": 17,
         "name": "created_at",
         "type_info": "Timestamptz",
         "origin": {
@@ -165,8 +220,13 @@
       false,
       false,
       false,
+      false,
+      false,
+      false,
+      false,
+      false,
       false
     ]
   },
-  "hash": "96d973ed30ee37ca55b7f13f17451499a616e280def0520db6ec0e4e220d60b2"
+  "hash": "40032bf6dab24b98f14541cd67c0f2f65f14b20723e0d1e76f19a8df7bf66031"
 }

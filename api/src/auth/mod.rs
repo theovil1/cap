@@ -84,7 +84,7 @@ pub struct AuthResponse {
     user: UserProfile,
 }
 
-fn normalize_email(email: &str) -> AppResult<String> {
+pub fn normalize_email(email: &str) -> AppResult<String> {
     let email = email.trim().to_lowercase();
     let valid = email.len() <= 254
         && email.split_once('@').is_some_and(|(local, domain)| {

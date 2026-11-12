@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT u.id, u.first_name, u.username, u.avatar_url,\n                CASE WHEN f.status = 'accepted' THEN 'friend'\n                     WHEN f.user_id = $1 THEN 'outgoing'\n                     WHEN f.user_id IS NOT NULL THEN 'incoming'\n                     ELSE 'none' END AS \"relation!\"\n         FROM users u\n         LEFT JOIN friendships f\n           ON (f.user_id = $1 AND f.friend_id = u.id) OR (f.user_id = u.id AND f.friend_id = $1)\n         WHERE starts_with(u.username, $2) AND u.id <> $1\n         ORDER BY length(u.username), u.username\n         LIMIT 10",
+  "query": "SELECT u.id, u.first_name, u.username, u.avatar_url,\n                CASE WHEN f.status = 'accepted' THEN 'friend'\n                     WHEN f.user_id = $1 THEN 'outgoing'\n                     WHEN f.user_id IS NOT NULL THEN 'incoming'\n                     ELSE 'none' END AS \"relation!\"\n         FROM users u\n         LEFT JOIN friendships f\n           ON (f.user_id = $1 AND f.friend_id = u.id) OR (f.user_id = u.id AND f.friend_id = $1)\n         WHERE u.id <> $1 AND (u.username = $2 OR (u.visibility = 'everyone' AND starts_with(u.username, $2)))\n         ORDER BY length(u.username), u.username\n         LIMIT 10",
   "describe": {
     "columns": [
       {
@@ -68,5 +68,5 @@
       null
     ]
   },
-  "hash": "722b56716a6003dd7ee94b703d7b970cbd3824302015b82f8c9481110888ab75"
+  "hash": "fe5bf2bd4c5fbbb5c1a25b98e4a3f3ed93f97a8b3ac5cba531d3c4f23a34552d"
 }

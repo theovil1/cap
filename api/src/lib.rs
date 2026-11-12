@@ -1,5 +1,6 @@
 //! Cap API: accounts, routes, journeys and treadmill sessions.
 
+pub mod account;
 pub mod app;
 pub mod auth;
 pub mod config;

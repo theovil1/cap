@@ -1,0 +1,29 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE users SET\n            first_name = COALESCE($2, first_name),\n            username = COALESCE($3, username),\n            home_city = COALESCE($4, home_city),\n            height_cm = COALESCE($5, height_cm),\n            stride_cm = COALESCE($6, stride_cm),\n            daily_step_goal = COALESCE($7, daily_step_goal),\n            sessions_per_week = COALESCE($8, sessions_per_week),\n            language = COALESCE($9, language),\n            email = COALESCE($10, email),\n            country = COALESCE($11, country),\n            app_color = COALESCE($12, app_color),\n            map_mood = COALESCE($13, map_mood),\n            units = COALESCE($14, units),\n            notifications = COALESCE($15, notifications),\n            visibility = COALESCE($16, visibility)\n         WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Text",
+        "Text",
+        "Int4",
+        "Int4",
+        "Int4",
+        "Int4",
+        "Text",
+        "Text",
+        "Text",
+        "Text",
+        "Text",
+        "Text",
+        "Bool",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "01ed9dcee922f24c8cc7feddc2d6d165c9f6a2cd0fad56238ce7848856f9057c"
+}

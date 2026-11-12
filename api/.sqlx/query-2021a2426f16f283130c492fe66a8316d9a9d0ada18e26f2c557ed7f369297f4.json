@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO user_avatars (user_id, content_type, image) VALUES ($1, $2, $3)\n         ON CONFLICT (user_id) DO UPDATE SET content_type = $2, image = $3, updated_at = now()",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Bytea"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "2021a2426f16f283130c492fe66a8316d9a9d0ada18e26f2c557ed7f369297f4"
+}
