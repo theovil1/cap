@@ -10,19 +10,22 @@ const path: RoutePoint[] = [
 ];
 
 describe('route', () => {
-  it('centres the follow camera on the free area', () => {
+  it('places the followed pawn low in the free area', () => {
     const view = { heading: 0, zoom: 16, pitch: 0, height: 800 };
-    expect(followCenter([1, 47], view, { bottom: 0, right: 0 })).toEqual([1, 47]);
-    // Flat view, panel of 400 px at the bottom: the pawn shows 200 px above the
-    // screen centre, so the centre is 200 px south of it.
+    const none = { top: 0, bottom: 0, right: 0 };
     const metersPerPx = (40_075_016.686 * Math.cos((47 * Math.PI) / 180)) / (512 * 2 ** 16);
-    const [lon, lat] = followCenter([1, 47], view, { bottom: 400, right: 0 });
+    // Flat view, whole screen free: the pawn shows 80 px below the centre,
+    // so the centre is 80 px north of it.
+    const [lon, lat] = followCenter([1, 47], view, none);
     expect(lon).toBeCloseTo(1, 9);
-    expect((47 - lat) * 111_320).toBeCloseTo(200 * metersPerPx, 3);
+    expect((lat - 47) * 111_320).toBeCloseTo(80 * metersPerPx, 3);
+    // A 400 px panel at the bottom: the pawn goes to 240 px, 160 px above the centre.
+    const panel = followCenter([1, 47], view, { ...none, bottom: 400 });
+    expect((47 - panel[1]) * 111_320).toBeCloseTo(160 * metersPerPx, 3);
     // Tilted, the same panel needs a longer step back; a side panel shifts it east.
-    const tilted = followCenter([1, 47], { ...view, pitch: 60 }, { bottom: 400, right: 0 });
-    expect(tilted[1]).toBeLessThan(lat);
-    expect(followCenter([1, 47], view, { bottom: 0, right: 440 })[0]).toBeGreaterThan(1);
+    const tilted = followCenter([1, 47], { ...view, pitch: 60 }, { ...none, bottom: 400 });
+    expect(tilted[1]).toBeLessThan(panel[1]);
+    expect(followCenter([1, 47], view, { ...none, right: 440 })[0]).toBeGreaterThan(1);
   });
 
   it('interpolates the pawn position', () => {

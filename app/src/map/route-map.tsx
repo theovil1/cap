@@ -126,7 +126,11 @@ export function RouteMap({
               center: followCenter(
                 pawn,
                 { heading, zoom: followZoom, pitch: FOLLOW_PITCH, height: screenH },
-                { bottom: padding?.bottom ?? 0, right: padding?.right ?? 0 },
+                {
+                  top: padding?.top ?? 0,
+                  bottom: padding?.bottom ?? 0,
+                  right: padding?.right ?? 0,
+                },
               ),
               zoom: followZoom,
               pitch: FOLLOW_PITCH,

@@ -30,8 +30,8 @@ import { useWide } from '@/ui/layout';
 import { Figure, Glass, GlassButton, Label, ProgressBar } from '@/ui/primitives';
 import { Sheet } from '@/ui/sheet';
 
-/** Room kept for the map buttons that ride on top of the sheet. */
-const BUTTONS_H = 70;
+/** Height of the top bar (minimise button and next stage) over the map. */
+const TOP_BAR_H = 64;
 
 export default function SessionScreen() {
   useKeepAwake();
@@ -230,7 +230,9 @@ export default function SessionScreen() {
           onUserMove={() => setFollowing(false)}
           initial={user?.first_name}
           padding={
-            wide ? { right: panelHidden ? 0 : 440 } : { bottom: (sheet.height || 360) + BUTTONS_H }
+            wide
+              ? { top: insets.top + TOP_BAR_H, right: panelHidden ? 0 : 440 }
+              : { top: insets.top + TOP_BAR_H, bottom: sheet.height || 360 }
           }
           style={StyleSheet.absoluteFill}
         />

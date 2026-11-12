@@ -86,28 +86,32 @@ export function offsetBy([lon, lat]: LngLat, bearing: number, meters: number): L
   return [lon + dLon, lat + dLat];
 }
 
+/** Where the followed pawn sits in the free area, from its top (GPS style). */
+export const FOLLOW_ANCHOR = 0.6;
+
 /**
- * Camera centre that shows the pawn in the middle of the free area of the
- * screen (above a bottom panel, left of a side panel) in a tilted view.
- * Computed here rather than with camera padding, which the iOS map applies
- * with the camera's current tilt and heading and so misses after a drag.
+ * Camera centre that shows the pawn low in the free area of the screen
+ * (between the top bar and a bottom panel, left of a side panel) in a tilted
+ * view. Computed here rather than with camera padding, which the iOS map
+ * applies with the camera's current tilt and heading and so misses after a drag.
  */
 export function followCenter(
   pawn: LngLat,
   view: { heading: number; zoom: number; pitch: number; height: number },
-  free: { bottom: number; right: number },
+  free: { top: number; bottom: number; right: number },
 ): LngLat {
   // MapLibre: 512 px tiles and a vertical field of view of about 36.87 degrees.
   const metersPerPx =
     (40_075_016.686 * Math.cos((pawn[1] * Math.PI) / 180)) / (512 * 2 ** view.zoom);
   const toCenter = view.height / 2 / Math.tan((36.87 * Math.PI) / 360);
   const pitch = (view.pitch * Math.PI) / 180;
-  // The free area's middle is `y` px above the screen centre: the pawn goes
-  // there, farther from the camera, so the centre sits behind the pawn.
-  const y = free.bottom / 2;
-  const above = Math.atan(y / toCenter);
+  // How far above the screen centre the pawn should show (negative: below).
+  const target = free.top + FOLLOW_ANCHOR * (view.height - free.top - free.bottom);
+  const up = view.height / 2 - target;
+  const angle = Math.atan(up / toCenter);
+  // A pawn above the centre is farther from the camera: the centre sits behind it.
   const groundPx =
-    toCenter * Math.cos(pitch) * Math.tan(pitch + above) - toCenter * Math.sin(pitch);
+    toCenter * Math.cos(pitch) * Math.tan(pitch + angle) - toCenter * Math.sin(pitch);
   const behind = offsetBy(pawn, view.heading + 180, groundPx * metersPerPx);
   return offsetBy(behind, view.heading + 90, (free.right / 2) * metersPerPx);
 }
