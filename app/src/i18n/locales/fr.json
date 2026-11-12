@@ -734,5 +734,32 @@
     "noMedal": "Pas encore de médaille.",
     "mutual_one": "1 ami en commun : {{names}}",
     "mutual_other": "{{count}} amis en commun · {{names}} et {{others}} autres"
+  },
+  "feed": {
+    "empty": "Ton fil est vide",
+    "emptyText": "Ajoute des amis ou suis des marcheurs : leurs arrivées, étapes et médailles s'afficheront ici.",
+    "arrivedFacts": "{{km}} km · {{sessions}} · {{days}}",
+    "sessions_one": "{{count}} séance",
+    "sessions_other": "{{count}} séances",
+    "days_one": "{{count}} jour",
+    "days_other": "{{count}} jours",
+    "stageTitle": "Étape {{name}}",
+    "stageFacts": "{{title}} · {{position}} sur {{stages}}",
+    "medal": "Médaille",
+    "distanceMedal": "{{km}} km",
+    "newMedal": "Nouvelle médaille",
+    "publishedFacts": "Nouveau trajet publié · {{km}} km",
+    "bravo": "Bravo · {{n}}",
+    "editWord": "Modifier mon mot",
+    "addWord": "Ajouter un mot",
+    "delete": "Supprimer",
+    "report": "Signaler",
+    "reportComment": "Signaler ce commentaire",
+    "wordTitle": "Un mot sur ce moment",
+    "more": "Voir plus",
+    "comments": "Commentaires",
+    "noComment": "Pas encore de commentaire.",
+    "commentPlaceholder": "Un mot d'encouragement…",
+    "send": "Envoyer"
   }
 }

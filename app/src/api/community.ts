@@ -1,9 +1,17 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  useInfiniteQuery,
+  useMutation,
+  useQuery,
+  useQueryClient,
+  type InfiniteData,
+} from '@tanstack/react-query';
 
 import { api } from './client';
 import { keys as journeyKeys } from './queries';
 import type {
+  Comment,
   EventCard,
+  FeedPost,
   JourneyDetail,
   LiveStandings,
   PublicProfile,
@@ -223,5 +231,107 @@ export function useFollow() {
     mutationFn: ({ id, on }: { id: string; on: boolean }) =>
       api<void>(`/users/${id}/follow`, { method: on ? 'POST' : 'DELETE' }),
     onSuccess: (_, { id }) => queryClient.invalidateQueries({ queryKey: profileKeys.profile(id) }),
+  });
+}
+
+export const feedKeys = {
+  feed: ['feed'] as const,
+  comments: (id: string) => ['feed', 'comments', id] as const,
+};
+
+/** The feed, twenty posts a page. */
+export function useFeed() {
+  return useInfiniteQuery({
+    queryKey: feedKeys.feed,
+    initialPageParam: undefined as string | undefined,
+    queryFn: ({ pageParam }) => api<FeedPost[]>('/feed', { query: { before: pageParam } }),
+    getNextPageParam: (page) => (page.length === 20 ? page.at(-1)?.created_at : undefined),
+  });
+}
+
+/** Changes a post in every page of the feed. */
+function patchPost(
+  queryClient: ReturnType<typeof useQueryClient>,
+  id: string,
+  patch: (post: FeedPost) => FeedPost | null,
+) {
+  queryClient.setQueryData<InfiniteData<FeedPost[]>>(feedKeys.feed, (data) =>
+    data
+      ? {
+          ...data,
+          pages: data.pages.map((page) =>
+            page.flatMap((post) => {
+              if (post.id !== id) return [post];
+              const next = patch(post);
+              return next ? [next] : [];
+            }),
+          ),
+        }
+      : data,
+  );
+}
+
+/** Bravo, shown at once and confirmed by the server. */
+export function useBravo() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, on }: { id: string; on: boolean }) =>
+      api<{ bravos: number; i_bravo: boolean }>(`/posts/${id}/bravo`, {
+        method: on ? 'POST' : 'DELETE',
+      }),
+    onMutate: ({ id, on }) =>
+      patchPost(queryClient, id, (post) => ({
+        ...post,
+        i_bravo: on,
+        bravos: post.bravos + (on ? 1 : -1),
+      })),
+    onSuccess: (count, { id }) => patchPost(queryClient, id, (post) => ({ ...post, ...count })),
+  });
+}
+
+export function useEditPost() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, text }: { id: string; text: string }) =>
+      api<FeedPost>(`/posts/${id}`, { method: 'PATCH', body: { text } }),
+    onSuccess: (post) => patchPost(queryClient, post.id, () => post),
+  });
+}
+
+export function useDeletePost() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => api<void>(`/posts/${id}`, { method: 'DELETE' }),
+    onSuccess: (_, id) => patchPost(queryClient, id, () => null),
+  });
+}
+
+export function useComments(id: string | undefined) {
+  return useQuery({
+    queryKey: feedKeys.comments(id ?? ''),
+    enabled: !!id,
+    queryFn: () => api<Comment[]>(`/posts/${id}/comments`),
+  });
+}
+
+export function useAddComment() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, text }: { id: string; text: string }) =>
+      api<Comment[]>(`/posts/${id}/comments`, { method: 'POST', body: { text } }),
+    onSuccess: (list, { id }) => {
+      queryClient.setQueryData(feedKeys.comments(id), list);
+      patchPost(queryClient, id, (post) => ({ ...post, comments: list.length }));
+    },
+  });
+}
+
+export function useDeleteComment() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ commentId }: { commentId: string; postId: string }) =>
+      api<void>(`/comments/${commentId}`, { method: 'DELETE' }),
+    onSuccess: (_, { postId }) =>
+      queryClient.invalidateQueries({ queryKey: feedKeys.comments(postId) }),
   });
 }

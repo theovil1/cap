@@ -318,3 +318,43 @@ export type PublicProfile = {
     path: RoutePoint[];
   } | null;
 };
+
+export type FeedKind = 'arrived' | 'stage' | 'medal' | 'published';
+
+/** A post of the feed; `data` depends on the kind. */
+export type FeedPost = {
+  id: string;
+  author: Walker;
+  kind: FeedKind;
+  data: {
+    title?: string;
+    kind?: 'solo' | 'race' | 'event';
+    distance_m?: number;
+    sessions?: number;
+    days?: number;
+    rank?: number | null;
+    end_town?: string | null;
+    end?: { lat: number; lon: number };
+    stage?: string;
+    position?: number;
+    stages?: number;
+    medal?: 'distance' | 'streak';
+    km?: number;
+    public_route_id?: string;
+  };
+  journey_id: string | null;
+  text: string | null;
+  bravos: number;
+  i_bravo: boolean;
+  comments: number;
+  mine: boolean;
+  created_at: string;
+};
+
+export type Comment = {
+  id: string;
+  author: Walker;
+  text: string;
+  mine: boolean;
+  created_at: string;
+};

@@ -1,14 +1,15 @@
 import { router } from 'expo-router';
-import { Newspaper, UsersRound } from 'lucide-react-native';
+import { UsersRound } from 'lucide-react-native';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { useFriends } from '@/api/queries';
+import { FeedList } from '@/community/feed-list';
 import { Rankings } from '@/community/rankings';
 import { fonts, useColors } from '@/theme';
 import { Tabs } from '@/ui/controls';
-import { EmptyState, ScreenHeader, TabScreen } from '@/ui/layout';
+import { ScreenHeader, TabScreen } from '@/ui/layout';
 import { RoundButton } from '@/ui/primitives';
 
 type Part = 'feed' | 'rankings';
@@ -46,15 +47,7 @@ export default function CommunityScreen() {
         value={part}
         onChange={setPart}
       />
-      {part === 'feed' ? (
-        <EmptyState
-          icon={<Newspaper size={22} color={colors.accentText} />}
-          title={t('community.feedSoon')}
-          text={t('community.feedSoonText')}
-        />
-      ) : (
-        <Rankings />
-      )}
+      {part === 'feed' ? <FeedList /> : <Rankings />}
     </TabScreen>
   );
 }

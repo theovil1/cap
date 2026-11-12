@@ -734,5 +734,32 @@
     "noMedal": "No medal yet.",
     "mutual_one": "1 friend in common: {{names}}",
     "mutual_other": "{{count}} friends in common · {{names}} and {{others}} others"
+  },
+  "feed": {
+    "empty": "Your feed is empty",
+    "emptyText": "Add friends or follow walkers: their arrivals, stages and medals will show here.",
+    "arrivedFacts": "{{km}} km · {{sessions}} · {{days}}",
+    "sessions_one": "{{count}} session",
+    "sessions_other": "{{count}} sessions",
+    "days_one": "{{count}} day",
+    "days_other": "{{count}} days",
+    "stageTitle": "Stage {{name}}",
+    "stageFacts": "{{title}} · {{position}} of {{stages}}",
+    "medal": "Medal",
+    "distanceMedal": "{{km}} km",
+    "newMedal": "New medal",
+    "publishedFacts": "New route published · {{km}} km",
+    "bravo": "Bravo · {{n}}",
+    "editWord": "Edit my word",
+    "addWord": "Add a word",
+    "delete": "Delete",
+    "report": "Report",
+    "reportComment": "Report this comment",
+    "wordTitle": "A word about this moment",
+    "more": "See more",
+    "comments": "Comments",
+    "noComment": "No comment yet.",
+    "commentPlaceholder": "A word of encouragement…",
+    "send": "Send"
   }
 }
