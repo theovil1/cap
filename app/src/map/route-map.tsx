@@ -1,5 +1,5 @@
 import { Camera, GeoJSONSource, Layer, Map, ViewAnnotation } from '@maplibre/maplibre-react-native';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
 
 import type { Stage } from '@/api/types';
@@ -15,6 +15,8 @@ import { useMapStyle } from './style';
  */
 export type MapMode = 'follow' | 'card' | 'overview';
 
+const FOLLOW_ZOOM = 16.6;
+
 type Props = {
   path: RoutePoint[];
   walkedM: number;
@@ -25,7 +27,7 @@ type Props = {
   style?: StyleProp<ViewStyle>;
   /** In `follow` mode, false leaves the camera where the walker moved it. */
   following?: boolean;
-  /** Called when the walker starts moving the map by hand. */
+  /** Called when the walker drags the map away (a pinch only zooms). */
   onUserMove?: () => void;
 };
 
@@ -42,6 +44,9 @@ export function RouteMap({
 }: Props) {
   const colors = useColors();
   const mapStyle = useMapStyle();
+  // While a finger is on the map the camera holds still; a pinch keeps following.
+  const [touching, setTouching] = useState(false);
+  const [followZoom, setFollowZoom] = useState(FOLLOW_ZOOM);
   // Long routes are lightened for the overview; the session keeps every point.
   const shown = useMemo(() => (mode === 'overview' ? simplify(path, 60) : path), [path, mode]);
   const { walked, left } = useMemo(() => splitAt(shown, walkedM), [shown, walkedM]);
@@ -95,11 +100,11 @@ export function RouteMap({
           padding,
           duration: 800,
         }
-      : mode === 'follow' && !following
+      : mode === 'follow' && (!following || touching)
         ? {}
         : {
             center: pawn,
-            zoom: mode === 'follow' ? 16.6 : 15.2,
+            zoom: mode === 'follow' ? followZoom : 15.2,
             pitch: mode === 'follow' ? 60 : 52,
             bearing: mode === 'follow' ? heading : 0,
             padding,
@@ -123,7 +128,16 @@ export function RouteMap({
       touchPitch={interactive}
       doubleTapZoom={interactive}
       onRegionWillChange={(event) => {
-        if (event.nativeEvent.userInteraction) onUserMove?.();
+        if (mode === 'follow' && following && event.nativeEvent.userInteraction) {
+          setTouching(true);
+        }
+      }}
+      onRegionDidChange={(event) => {
+        if (!touching) return;
+        setTouching(false);
+        const { zoom } = event.nativeEvent;
+        if (Math.abs(zoom - followZoom) > 0.05) setFollowZoom(zoom);
+        else onUserMove?.();
       }}
     >
       <Camera {...camera} />

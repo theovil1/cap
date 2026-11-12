@@ -98,8 +98,19 @@ const IGN_ORTHO =
   '&LAYER=ORTHOIMAGERY.ORTHOPHOTOS&STYLE=normal&TILEMATRIXSET=PM' +
   '&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}&FORMAT=image/jpeg';
 
-/** Aerial photos with Liberty's place and street names on top. */
+/** Aerial photos with Liberty's 3D buildings and names on top. */
 export function satelliteStyle(base: StyleSpecification): StyleSpecification {
+  // Light, see-through 3D buildings so the photo still shows.
+  const buildings = base.layers
+    .filter((layer) => layer.type === 'fill-extrusion')
+    .map((layer) => ({
+      ...layer,
+      paint: {
+        ...(('paint' in layer && layer.paint) || {}),
+        'fill-extrusion-color': '#ECE8E0',
+        'fill-extrusion-opacity': 0.7,
+      },
+    })) as LayerSpecification[];
   const labels = base.layers
     .filter((layer) => layer.type === 'symbol' && !HIDDEN.test(layer.id))
     .map((layer) => ({
@@ -126,6 +137,7 @@ export function satelliteStyle(base: StyleSpecification): StyleSpecification {
     layers: [
       { id: 'background', type: 'background', paint: { 'background-color': '#1F2A1E' } },
       { id: 'ign-ortho', type: 'raster', source: 'ign' },
+      ...buildings,
       ...labels,
     ],
   };

@@ -122,7 +122,10 @@
     "fromStart": "from {{place}}",
     "toEnd": "{{place}} in {{km}} km",
     "minimize": "Minimise the map",
-    "finish": "End the session"
+    "finish": "End the session",
+    "resizePanel": "Resize the panel",
+    "hidePanel": "Hide the panel",
+    "showPanel": "Show the panel"
   },
   "summary": {
     "done": "Session done · {{minutes}} min",

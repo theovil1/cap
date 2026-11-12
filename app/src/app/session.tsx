@@ -6,18 +6,19 @@ import {
   Footprints,
   Gauge,
   LocateFixed,
+  PanelRightClose,
+  PanelRightOpen,
   Target,
   TrendingUp,
 } from 'lucide-react-native';
-import { useState, type ReactNode } from 'react';
+import { useCallback, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View, type LayoutChangeEvent } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useAuth } from '@/api/auth';
 import { useActiveJourney } from '@/api/queries';
 import { formatDuration, formatKm, formatNumber, formatPace } from '@/i18n/format';
-import { journeyTitle } from '@/journey/names';
 import { nextStage, paceMinPerKm, stepsFor } from '@/journey/progress';
 import { MapKindButton } from '@/map/map-kind-button';
 import { RouteMap } from '@/map/route-map';
@@ -27,6 +28,10 @@ import { pendingSessions } from '@/session/store';
 import { fonts, useColors, type Colors } from '@/theme';
 import { useWide } from '@/ui/layout';
 import { Figure, Glass, GlassButton, Label, ProgressBar } from '@/ui/primitives';
+import { Sheet } from '@/ui/sheet';
+
+/** Room kept for the map buttons that ride on top of the sheet. */
+const BUTTONS_H = 70;
 
 export default function SessionScreen() {
   useKeepAwake();
@@ -39,6 +44,20 @@ export default function SessionScreen() {
   const { summary, detail } = useActiveJourney();
   // The camera stops following the pawn while the walker looks around.
   const [following, setFollowing] = useState(true);
+  // Phone: the sheet snaps to a single line, the big figures, or everything.
+  const [stops, setStops] = useState({ minimal: 0, compact: 0 });
+  const [sheet, setSheet] = useState({ index: 2, height: 0 });
+  const onSheetChange = useCallback(
+    (index: number, height: number) => setSheet({ index, height }),
+    [],
+  );
+  // iPad: the side panel can be hidden for a full-size map.
+  const [panelHidden, setPanelHidden] = useState(false);
+  const bottomOf = (event: LayoutChangeEvent) => {
+    const { y, height } = event.nativeEvent.layout;
+    return y + height + insets.bottom + 14;
+  };
+  const minimal = !wide && sheet.index === 0;
 
   const sessionM = live?.distanceM ?? 0;
   const steps = stepsFor(sessionM, user?.stride_cm);
@@ -84,18 +103,15 @@ export default function SessionScreen() {
     ]);
   }
 
-  const panel = (
-    <View
-      style={[
-        styles.panel,
-        { backgroundColor: colors.surface, shadowColor: colors.shadow },
-        wide
-          ? [styles.panelWide, { top: insets.top + 16, bottom: insets.bottom + 16 }]
-          : { paddingBottom: insets.bottom + 16 },
-      ]}
-    >
-      {!wide && <View style={[styles.grabber, { backgroundColor: colors.track }]} />}
-      <View style={styles.statusRow}>
+  const content = (
+    <>
+      <View
+        style={styles.statusRow}
+        onLayout={(e) => {
+          const minimalH = bottomOf(e);
+          setStops((old) => ({ ...old, minimal: minimalH }));
+        }}
+      >
         <View style={styles.inline}>
           <View
             style={[
@@ -104,16 +120,32 @@ export default function SessionScreen() {
               connected && { boxShadow: `0 0 0 4px ${colors.successSoft}` },
             ]}
           />
-          <Text style={[styles.status, { color: colors.textSecondary }]} numberOfLines={1}>
-            {t(`treadmill.status.${connection.status}`, { name })}
-          </Text>
+          {minimal ? (
+            <Text style={[styles.status, { color: colors.text }]} numberOfLines={1}>
+              {formatNumber(sessionM / 1000, 2)} {t('units.km')}
+              {'  ·  '}
+              <Text style={{ color: colors.accentText }}>
+                {formatNumber(speed, 1)} {t('units.kmh')}
+              </Text>
+            </Text>
+          ) : (
+            <Text style={[styles.status, { color: colors.textSecondary }]} numberOfLines={1}>
+              {t(`treadmill.status.${connection.status}`, { name })}
+            </Text>
+          )}
         </View>
         <Text style={[styles.status, { color: colors.textSecondary }]}>
           {formatDuration((live?.movingMs ?? 0) / 1000)}
         </Text>
       </View>
 
-      <View style={wide ? { gap: 14 } : styles.bigRow}>
+      <View
+        style={wide ? { gap: 14 } : styles.bigRow}
+        onLayout={(e) => {
+          const compactH = bottomOf(e);
+          setStops((old) => ({ ...old, compact: compactH }));
+        }}
+      >
         <View style={{ gap: 8, flexShrink: 1 }}>
           <Label>{t('session.today')}</Label>
           <Figure
@@ -171,7 +203,20 @@ export default function SessionScreen() {
           <Text style={[styles.finishText, { color: colors.text }]}>{t('session.finish')}</Text>
         </Pressable>
       )}
-    </View>
+    </>
+  );
+
+  const mapButtons = detail && (
+    <>
+      {!following && (
+        <GlassButton
+          icon={<LocateFixed size={21} color={colors.text} />}
+          onPress={() => setFollowing(true)}
+          label={t('map.recenter')}
+        />
+      )}
+      <MapKindButton />
+    </>
   );
 
   return (
@@ -184,7 +229,9 @@ export default function SessionScreen() {
           following={following}
           onUserMove={() => setFollowing(false)}
           initial={user?.first_name}
-          padding={wide ? { right: 440 } : { bottom: 360 }}
+          padding={
+            wide ? { right: panelHidden ? 0 : 440 } : { bottom: (sheet.height || 360) + BUTTONS_H }
+          }
           style={StyleSheet.absoluteFill}
         />
       ) : (
@@ -195,53 +242,78 @@ export default function SessionScreen() {
         </View>
       )}
 
-      <View style={[styles.top, { top: insets.top + 8 }, wide && { right: 460 }]}>
+      <View style={[styles.top, { top: insets.top + 8, right: wide && !panelHidden ? 460 : 20 }]}>
         <GlassButton
           icon={<ChevronDown size={22} color={colors.text} />}
           onPress={() => router.back()}
           label={t('session.minimize')}
         />
-        {summary && (
-          <Glass style={styles.titlePill}>
-            <Text style={[styles.titleText, { color: colors.text }]} numberOfLines={1}>
-              {journeyTitle(summary)}
+        {stage && (
+          <Glass style={styles.stageChip}>
+            <Flag size={16} color={colors.blueText} strokeWidth={2.2} />
+            <Text style={[styles.stageText, { color: colors.text }]} numberOfLines={1}>
+              {t('session.stageIn', { name: stage.name, km: formatKm(stage.at_m - walked) })}
             </Text>
           </Glass>
         )}
       </View>
-      {stage && (
-        <Glass
-          style={[
-            styles.stageChip,
-            { top: insets.top + (wide ? 8 : 72) },
-            wide ? { right: 460 } : { right: 20 },
-          ]}
-        >
-          <Flag size={15} color={colors.blueText} strokeWidth={2.2} />
-          <Text style={[styles.stageText, { color: colors.text }]} numberOfLines={1}>
-            {t('session.stageIn', { name: stage.name, km: formatKm(stage.at_m - walked) })}
-          </Text>
-        </Glass>
-      )}
-      {detail && (
-        <View
-          style={[
-            styles.mapButtons,
-            { top: insets.top + (wide ? 56 : 118) },
-            wide ? { right: 460 } : { right: 20 },
-          ]}
-        >
-          <MapKindButton />
-          {!following && (
+      {wide ? (
+        <>
+          <View
+            style={[
+              styles.mapButtons,
+              { bottom: insets.bottom + 20, right: wide && !panelHidden ? 460 : 20 },
+            ]}
+          >
+            {mapButtons}
             <GlassButton
-              icon={<LocateFixed size={21} color={colors.text} />}
-              onPress={() => setFollowing(true)}
-              label={t('map.recenter')}
+              icon={
+                panelHidden ? (
+                  <PanelRightOpen size={21} color={colors.text} />
+                ) : (
+                  <PanelRightClose size={21} color={colors.text} />
+                )
+              }
+              onPress={() => setPanelHidden((hidden) => !hidden)}
+              label={t(panelHidden ? 'session.showPanel' : 'session.hidePanel')}
             />
+          </View>
+          {!panelHidden && (
+            <View
+              style={[
+                styles.panel,
+                styles.panelWide,
+                {
+                  backgroundColor: colors.surface,
+                  shadowColor: colors.shadow,
+                  top: insets.top + 16,
+                  bottom: insets.bottom + 16,
+                },
+              ]}
+            >
+              {content}
+            </View>
           )}
-        </View>
+        </>
+      ) : (
+        <Sheet
+          stops={[stops.minimal, stops.compact]}
+          onChange={onSheetChange}
+          grabberColor={colors.track}
+          grabberLabel={t('session.resizePanel')}
+          above={<View style={[styles.mapButtons, styles.mapButtonsPhone]}>{mapButtons}</View>}
+          style={[
+            styles.panel,
+            {
+              backgroundColor: colors.surface,
+              shadowColor: colors.shadow,
+              paddingBottom: insets.bottom + 16,
+            },
+          ]}
+        >
+          {content}
+        </Sheet>
       )}
-      {panel}
     </View>
   );
 }
@@ -286,23 +358,28 @@ const styles = StyleSheet.create({
     gap: 12,
     alignItems: 'center',
   },
-  titlePill: { flexShrink: 1, height: 48, justifyContent: 'center', paddingHorizontal: 20 },
-  titleText: { fontFamily: fonts.textSemiBold, fontSize: 14.5 },
   stageChip: {
-    position: 'absolute',
+    flexShrink: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 7,
-    height: 34,
-    paddingHorizontal: 12,
+    gap: 8,
+    height: 48,
+    paddingHorizontal: 18,
   },
   mapButtons: { position: 'absolute', gap: 10, alignItems: 'flex-end' },
-  stageText: { fontFamily: fonts.textSemiBold, fontSize: 12.5, fontVariant: ['tabular-nums'] },
+  mapButtonsPhone: {
+    position: 'relative',
+    alignSelf: 'flex-end',
+    marginRight: 20,
+    marginBottom: 12,
+  },
+  stageText: {
+    flexShrink: 1,
+    fontFamily: fonts.textSemiBold,
+    fontSize: 14,
+    fontVariant: ['tabular-nums'],
+  },
   panel: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    bottom: 0,
     gap: 18,
     paddingTop: 10,
     paddingHorizontal: 20,
@@ -313,15 +390,13 @@ const styles = StyleSheet.create({
     shadowRadius: 40,
   },
   panelWide: {
-    left: undefined,
-    bottom: undefined,
+    position: 'absolute',
     right: 20,
     width: 404,
     paddingTop: 22,
     borderRadius: 30,
     borderCurve: 'continuous',
   },
-  grabber: { alignSelf: 'center', width: 38, height: 5, borderRadius: 99 },
   statusRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',

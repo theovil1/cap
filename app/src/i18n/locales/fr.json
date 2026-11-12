@@ -122,7 +122,10 @@
     "fromStart": "depuis {{place}}",
     "toEnd": "{{place}} dans {{km}} km",
     "minimize": "Réduire la carte",
-    "finish": "Terminer la séance"
+    "finish": "Terminer la séance",
+    "resizePanel": "Changer la taille du panneau",
+    "hidePanel": "Masquer le panneau",
+    "showPanel": "Afficher le panneau"
   },
   "summary": {
     "done": "Séance terminée · {{minutes}} min",
