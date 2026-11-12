@@ -466,6 +466,15 @@
     "next": "Choisir le prochain trajet",
     "share": "Partager ma médaille",
     "medal": "Médaille d'or de {{place}}",
-    "shareText": "J'ai marché de {{from}} à {{to}}, {{km}} km, sur mon tapis avec Cap."
+    "shareText": "J'ai marché de {{from}} à {{to}}, {{km}} km, sur mon tapis avec Cap.",
+    "racePlace": "{{place}} de la course",
+    "summary": "{{sessions}}, {{days}}.",
+    "sessionsCount_one": "{{count}} séance",
+    "sessionsCount_other": "{{count}} séances",
+    "daysCount_one": "{{count}} jour",
+    "daysCount_other": "{{count}} jours",
+    "newJourney": "Choisir un nouveau trajet",
+    "newMedal": "Nouvelle médaille",
+    "medalOf": "{{from}} → {{to}} · or"
   }
 }

@@ -466,6 +466,15 @@
     "next": "Choose the next journey",
     "share": "Share my medal",
     "medal": "{{place}} gold medal",
-    "shareText": "I walked from {{from}} to {{to}}, {{km}} km, on my treadmill with Cap."
+    "shareText": "I walked from {{from}} to {{to}}, {{km}} km, on my treadmill with Cap.",
+    "racePlace": "{{place}} in the race",
+    "summary": "{{sessions}}, {{days}}.",
+    "sessionsCount_one": "{{count}} session",
+    "sessionsCount_other": "{{count}} sessions",
+    "daysCount_one": "{{count}} day",
+    "daysCount_other": "{{count}} days",
+    "newJourney": "Choose a new journey",
+    "newMedal": "New medal",
+    "medalOf": "{{from}} → {{to}} · gold"
   }
 }

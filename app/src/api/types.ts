@@ -73,6 +73,8 @@ export type JourneySummary = {
   start_town: string | null;
   end_town: string | null;
   distance_m: number;
+  /** Sessions that counted for this journey (sent since the API of 12 Nov 2026). */
+  sessions?: number;
   arrived_at: string | null;
   created_at: string;
 };

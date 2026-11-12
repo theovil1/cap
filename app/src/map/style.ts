@@ -93,7 +93,7 @@ export function capStyle(base: StyleSpecification, mood: Mood): StyleSpecificati
 }
 
 /** IGN aerial photos (Etalab open licence, no key), France only. */
-const IGN_ORTHO =
+export const IGN_ORTHO =
   'https://data.geopf.fr/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0' +
   '&LAYER=ORTHOIMAGERY.ORTHOPHOTOS&STYLE=normal&TILEMATRIXSET=PM' +
   '&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}&FORMAT=image/jpeg';
