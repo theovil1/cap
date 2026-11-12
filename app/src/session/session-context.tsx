@@ -63,7 +63,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   const onRace = useCallback(
     () =>
       (queryClient.getQueryData<JourneySummary[]>(['journeys']) ?? []).some(
-        (j) => j.kind === 'race' && j.status === 'active' && j.joined,
+        (j) => (j.kind === 'race' || j.kind === 'event') && j.status === 'active' && j.joined,
       ),
     [queryClient],
   );

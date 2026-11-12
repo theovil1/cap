@@ -55,7 +55,7 @@ export type RouteDetail = {
 
 export type JourneySummary = {
   id: string;
-  kind: 'solo' | 'race';
+  kind: 'solo' | 'race' | 'event';
   /** `waiting`: a race not started yet. */
   status: 'waiting' | 'active' | 'finished';
   /** False while invited to a race. */
@@ -77,6 +77,9 @@ export type JourneySummary = {
   sessions?: number;
   /** The public route it was started from, or published as. */
   public_route_id?: string | null;
+  /** Title and end of a scheduled journey. */
+  title?: string | null;
+  ends_at?: string | null;
   arrived_at: string | null;
   created_at: string;
 };
@@ -227,3 +230,48 @@ export type PublicRouteDetail = PublicRouteCard & {
 };
 
 export type PublicRouteSort = 'popular' | 'new' | 'near';
+
+export type EventState = 'upcoming' | 'live' | 'ended';
+
+/** A scheduled journey ("trajet planifié"). */
+export type EventCard = {
+  id: string;
+  title: string;
+  public_route_id: string;
+  state: EventState;
+  starts_at: string;
+  ends_at: string;
+  organizer: Walker;
+  start: Place;
+  end: Place;
+  start_town: string | null;
+  end_town: string | null;
+  distance_m: number;
+  stages: number;
+  photo_url: string | null;
+  registered: number;
+  walking_now: number;
+  friends: Walker[];
+  friends_registered: number;
+  me_registered: boolean;
+};
+
+export type Standing = {
+  rank: number;
+  walker: Walker;
+  distance_m: number;
+  friend: boolean;
+  speed_kmh: number | null;
+  arrived_at: string | null;
+};
+
+export type LiveStandings = {
+  registered: number;
+  walking_now: number;
+  route_distance_m: number;
+  me: Standing | null;
+  my_rank_before: number | null;
+  leaders: Standing[];
+  friends: Standing[];
+  others_m: number[];
+};

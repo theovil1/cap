@@ -1,19 +1,19 @@
 import { router } from 'expo-router';
-import { CalendarDays, Plus } from 'lucide-react-native';
+import { Plus } from 'lucide-react-native';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActionSheetIOS, Text } from 'react-native';
 
+import { useEvents, type EventFilter } from '@/api/community';
+import { EVENT_FILTERS, EventsExplorer } from '@/community/events-explorer';
 import { ROUTE_FILTERS, RoutesExplorer, type RouteFilter } from '@/community/routes-explorer';
 import { useColors } from '@/theme';
 import { type } from '@/tokens';
 import { Chip, ChipRow, SearchBar, Tabs } from '@/ui/controls';
-import { EmptyState, ScreenHeader, TabScreen } from '@/ui/layout';
+import { ScreenHeader, TabScreen } from '@/ui/layout';
 import { RoundButton } from '@/ui/primitives';
 
 type Part = 'routes' | 'planned';
-
-const PLANNED_FILTERS = ['all', 'mine', 'friends'] as const;
 
 /** Explore tab: public routes and scheduled journeys. */
 export default function ExploreScreen() {
@@ -21,7 +21,10 @@ export default function ExploreScreen() {
   const colors = useColors();
   const [part, setPart] = useState<Part>('routes');
   const [routeFilter, setRouteFilter] = useState<RouteFilter>('popular');
-  const [plannedFilter, setPlannedFilter] = useState<string>('all');
+  const [plannedFilter, setPlannedFilter] = useState<EventFilter>('all');
+  // A green dot on Planifiés while one is under way.
+  const { data: events = [] } = useEvents('all');
+  const live = events.some((e) => e.state === 'live');
   const [search, setSearch] = useState('');
 
   // New journey, or publish one of mine for the community.
@@ -49,7 +52,7 @@ export default function ExploreScreen() {
       <Tabs
         options={[
           { value: 'routes', label: t('explore.routes') },
-          { value: 'planned', label: t('explore.planned') },
+          { value: 'planned', label: t('explore.planned'), dot: live },
         ]}
         value={part}
         onChange={setPart}
@@ -69,7 +72,7 @@ export default function ExploreScreen() {
                 onPress={() => setRouteFilter(key)}
               />
             ))
-          : PLANNED_FILTERS.map((key) => (
+          : EVENT_FILTERS.map((key) => (
               <Chip
                 key={key}
                 label={t(`explore.filters.${key}`)}
@@ -85,11 +88,7 @@ export default function ExploreScreen() {
           <Text style={[type.subhead, { color: colors.textSecondary }]}>
             {t('explore.plannedIntro')}
           </Text>
-          <EmptyState
-            icon={<CalendarDays size={22} color={colors.accentText} />}
-            title={t('explore.soon')}
-            text={t('explore.soonPlanned')}
-          />
+          <EventsExplorer search={search} filter={plannedFilter} />
         </>
       )}
     </TabScreen>

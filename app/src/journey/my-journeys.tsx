@@ -1,5 +1,5 @@
 import { router } from 'expo-router';
-import { ChevronRight, Ellipsis, Flag, Swords } from 'lucide-react-native';
+import { CalendarDays, ChevronRight, Ellipsis, Flag, Swords } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 import { ActionSheetIOS, Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 
@@ -17,7 +17,8 @@ export function MyJourneys() {
   const colors = useColors();
   const { data: journeys = [] } = useJourneys();
   const invitations = journeys.filter((j) => j.status === 'waiting' && !j.joined);
-  const waiting = journeys.filter((j) => j.status === 'waiting' && j.joined);
+  const waiting = journeys.filter((j) => j.status === 'waiting' && j.joined && j.kind === 'race');
+  const scheduled = journeys.filter((j) => j.status === 'waiting' && j.kind === 'event');
   const active = journeys.filter((j) => j.status === 'active' && j.joined);
   const finished = journeys.filter((j) => j.status === 'finished');
 
@@ -32,6 +33,7 @@ export function MyJourneys() {
         <Section title={t('journeys.invitations')} journeys={invitations} />
       )}
       {waiting.length > 0 && <Section title={t('journeys.waiting')} journeys={waiting} />}
+      {scheduled.length > 0 && <Section title={t('journeys.scheduled')} journeys={scheduled} />}
       {active.length > 0 && <Section title={t('journeys.active')} journeys={active} />}
       {finished.length > 0 && <Section title={t('journeys.history')} journeys={finished} />}
       {journeys.length === 0 && (
@@ -95,11 +97,18 @@ function JourneyRow({ journey }: { journey: JourneySummary }) {
   const openMenu = useJourneyMenu(journey);
   const ratio = journey.distance_m / journey.route_distance_m;
   const race = journey.kind === 'race';
+  const event = journey.kind === 'event';
   return (
     <Pressable
-      disabled={!race}
-      onPress={() => router.push({ pathname: '/race/[id]', params: { id: journey.id } })}
-      accessibilityRole={race ? 'button' : undefined}
+      disabled={!race && !event}
+      onPress={() =>
+        router.push(
+          event
+            ? { pathname: '/event/[id]', params: { id: journey.id } }
+            : { pathname: '/race/[id]', params: { id: journey.id } },
+        )
+      }
+      accessibilityRole={race || event ? 'button' : undefined}
     >
       <Card style={styles.row}>
         <View style={styles.rowTop}>
@@ -113,7 +122,7 @@ function JourneyRow({ journey }: { journey: JourneySummary }) {
               {formatNumber(Math.floor(ratio * 100))} %
             </Text>
           )}
-          {race ? (
+          {race || event ? (
             <ChevronRight size={20} color={colors.textMuted} />
           ) : (
             <Pressable
@@ -127,6 +136,21 @@ function JourneyRow({ journey }: { journey: JourneySummary }) {
             </Pressable>
           )}
         </View>
+        {event && (
+          <View style={styles.raceTag}>
+            <CalendarDays size={14} color={colors.blueText} />
+            <Text style={[styles.detail, { color: colors.blueText }]}>
+              {journey.status === 'waiting'
+                ? t('journeys.eventWaiting', {
+                    date: formatDate(new Date(journey.starts_at ?? journey.created_at), {
+                      day: 'numeric',
+                      month: 'long',
+                    }),
+                  })
+                : t('journeys.eventPlayers', { count: journey.players })}
+            </Text>
+          </View>
+        )}
         {race && (
           <View style={styles.raceTag}>
             <Swords size={14} color={colors.blueText} />

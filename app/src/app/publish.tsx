@@ -16,10 +16,11 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { API_URL, ApiError } from '@/api/client';
-import { usePublicRoute, usePublish, useRoutePhoto } from '@/api/community';
+import { useCreateEvent, usePublicRoute, usePublish, useRoutePhoto } from '@/api/community';
 import { useJourney, useJourneys } from '@/api/queries';
 import type { JourneySummary, RoutePhoto } from '@/api/types';
 import { pickPhoto } from '@/community/pick-photo';
+import { PlanFields, usePlan } from '@/community/plan-fields';
 import { formatKm } from '@/i18n/format';
 import { journeyTitle } from '@/journey/names';
 import { AerialView } from '@/map/aerial';
@@ -53,6 +54,8 @@ export default function PublishScreen() {
   const { data: published } = usePublicRoute(publicRouteId);
   const publish = usePublish();
   const upload = useRoutePhoto();
+  const createEvent = useCreateEvent();
+  const [plan, setPlan] = usePlan();
   const [title, setTitle] = useState<string | null>(null);
   const [description, setDescription] = useState('');
   const [visibility, setVisibility] = useState<'everyone' | 'friends'>('everyone');
@@ -92,6 +95,22 @@ export default function PublishScreen() {
             if (photo) {
               await upload.mutateAsync({ id: route.id, kind, image: photo.bytes }).catch(() => {});
             }
+          }
+          if (plan.on) {
+            const event = await createEvent
+              .mutateAsync({
+                public_route_id: route.id,
+                title: shownTitle.trim(),
+                starts_at: plan.startsAt.toISOString(),
+                ends_at: plan.endsAt.toISOString(),
+              })
+              .catch(() => null);
+            setBusy(false);
+            if (event) {
+              router.replace({ pathname: '/event/[id]', params: { id: event.id } });
+              return;
+            }
+            Alert.alert(t('plan.failed'));
           }
           setBusy(false);
           router.replace({ pathname: '/public-route/[id]', params: { id: route.id } });
@@ -224,6 +243,7 @@ export default function PublishScreen() {
                 onChange={setVisibility}
               />
             </View>
+            <PlanFields plan={plan} onChange={setPlan} />
             <View style={{ gap: 6 }}>
               <Text style={[styles.label, { color: colors.textSecondary }]}>
                 {t('publish.themes')}

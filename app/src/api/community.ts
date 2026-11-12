@@ -3,7 +3,9 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from './client';
 import { keys as journeyKeys } from './queries';
 import type {
+  EventCard,
   JourneyDetail,
+  LiveStandings,
   PublicRouteCard,
   PublicRouteDetail,
   PublicRouteSort,
@@ -129,5 +131,74 @@ export function useReport() {
   return useMutation({
     mutationFn: (input: { target_type: ReportTarget; target_id: string; reason?: string }) =>
       api<void>('/reports', { method: 'POST', body: input }),
+  });
+}
+
+export const eventKeys = {
+  events: ['events'] as const,
+  event: (id: string) => ['events', 'one', id] as const,
+  live: (id: string) => ['events', 'live', id] as const,
+};
+
+export type EventFilter = 'all' | 'mine' | 'friends';
+
+export function useEvents(filter: EventFilter, q?: string) {
+  return useQuery({
+    queryKey: [...eventKeys.events, 'list', filter, q ?? ''],
+    staleTime: 30_000,
+    queryFn: () => api<EventCard[]>('/events', { query: { filter, q: q || undefined } }),
+  });
+}
+
+export function useEvent(id: string | undefined) {
+  return useQuery({
+    queryKey: eventKeys.event(id ?? ''),
+    enabled: !!id,
+    queryFn: () => api<EventCard>(`/events/${id}`),
+  });
+}
+
+/** Live standings, refreshed every five seconds while shown. */
+export function useLiveStandings(id: string | undefined) {
+  return useQuery({
+    queryKey: eventKeys.live(id ?? ''),
+    enabled: !!id,
+    refetchInterval: 5_000,
+    queryFn: () => api<LiveStandings>(`/events/${id}/live`),
+  });
+}
+
+export function useCreateEvent() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input: {
+      public_route_id: string;
+      title: string;
+      starts_at: string;
+      ends_at: string;
+    }) => api<EventCard>('/events', { method: 'POST', body: input }),
+    onSuccess: (event) => {
+      queryClient.setQueryData(eventKeys.event(event.id), event);
+      return Promise.all([
+        queryClient.invalidateQueries({ queryKey: eventKeys.events }),
+        queryClient.invalidateQueries({ queryKey: journeyKeys.journeys }),
+      ]);
+    },
+  });
+}
+
+/** Sign up (`true`) or leave (`false`). */
+export function useRegister() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, on }: { id: string; on: boolean }) =>
+      api<EventCard>(`/events/${id}/register`, { method: on ? 'POST' : 'DELETE' }),
+    onSuccess: (event) => {
+      queryClient.setQueryData(eventKeys.event(event.id), event);
+      return Promise.all([
+        queryClient.invalidateQueries({ queryKey: eventKeys.events }),
+        queryClient.invalidateQueries({ queryKey: journeyKeys.journeys }),
+      ]);
+    },
   });
 }

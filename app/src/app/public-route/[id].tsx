@@ -98,15 +98,25 @@ function useActions(route: PublicRouteDetail) {
   };
   const more = () => {
     const options = route.mine
-      ? [t('publicRoute.photos'), t('publicRoute.unpublish'), t('journeys.cancel')]
-      : [t('publicRoute.report'), t('journeys.cancel')];
+      ? [
+          t('plan.schedule'),
+          t('publicRoute.photos'),
+          t('publicRoute.unpublish'),
+          t('journeys.cancel'),
+        ]
+      : [t('plan.schedule'), t('publicRoute.report'), t('journeys.cancel')];
     ActionSheetIOS.showActionSheetWithOptions(
       {
         options,
         cancelButtonIndex: options.length - 1,
-        destructiveButtonIndex: route.mine ? 1 : 0,
+        destructiveButtonIndex: route.mine ? 2 : 1,
       },
-      (index) => {
+      (choice) => {
+        if (choice === 0) {
+          router.push({ pathname: '/plan', params: { publicRouteId: route.id } });
+          return;
+        }
+        const index = choice - 1;
         if (route.mine && index === 0) {
           router.push({ pathname: '/publish', params: { publicRouteId: route.id } });
         } else if (route.mine && index === 1) {

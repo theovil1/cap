@@ -52,6 +52,8 @@ type Props = {
   speedMps?: number;
   /** Other walkers of a race, drawn as blue pawns. */
   rivals?: Rival[];
+  /** Distances of many other walkers (a scheduled journey), drawn as small dots. */
+  crowd?: number[];
 };
 
 export type Rival = {
@@ -75,6 +77,7 @@ export function RouteMap({
   onUserMove,
   speedMps = 0,
   rivals = [],
+  crowd = [],
 }: Props) {
   const colors = useColors();
   const mapStyle = useMapStyle();
@@ -227,6 +230,38 @@ export function RouteMap({
                 colors.accent,
                 colors.textSecondary,
               ],
+            }}
+          />
+        </GeoJSONSource>
+      )}
+      {crowd.length > 0 && (
+        <GeoJSONSource
+          id="crowd"
+          data={{
+            type: 'FeatureCollection',
+            features: crowd.map((m, i) => ({
+              type: 'Feature',
+              properties: { tone: i % 3 },
+              geometry: { type: 'Point', coordinates: positionAt(path, m) },
+            })),
+          }}
+        >
+          <Layer
+            id="crowd-dots"
+            type="circle"
+            paint={{
+              'circle-radius': 4.5,
+              'circle-color': [
+                'match',
+                ['get', 'tone'],
+                0,
+                colors.blue,
+                1,
+                colors.success,
+                colors.accent,
+              ],
+              'circle-stroke-width': 1.5,
+              'circle-stroke-color': '#FFFFFF',
             }}
           />
         </GeoJSONSource>
