@@ -55,3 +55,21 @@ export function racers(
   });
   return list.map(({ rank: _rank, ...racer }, i) => ({ ...racer, place: i + 1 }));
 }
+
+/**
+ * Stretch of road shown on the home race track: a little room around the
+ * walkers, rounded to 5 km, at least 10 km long.
+ */
+export function trackWindow(distancesM: number[]): { startM: number; endM: number } {
+  const step = 5_000;
+  const min = Math.min(...distancesM);
+  const max = Math.max(...distancesM);
+  const room = Math.max(1_000, (max - min) * 0.25);
+  const startM = Math.max(0, Math.floor((min - room) / step) * step);
+  let endM = Math.ceil((max + room * 0.6) / step) * step;
+  if (endM - startM < 2 * step) {
+    endM = startM + 2 * step;
+  }
+  if (endM <= max) endM = max + step;
+  return { startM, endM };
+}

@@ -65,7 +65,13 @@
     "record_other": "Record : {{count}} jours",
     "treadmillConnected": "{{name}} connecté",
     "treadmillHint": "Allume le tapis à côté du téléphone",
-    "sessionRunning": "Séance en cours, touche pour voir la carte"
+    "sessionRunning": "Séance en cours, touche pour voir la carte",
+    "race": "Course ·",
+    "raceOf": "sur {{count}}",
+    "walking": "{{name}} marche",
+    "raceToLead": "{{km}} {{unit}} pour prendre la tête",
+    "raceAhead": "{{km}} {{unit}} d'avance",
+    "thisWeek": "Cette semaine"
   },
   "journeys": {
     "title": "Mes trajets",

@@ -1,6 +1,6 @@
 import type { JourneyDetail, Participant } from '@/api/types';
 
-import { racers } from '../race';
+import { racers, trackWindow } from '../race';
 
 const person = (id: string, distance: number, extra: Partial<Participant> = {}): Participant => ({
   user_id: id,
@@ -49,5 +49,15 @@ describe('racers', () => {
       person('max', 10_000, { rank: 1, arrived_at: 'y' }),
     ]);
     expect(racers(detail, {}, 0).map((r) => r.userId)).toEqual(['max', 'lilou', 'me']);
+  });
+});
+
+describe('trackWindow', () => {
+  it('frames the walkers on round kilometres', () => {
+    expect(trackWindow([39_000, 50_100, 52_500])).toEqual({ startM: 35_000, endM: 55_000 });
+  });
+
+  it('keeps at least 10 km and starts at 0 at most', () => {
+    expect(trackWindow([1_200, 1_500])).toEqual({ startM: 0, endM: 10_000 });
   });
 });

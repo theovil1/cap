@@ -65,7 +65,13 @@
     "record_other": "Best: {{count}} days",
     "treadmillConnected": "{{name}} connected",
     "treadmillHint": "Turn on the treadmill next to your phone",
-    "sessionRunning": "Session running, tap to see the map"
+    "sessionRunning": "Session running, tap to see the map",
+    "race": "Race ·",
+    "raceOf": "of {{count}}",
+    "walking": "{{name}} is walking",
+    "raceToLead": "{{km}} {{unit}} to take the lead",
+    "raceAhead": "{{km}} {{unit}} ahead",
+    "thisWeek": "This week"
   },
   "journeys": {
     "title": "My journeys",

@@ -15,6 +15,8 @@ export type DayStats = {
   bestStreak: number;
   /** The last seven days, oldest first: true when active. */
   week: boolean[];
+  /** Metres walked each day of the calendar week, Monday first. */
+  weekM: number[];
 };
 
 /** Merges the server history with sessions still on the phone (same local id = same session). */
@@ -38,8 +40,10 @@ export function computeDayStats(
   let todaySteps = extraSteps;
   let todayM = extraM;
   const days = new Set<string>();
+  const metresByDay = new Map<string, number>([[today, extraM]]);
   for (const s of byId.values()) {
     days.add(s.day);
+    metresByDay.set(s.day, (metresByDay.get(s.day) ?? 0) + s.m);
     if (s.day === today) {
       todaySteps += s.steps;
       todayM += s.m;
@@ -50,7 +54,21 @@ export function computeDayStats(
   const week = Array.from({ length: 7 }, (_, i) =>
     days.has(dayKey(new Date(nowMs - (6 - i) * DAY_MS))),
   );
-  return { todaySteps, todayM, streak: current, bestStreak: best, week };
+  // Monday of this week: getDay() is 0 on Sunday.
+  const monday = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate() - ((now.getDay() + 6) % 7),
+    12,
+  );
+  const weekM = Array.from(
+    { length: 7 },
+    (_, i) =>
+      metresByDay.get(
+        dayKey(new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() + i, 12)),
+      ) ?? 0,
+  );
+  return { todaySteps, todayM, streak: current, bestStreak: best, week, weekM };
 }
 
 /** Current time, refreshed every minute so "today" changes at midnight. */

@@ -7,6 +7,7 @@ import { useAuth } from '@/api/auth';
 import { useActiveJourney } from '@/api/queries';
 import { formatDate, formatKm, formatNumber } from '@/i18n/format';
 import { MyJourneys } from '@/journey/my-journeys';
+import { RaceCard } from '@/live/race-card';
 import { journeyTitle } from '@/journey/names';
 import { nextStage, stepsFor } from '@/journey/progress';
 import { RouteMap } from '@/map/route-map';
@@ -28,6 +29,7 @@ export default function HomeScreen() {
   const goal = user?.daily_step_goal ?? 7000;
   const strideM = (user?.stride_cm ?? 70) / 100;
   const leftSteps = Math.max(0, goal - stats.todaySteps);
+  const { detail } = useActiveJourney();
 
   return (
     <TabScreen>
@@ -49,7 +51,7 @@ export default function HomeScreen() {
       </View>
 
       <View style={[styles.columns, wide && styles.columnsWide]}>
-        <View style={[styles.column, wide && { flex: 1.3 }]}>
+        <View style={[styles.column, wide && styles.mapColumn]}>
           <JourneyCard walkingM={live?.distanceM ?? 0} />
         </View>
         <View style={[styles.column, wide && { flex: 1 }]}>
@@ -108,6 +110,10 @@ export default function HomeScreen() {
             </Card>
           </View>
           <TreadmillBanner />
+          {detail ? (
+            <RaceCard detail={detail} myDistanceM={detail.distance_m + (live?.distanceM ?? 0)} />
+          ) : null}
+          {wide ? <WeekCard metres={stats.weekM} /> : null}
         </View>
       </View>
       <MyJourneys />
@@ -118,6 +124,7 @@ export default function HomeScreen() {
 function JourneyCard({ walkingM }: { walkingM: number }) {
   const { t } = useTranslation();
   const colors = useColors();
+  const wide = useWide();
   const { user } = useAuth();
   const { summary, detail, isLoading } = useActiveJourney();
 
@@ -148,9 +155,9 @@ function JourneyCard({ walkingM }: { walkingM: number }) {
     .map((s) => s.at_m / total);
 
   return (
-    <Pressable onPress={() => router.push('/session')}>
-      <Card style={{ overflow: 'hidden' }}>
-        <View style={styles.mapBox}>
+    <Pressable onPress={() => router.push('/session')} style={wide && styles.grow}>
+      <Card style={[styles.journey, wide && styles.grow]}>
+        <View style={[styles.mapBox, wide && styles.grow]}>
           {detail && (
             <RouteMap
               path={detail.path}
@@ -233,6 +240,44 @@ function TreadmillBanner() {
   );
 }
 
+/** iPad: kilometres of each day of the week as bars, Monday first. */
+function WeekCard({ metres }: { metres: number[] }) {
+  const { t } = useTranslation();
+  const colors = useColors();
+  const top = Math.max(...metres, 1);
+  // Monday 7 December 2026 starts the reference week for the day initials.
+  const initials = metres.map((_, i) =>
+    formatDate(new Date(2026, 11, 7 + i, 12), { weekday: 'narrow' }).toUpperCase(),
+  );
+  return (
+    <Card style={[styles.week, styles.grow]}>
+      <View style={styles.weekHeader}>
+        <Label style={styles.weekLabel}>{t('home.thisWeek')}</Label>
+        <Figure
+          value={formatKm(metres.reduce((a, b) => a + b, 0))}
+          unit={t('units.km')}
+          size={26}
+        />
+      </View>
+      <View style={styles.bars}>
+        {metres.map((m, i) => (
+          <View key={i} style={styles.barColumn}>
+            <View
+              style={[
+                styles.bar,
+                m > 0
+                  ? { height: `${Math.max(8, (85 * m) / top)}%`, backgroundColor: colors.accent }
+                  : { height: 6, backgroundColor: colors.inset },
+              ]}
+            />
+            <Text style={[styles.barDay, { color: colors.textMuted }]}>{initials[i]}</Text>
+          </View>
+        ))}
+      </View>
+    </Card>
+  );
+}
+
 const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
@@ -243,20 +288,30 @@ const styles = StyleSheet.create({
   date: { fontFamily: fonts.textMedium, fontSize: 14, textTransform: 'capitalize' },
   hello: { fontFamily: fonts.display, fontSize: 31, lineHeight: 33, letterSpacing: -0.9 },
   columns: { gap: 12 },
-  columnsWide: { flexDirection: 'row', alignItems: 'flex-start' },
+  columnsWide: { flexDirection: 'row', alignItems: 'stretch' },
+  mapColumn: { flex: 1.3 },
+  grow: { flex: 1 },
+  journey: { overflow: 'hidden', borderRadius: 28 },
   column: { gap: 12 },
   row: { flexDirection: 'row', gap: 12 },
   small: { padding: 14, gap: 10 },
   goal: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  caption: { fontFamily: fonts.text, fontSize: 12.5, fontVariant: ['tabular-nums'] },
+  caption: { fontFamily: fonts.text, fontSize: 12, fontVariant: ['tabular-nums'] },
   strong: { fontFamily: fonts.textSemiBold },
   inline: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   dots: { flexDirection: 'row', justifyContent: 'space-between' },
   dot: { width: 12, height: 12, borderRadius: 99 },
   record: { fontFamily: fonts.text, fontSize: 11.5 },
+  week: { padding: 18, gap: 12, minHeight: 200, borderRadius: 26 },
+  weekHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline' },
+  weekLabel: { fontSize: 14 },
+  bars: { flex: 1, flexDirection: 'row', alignItems: 'flex-end', gap: 10 },
+  barColumn: { flex: 1, height: '100%', alignItems: 'center', justifyContent: 'flex-end', gap: 6 },
+  bar: { width: '100%', borderRadius: 8 },
+  barDay: { fontFamily: fonts.textSemiBold, fontSize: 11.5 },
   empty: { padding: 22, gap: 10, alignItems: 'center' },
   emptyTitle: { fontFamily: fonts.display, fontSize: 21 },
-  mapBox: { height: 150, overflow: 'hidden' },
+  mapBox: { height: 132, minHeight: 132, overflow: 'hidden' },
   chip: {
     position: 'absolute',
     left: 12,
