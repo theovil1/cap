@@ -1,9 +1,9 @@
 import { router } from 'expo-router';
-import { Flag, Plus } from 'lucide-react-native';
+import { Ellipsis, Flag, Plus } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
-import { StyleSheet, Text, View } from 'react-native';
+import { ActionSheetIOS, Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { useJourneys } from '@/api/queries';
+import { useDeleteJourney, useJourneys, useResetJourney } from '@/api/queries';
 import type { JourneySummary } from '@/api/types';
 import { formatDate, formatKm, formatNumber } from '@/i18n/format';
 import { journeyTitle } from '@/journey/names';
@@ -47,9 +47,46 @@ function Section({ title, journeys }: { title: string; journeys: JourneySummary[
   );
 }
 
+/** Native menu, then a confirmation: start again or delete for good. */
+function useJourneyMenu(journey: JourneySummary) {
+  const { t } = useTranslation();
+  const reset = useResetJourney();
+  const remove = useDeleteJourney();
+  const failed = () => Alert.alert(t('journeys.failed'));
+  const confirm = (title: string, body: string, action: string, run: () => void) =>
+    Alert.alert(title, body, [
+      { text: t('journeys.cancel'), style: 'cancel' },
+      { text: action, style: 'destructive', onPress: run },
+    ]);
+  return () =>
+    ActionSheetIOS.showActionSheetWithOptions(
+      {
+        title: journeyTitle(journey),
+        options: [t('journeys.restart'), t('journeys.delete'), t('journeys.cancel')],
+        destructiveButtonIndex: 1,
+        cancelButtonIndex: 2,
+      },
+      (index) => {
+        if (index === 0) {
+          confirm(
+            t('journeys.restartTitle'),
+            t('journeys.restartBody'),
+            t('journeys.restart'),
+            () => reset.mutate(journey.id, { onError: failed }),
+          );
+        } else if (index === 1) {
+          confirm(t('journeys.deleteTitle'), t('journeys.deleteBody'), t('journeys.delete'), () =>
+            remove.mutate(journey.id, { onError: failed }),
+          );
+        }
+      },
+    );
+}
+
 function JourneyRow({ journey }: { journey: JourneySummary }) {
   const { t } = useTranslation();
   const colors = useColors();
+  const openMenu = useJourneyMenu(journey);
   const ratio = journey.distance_m / journey.route_distance_m;
   return (
     <Card style={styles.row}>
@@ -64,6 +101,15 @@ function JourneyRow({ journey }: { journey: JourneySummary }) {
             {formatNumber(Math.floor(ratio * 100))} %
           </Text>
         )}
+        <Pressable
+          onPress={openMenu}
+          accessibilityRole="button"
+          accessibilityLabel={t('journeys.options')}
+          hitSlop={10}
+          style={[styles.more, { backgroundColor: colors.inset }]}
+        >
+          <Ellipsis size={18} color={colors.textSecondary} />
+        </Pressable>
       </View>
       <Text style={[styles.detail, { color: colors.textSecondary }]}>
         {journey.arrived_at
@@ -93,5 +139,6 @@ const styles = StyleSheet.create({
   rowTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10 },
   name: { flex: 1, fontFamily: fonts.display, fontSize: 18 },
   percent: { fontFamily: fonts.display, fontSize: 18, fontVariant: ['tabular-nums'] },
+  more: { width: 32, height: 32, borderRadius: 99, alignItems: 'center', justifyContent: 'center' },
   detail: { fontFamily: fonts.text, fontSize: 13, fontVariant: ['tabular-nums'] },
 });

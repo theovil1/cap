@@ -101,3 +101,26 @@ export function useStartJourney() {
     },
   });
 }
+
+/** Back to the start: the walked sessions stay in the history. */
+export function useResetJourney() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => api<JourneyDetail>(`/journeys/${id}/reset`, { method: 'POST' }),
+    onSuccess: (journey) => {
+      queryClient.setQueryData(keys.journey(journey.id), journey);
+      return queryClient.invalidateQueries({ queryKey: keys.journeys });
+    },
+  });
+}
+
+export function useDeleteJourney() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => api<void>(`/journeys/${id}`, { method: 'DELETE' }),
+    onSuccess: (_, id) => {
+      queryClient.removeQueries({ queryKey: keys.journey(id) });
+      return queryClient.invalidateQueries({ queryKey: keys.journeys });
+    },
+  });
+}

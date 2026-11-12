@@ -66,7 +66,16 @@
     "history": "Terminés",
     "empty": "Ton premier trajet t'attend.",
     "progress": "{{walked}} sur {{total}} km",
-    "arrivedOn": "{{km}} km, arrivé le {{date}}"
+    "arrivedOn": "{{km}} km, arrivé le {{date}}",
+    "options": "Options du trajet",
+    "restart": "Recommencer depuis le départ",
+    "delete": "Supprimer le trajet",
+    "cancel": "Annuler",
+    "restartTitle": "Recommencer ce trajet ?",
+    "restartBody": "Ton pion revient au départ et les étapes passées sont oubliées. Tes séances restent dans ton historique.",
+    "deleteTitle": "Supprimer ce trajet ?",
+    "deleteBody": "Il disparaît pour de bon. Tes séances restent dans ton historique.",
+    "failed": "Impossible pour le moment. Vérifie ta connexion et réessaie."
   },
   "newJourney": {
     "title": "Nouveau trajet",

@@ -66,7 +66,16 @@
     "history": "Finished",
     "empty": "Your first journey is waiting.",
     "progress": "{{walked}} of {{total}} km",
-    "arrivedOn": "{{km}} km, arrived on {{date}}"
+    "arrivedOn": "{{km}} km, arrived on {{date}}",
+    "options": "Journey options",
+    "restart": "Start again from the beginning",
+    "delete": "Delete the journey",
+    "cancel": "Cancel",
+    "restartTitle": "Start this journey again?",
+    "restartBody": "Your pawn goes back to the start and the passed stages are forgotten. Your sessions stay in your history.",
+    "deleteTitle": "Delete this journey?",
+    "deleteBody": "It is gone for good. Your sessions stay in your history.",
+    "failed": "Not possible right now. Check your connection and try again."
   },
   "newJourney": {
     "title": "New journey",
