@@ -140,7 +140,7 @@ async fn get_profile(
     let private = user.visibility == "friends" && relation != "friend" && relation != "me";
     let under_way = if private { None } else { under_way(db, id).await? };
 
-    let badges = badges_of(db, &[id]).await?.pop().map(|(_, b)| b).unwrap_or_default();
+    let badges = badges_of(db, &[id]).await?.pop().unwrap_or_default().1;
     Ok(Json(PublicProfile {
         badges,
         walker: Walker {
