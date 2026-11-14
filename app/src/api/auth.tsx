@@ -23,6 +23,7 @@ import {
   setSignedOutHandler,
   storedRefreshToken,
 } from './client';
+import { keys } from './queries';
 import type { AuthResponse, UserProfile } from './types';
 
 type Status = 'loading' | 'signedOut' | 'signedIn';
@@ -68,11 +69,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     getValue<UserProfile>(PROFILE_KEY),
   );
 
-  const setUser = useCallback((profile: UserProfile) => {
-    setValue(PROFILE_KEY, profile);
-    setUserState(profile);
-    applySettings(profile);
-  }, []);
+  const setUser = useCallback(
+    (profile: UserProfile) => {
+      const before = getValue<UserProfile>(PROFILE_KEY);
+      setValue(PROFILE_KEY, profile);
+      setUserState(profile);
+      applySettings(profile);
+      // Every screen reading `useMe` sees the change at once.
+      queryClient.setQueryData(keys.me, profile);
+      // Posts, rankings and profiles carry my name and photo: fetch them again.
+      if (
+        before &&
+        (before.avatar_url !== profile.avatar_url || before.first_name !== profile.first_name)
+      ) {
+        queryClient.invalidateQueries({ predicate: (query) => query.queryKey[0] !== keys.me[0] });
+      }
+    },
+    [queryClient],
+  );
   // The stored profile sets colours and language from the first screen.
   useEffect(() => {
     const stored = getValue<UserProfile>(PROFILE_KEY);
