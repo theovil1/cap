@@ -230,23 +230,29 @@ function TreadmillBanner() {
   return (
     <Pressable
       onPress={() => router.push('/session')}
-      style={[styles.banner, { backgroundColor: connected ? colors.blue : colors.textSecondary }]}
+      style={[
+        styles.banner,
+        { backgroundColor: connected ? colors.bluetooth : colors.textSecondary },
+      ]}
     >
       <View style={styles.bannerIcon}>
         {connected ? (
-          <Footprints size={21} color={colors.onBlue} />
+          <Footprints size={21} color={colors.onBluetooth} />
         ) : (
           <Bluetooth size={21} color="#FFFFFF" />
         )}
       </View>
       <View style={{ flex: 1, gap: 1 }}>
-        <Text style={[styles.bannerTitle, connected && { color: colors.onBlue }]} numberOfLines={1}>
+        <Text
+          style={[styles.bannerTitle, connected && { color: colors.onBluetooth }]}
+          numberOfLines={1}
+        >
           {connected
             ? t('home.treadmillConnected', { name })
             : t(`treadmill.status.${connection.status}`, { name })}
         </Text>
         <Text
-          style={[styles.bannerText, connected && { color: colors.onBlue, opacity: 0.85 }]}
+          style={[styles.bannerText, connected && { color: colors.onBluetooth, opacity: 0.85 }]}
           numberOfLines={1}
         >
           {live

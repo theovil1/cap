@@ -119,7 +119,7 @@ export default function TreadmillScreen() {
               styles.bar,
               {
                 height: 34 * level,
-                backgroundColor: colors.blue,
+                backgroundColor: colors.bluetooth,
                 opacity: v === undefined ? 0.25 : 0.4 + level * 0.6,
               },
             ]}
@@ -252,7 +252,7 @@ export default function TreadmillScreen() {
             style={styles.flex}
           />
           <Button
-            tone="blue"
+            tone="bluetooth"
             title={t('treadmillSetup.yes')}
             icon={<Check size={18} color="#FFFFFF" />}
             onPress={() => {

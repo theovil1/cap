@@ -162,10 +162,10 @@ export default function PreviewScreen() {
                   <View
                     style={[
                       styles.tick,
-                      { backgroundColor: colors.blue, borderColor: colors.surface },
+                      { backgroundColor: colors.other, borderColor: colors.surface },
                     ]}
                   >
-                    <Check size={11} color={colors.onBlue} strokeWidth={3} />
+                    <Check size={11} color={colors.onOther} strokeWidth={3} />
                   </View>
                 )}
               </View>

@@ -175,7 +175,7 @@ export function Label({ children, style }: { children: ReactNode; style?: StyleP
   return <Text style={[styles.label, { color: colors.textSecondary }, style]}>{children}</Text>;
 }
 
-type ButtonTone = 'blue' | 'accent' | 'dark' | 'light';
+type ButtonTone = 'blue' | 'bluetooth' | 'accent' | 'dark' | 'light';
 type ButtonSize = 'large' | 'medium' | 'small';
 
 const BUTTON_SIZES = {
@@ -210,6 +210,7 @@ export function Button({
   const colors = useColors();
   const [background, foreground, border] = {
     blue: [colors.blue, colors.onBlue, colors.blue],
+    bluetooth: [colors.bluetooth, colors.onBluetooth, colors.bluetooth],
     accent: [colors.accent, colors.onAccent, colors.accent],
     dark: [colors.inverse, colors.onInverse, colors.inverse],
     light: [colors.surface, colors.text, colors.border],
@@ -315,7 +316,7 @@ export function Avatar({
    * `accent` for me, `walker` for everyone else (a colour from `seed`),
    * `blue` and `plain` for the older screens.
    */
-  tone?: 'accent' | 'blue' | 'plain' | 'walker';
+  tone?: 'accent' | 'blue' | 'other' | 'plain' | 'walker';
   /** Usually the user id, so a walker keeps the same colour everywhere. */
   seed?: string;
   /** Colour of the 3 point ring that separates stacked avatars. */
@@ -326,6 +327,7 @@ export function Avatar({
   const [background, foreground] = {
     accent: [colors.accent, colors.onAccent],
     blue: [colors.blue, colors.onBlue],
+    other: [colors.other, colors.onOther],
     plain: [colors.inset, colors.text],
     walker: [walker.background, walker.foreground],
   }[tone];

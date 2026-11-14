@@ -436,8 +436,8 @@ function TreadmillCard() {
       style={styles.flex}
     >
       <Card style={[styles.card, styles.row, styles.flex]}>
-        <View style={[styles.bigIcon, { backgroundColor: colors.blue }]}>
-          <Bluetooth size={24} color={colors.onBlue} />
+        <View style={[styles.bigIcon, { backgroundColor: colors.bluetooth }]}>
+          <Bluetooth size={24} color={colors.onBluetooth} />
         </View>
         <View style={{ flex: 1, gap: 4 }}>
           <Text style={[styles.cardTitle, { color: colors.text }]} numberOfLines={1}>

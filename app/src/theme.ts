@@ -51,18 +51,19 @@ function softAccent(name: string, accent: string, dark: boolean): string {
 }
 
 /**
- * The second colour (the other walkers, links, stages) is blue, so that my
- * accent and theirs differ. With the blue app colour they would look the
- * same: it becomes Cap's orange instead.
+ * The mockups' second colour (blue buttons and links) takes the app colour,
+ * so every button follows the theme. Only the others on the map (rival
+ * pawns, the route ahead) need to differ from me: they stay blue, or take
+ * Cap's orange when the app colour is blue. Bluetooth keeps its own blue.
  */
-function second(name: string, dark: boolean) {
-  if (name !== 'blue') return {};
+function second(name: string, accent: Accent, soft: string, dark: boolean) {
   const orange = ACCENTS.orange[dark ? 'dark' : 'light'];
   return {
-    blue: orange.accent,
-    onBlue: orange.onAccent,
-    blueText: orange.accentText,
-    blueSoft: dark ? palette.dark.accentSoft : palette.light.accentSoft,
+    blue: accent.accent,
+    onBlue: accent.onAccent,
+    blueText: accent.accentText,
+    blueSoft: soft,
+    ...(name === 'blue' ? { other: orange.accent, onOther: orange.onAccent } : {}),
   };
 }
 
@@ -74,13 +75,13 @@ const themes = Object.fromEntries(
         ...palette.light,
         ...accent.light,
         accentSoft: softAccent(name, accent.light.accent, false),
-        ...second(name, false),
+        ...second(name, accent.light, softAccent(name, accent.light.accent, false), false),
       },
       dark: {
         ...palette.dark,
         ...accent.dark,
         accentSoft: softAccent(name, accent.dark.accent, true),
-        ...second(name, true),
+        ...second(name, accent.dark, softAccent(name, accent.dark.accent, true), true),
       },
     },
   ]),

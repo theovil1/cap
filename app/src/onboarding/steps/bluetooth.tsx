@@ -27,7 +27,7 @@ export function BluetoothStep({ nav, allow }: { nav: FrameNav; allow: () => void
           <Text style={[styles.note, { color: colors.textMuted }]}>
             {t('onboarding.bluetooth.note')}
           </Text>
-          <Button tone="blue" title={t('onboarding.bluetooth.allow')} onPress={allow} />
+          <Button tone="bluetooth" title={t('onboarding.bluetooth.allow')} onPress={allow} />
         </>
       }
     >

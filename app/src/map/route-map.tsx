@@ -205,7 +205,7 @@ export function RouteMap({
           filter={['==', ['get', 'part'], 'left']}
           layout={{ 'line-cap': 'round', 'line-join': 'round' }}
           paint={{
-            'line-color': colors.blue,
+            'line-color': colors.other,
             'line-width': mode === 'overview' ? 4 : 6,
             'line-dasharray': [0.1, 2],
           }}
@@ -258,7 +258,7 @@ export function RouteMap({
                 'match',
                 ['get', 'tone'],
                 0,
-                colors.blue,
+                colors.other,
                 1,
                 colors.success,
                 colors.accent,
@@ -358,8 +358,8 @@ function RivalPawn({ path, rival }: { path: RoutePoint[]; rival: Rival }) {
           offset={[-24, -22]}
         >
           <Glass style={styles.bubble}>
-            <View style={[styles.bubbleDot, { backgroundColor: colors.blue }]}>
-              <Text style={[styles.bubbleInitial, { color: colors.onBlue }]}>
+            <View style={[styles.bubbleDot, { backgroundColor: colors.other }]}>
+              <Text style={[styles.bubbleInitial, { color: colors.onOther }]}>
                 {rival.initial.charAt(0).toUpperCase()}
               </Text>
             </View>
@@ -373,7 +373,7 @@ function RivalPawn({ path, rival }: { path: RoutePoint[]; rival: Rival }) {
 
 function Pawn({ initial, rival = false }: { initial: string; rival?: boolean }) {
   const colors = useColors();
-  const color = rival ? colors.blue : colors.accent;
+  const color = rival ? colors.other : colors.accent;
   return (
     <View style={[styles.pawnArea, rival && styles.rivalArea]} pointerEvents="none">
       {!rival && <View style={[styles.halo, { backgroundColor: color }]} />}
@@ -384,7 +384,7 @@ function Pawn({ initial, rival = false }: { initial: string; rival?: boolean }) 
           { backgroundColor: color, borderColor: colors.surface },
         ]}
       >
-        <Text style={[styles.initial, { color: rival ? colors.onBlue : colors.onAccent }]}>
+        <Text style={[styles.initial, { color: rival ? colors.onOther : colors.onAccent }]}>
           {initial.charAt(0).toUpperCase()}
         </Text>
       </View>

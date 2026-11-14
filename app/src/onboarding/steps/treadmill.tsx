@@ -119,7 +119,12 @@ export function TreadmillStep({ nav, next }: { nav: FrameNav; next: () => void }
     <OnboardingFrame
       {...nav}
       footer={
-        <Button tone="blue" title={t('onboarding.continue')} onPress={next} disabled={!connected} />
+        <Button
+          tone="bluetooth"
+          title={t('onboarding.continue')}
+          onPress={next}
+          disabled={!connected}
+        />
       }
     >
       <Headline
