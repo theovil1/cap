@@ -58,6 +58,9 @@ function Screens() {
 
   return (
     <Stack
+      // Signing in or out starts the navigation afresh: a session that turns out to be
+      // expired would otherwise leave an empty screen where the tabs were.
+      key={status === 'signedIn' ? (pending ? 'onboarding' : 'app') : 'signed-out'}
       screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.background } }}
     >
       <Stack.Protected guard={status === 'signedIn' && pending}>
@@ -79,6 +82,17 @@ function Screens() {
         <Stack.Screen name="manual-session" options={{ presentation: 'modal' }} />
         <Stack.Screen name="stride" options={{ presentation: 'modal' }} />
         <Stack.Screen name="invite/[code]" options={{ presentation: 'modal' }} />
+        <Stack.Screen name="arrival" options={{ presentation: 'fullScreenModal' }} />
+        <Stack.Screen name="treadmill" options={{ presentation: 'modal' }} />
+        <Stack.Screen name="me" />
+        <Stack.Screen name="walker/[id]" />
+        <Stack.Screen name="public-route/[id]" />
+        <Stack.Screen name="publish" />
+        <Stack.Screen name="plan" />
+        <Stack.Screen name="event/[id]" />
+        <Stack.Screen name="event-live/[id]" options={{ presentation: 'fullScreenModal' }} />
+        <Stack.Screen name="post/[id]" />
+        <Stack.Screen name="catalog" />
       </Stack.Protected>
       <Stack.Protected guard={status === 'signedOut'}>
         <Stack.Screen name="welcome" />
