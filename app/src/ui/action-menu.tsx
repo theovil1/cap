@@ -2,8 +2,12 @@ import { MenuView } from '@expo/ui/community/menu';
 import { requireOptionalNativeModule } from 'expo';
 import { t as translate } from 'i18next';
 import type { ReactNode } from 'react';
-import { Pressable, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
+import { ChevronDown } from 'lucide-react-native';
+import { Pressable, StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
 import type { SFSymbol } from 'sf-symbols-typescript';
+
+import { useColors } from '@/theme';
+import { size, type } from '@/tokens';
 
 import { showActions } from './action-sheet';
 
@@ -100,6 +104,44 @@ export function ActionMenu({
   );
 }
 
+/** A filter as a pill that opens a native menu: "Cette semaine ▾". */
+export function MenuPill({
+  label,
+  icon,
+  title,
+  items,
+}: {
+  label: string;
+  /** Before the label, e.g. a flag. */
+  icon?: ReactNode;
+  title?: string;
+  items: MenuItem[];
+}) {
+  const colors = useColors();
+  return (
+    <ActionMenu title={title} items={items} label={title ? `${title} : ${label}` : label}>
+      <View style={[styles.pill, { backgroundColor: colors.surface, borderColor: colors.track }]}>
+        {icon}
+        <Text style={[type.label, styles.pillText, { color: colors.text }]} numberOfLines={1}>
+          {label}
+        </Text>
+        <ChevronDown size={16} color={colors.textSecondary} strokeWidth={2.2} />
+      </View>
+    </ActionMenu>
+  );
+}
+
 const styles = StyleSheet.create({
   full: { alignSelf: 'stretch', width: '100%' },
+  pill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 7,
+    height: size.chip,
+    maxWidth: 260,
+    paddingHorizontal: 14,
+    borderRadius: 999,
+    borderWidth: 1,
+  },
+  pillText: { flexShrink: 1 },
 });

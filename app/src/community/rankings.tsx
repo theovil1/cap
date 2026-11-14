@@ -2,7 +2,7 @@ import { router } from 'expo-router';
 import type { TFunction } from 'i18next';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { StyleSheet, Text } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
 import { countryName } from '@/i18n/countries';
 import { Flag } from '@/ui/flag';
@@ -16,12 +16,13 @@ import type {
 import { formatDate, formatKm, formatNumber, formatRank } from '@/i18n/format';
 import { useColors } from '@/theme';
 import { type } from '@/tokens';
-import { Chip, ChipRow } from '@/ui/controls';
+import { MenuPill } from '@/ui/action-menu';
 import { Avatar, Card } from '@/ui/primitives';
 import { RankCard, RankRow } from '@/ui/stats';
 
 const PERIODS: LeaderboardPeriod[] = ['week', 'month', 'all', 'streak'];
 const SCOPES: LeaderboardScope[] = ['world', 'country', 'friends'];
+const SCOPE_ICONS = { world: 'globe.europe.africa', country: 'flag', friends: 'person.2' } as const;
 
 /** Rankings part of the Community tab: period and scope, my place, the list. */
 export function Rankings() {
@@ -69,29 +70,33 @@ export function Rankings() {
 
   return (
     <>
-      <ChipRow>
-        {PERIODS.map((p) => (
-          <Chip key={p} label={t(`rankings.${p}`)} on={p === period} onPress={() => setPeriod(p)} />
-        ))}
-      </ChipRow>
-      <ChipRow>
-        {SCOPES.map((s) => (
-          <Chip
-            key={s}
-            small
-            // "Pays" and its flag: a long country name pushed the Amis chip off
-            // screen. The full name is in the line under the chips.
-            label={t(`rankings.${s}`)}
-            icon={
-              s === 'country' && current?.country ? (
-                <Flag code={current.country} height={12} />
-              ) : undefined
-            }
-            on={s === scope}
-            onPress={() => setScope(s)}
-          />
-        ))}
-      </ChipRow>
+      {/* Two menus on one line: the period and who I am ranked with. */}
+      <View style={styles.filters}>
+        <MenuPill
+          label={t(`rankings.${period}`)}
+          title={t('rankings.periodTitle')}
+          items={PERIODS.map((p) => ({
+            label: t(`rankings.${p}`),
+            checked: p === period,
+            onPress: () => setPeriod(p),
+          }))}
+        />
+        <MenuPill
+          label={t(`rankings.${scope}`)}
+          icon={
+            scope === 'country' && current?.country ? (
+              <Flag code={current.country} height={12} />
+            ) : undefined
+          }
+          title={t('rankings.scopeTitle')}
+          items={SCOPES.map((s) => ({
+            label: t(`rankings.${s}`),
+            icon: SCOPE_ICONS[s],
+            checked: s === scope,
+            onPress: () => setScope(s),
+          }))}
+        />
+      </View>
       {current && (
         <Text style={[type.footnote, { color: colors.textSecondary }]}>{subtitle(current, t)}</Text>
       )}
@@ -184,5 +189,6 @@ function hint(entries: LeaderboardEntry[], period: LeaderboardPeriod, t: T): str
 }
 
 const styles = StyleSheet.create({
+  filters: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   list: { paddingVertical: 2 },
 });

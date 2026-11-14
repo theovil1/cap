@@ -262,7 +262,9 @@
       "all": "in all",
       "streak": "in a row"
     },
-    "gapAll": "{{km}} {{unit}} more and you are {{place}}."
+    "gapAll": "{{km}} {{unit}} more and you are {{place}}.",
+    "periodTitle": "Period",
+    "scopeTitle": "Ranking"
   },
   "friends": {
     "title": "Friends",

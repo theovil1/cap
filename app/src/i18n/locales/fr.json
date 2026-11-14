@@ -262,7 +262,9 @@
       "all": "en tout",
       "streak": "d'affilée"
     },
-    "gapAll": "{{km}} {{unit}} de plus et tu passes {{place}}."
+    "gapAll": "{{km}} {{unit}} de plus et tu passes {{place}}.",
+    "periodTitle": "Période",
+    "scopeTitle": "Classement"
   },
   "friends": {
     "title": "Amis",
