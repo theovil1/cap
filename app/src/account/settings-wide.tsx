@@ -4,7 +4,6 @@ import {
   Bell,
   Bluetooth,
   ChevronLeft,
-  Globe,
   ImageIcon,
   MapPin,
   ShieldCheck,
@@ -17,7 +16,8 @@ import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { countryLabel } from '@/i18n/countries';
+import { countryName } from '@/i18n/countries';
+import { Flag } from '@/ui/flag';
 import type { ProfilePatch } from '@/api/profile';
 import type { UserProfile } from '@/api/types';
 import { fonts, useColors } from '@/theme';
@@ -184,9 +184,9 @@ export function SettingsWide({
                         { backgroundColor: colors.surface, borderColor: colors.track },
                       ]}
                     >
-                      <Globe size={17} color={colors.textSecondary} />
+                      <Flag code={country} height={16} />
                       <Text style={[styles.pickerText, { color: colors.text }]}>
-                        {countryLabel(country)}
+                        {countryName(country)}
                       </Text>
                     </Pressable>
                   </View>

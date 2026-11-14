@@ -16,7 +16,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { countryLabel } from '@/i18n/countries';
+import { countryName } from '@/i18n/countries';
 import { useAuth } from '@/api/auth';
 import { api, ApiError } from '@/api/client';
 import { useUpdateProfile, type ProfilePatch } from '@/api/profile';
@@ -314,7 +314,7 @@ export default function AccountScreen() {
           />
           <Row
             label={t('account.country')}
-            value={countryLabel(user.country)}
+            value={countryName(user.country)}
             onPress={() => router.push('/country')}
           />
           <Row

@@ -16,7 +16,8 @@ import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { countryLabel } from '@/i18n/countries';
+import { countryName } from '@/i18n/countries';
+import { Flag as CountryFlag } from '@/ui/flag';
 import { useAuth } from '@/api/auth';
 import { useProfile } from '@/api/community';
 import { useActiveJourney, useFriends, useJourneys, useSessions } from '@/api/queries';
@@ -66,7 +67,7 @@ export default function MyProfileScreen() {
   const won = medals.filter((m) => m.metal !== 'locked').length;
   const place = [
     `@${user.username}`,
-    [user.home_city, countryLabel(user.country)].filter(Boolean).join(', '),
+    [user.home_city, countryName(user.country)].filter(Boolean).join(', '),
     t('me.since', {
       date: formatDate(new Date(user.created_at), { month: 'long', year: 'numeric' }),
     }),
@@ -118,7 +119,12 @@ export default function MyProfileScreen() {
           <Text style={[styles.name, { color: colors.text }]}>{user.first_name}</Text>
           <NameBadge badges={badges} />
         </View>
-        <Text style={[styles.place, { color: colors.textSecondary }]}>{place}</Text>
+        <View style={styles.placeRow}>
+          <CountryFlag code={user.country} height={13} />
+          <Text style={[styles.place, styles.placeText, { color: colors.textSecondary }]}>
+            {place}
+          </Text>
+        </View>
         <BadgeRow badges={badges} />
       </View>
       <View style={styles.row}>
@@ -325,6 +331,8 @@ const styles = StyleSheet.create({
   nameRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 4 },
   name: { fontFamily: fonts.display, fontSize: 28, letterSpacing: -0.8, marginTop: 4 },
   place: { fontFamily: fonts.text, fontSize: 14, textAlign: 'center' },
+  placeRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 7 },
+  placeText: { flexShrink: 1 },
   row: { flexDirection: 'row', gap: 10 },
   card: { padding: 16, gap: 14 },
   cardTitle: { fontFamily: fonts.display, fontSize: 19, letterSpacing: -0.38 },

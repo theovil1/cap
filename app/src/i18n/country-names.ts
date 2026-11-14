@@ -233,7 +233,6 @@ export const COUNTRIES: [code: string, fr: string, en: string][] = [
   ['TZ', 'Tanzanie', 'Tanzania'],
   ['UA', 'Ukraine', 'Ukraine'],
   ['UG', 'Ouganda', 'Uganda'],
-  ['UK', 'Royaume-Uni', 'United Kingdom'],
   ['US', 'États-Unis', 'United States'],
   ['UY', 'Uruguay', 'Uruguay'],
   ['UZ', 'Ouzbékistan', 'Uzbekistan'],

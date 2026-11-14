@@ -7,9 +7,10 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useAuth } from '@/api/auth';
 import { useUpdateProfile } from '@/api/profile';
-import { allCountries, flag } from '@/i18n/countries';
+import { allCountries } from '@/i18n/countries';
 import { fonts, useColors } from '@/theme';
 import { SearchBar } from '@/ui/controls';
+import { Flag } from '@/ui/flag';
 import { ScreenHeader } from '@/ui/layout';
 import { RoundButton } from '@/ui/primitives';
 
@@ -58,7 +59,7 @@ export default function CountryScreen() {
               accessibilityLabel={item.name}
               style={[styles.row, { borderBottomColor: colors.border }]}
             >
-              <Text style={styles.flag}>{flag(item.code)}</Text>
+              <Flag code={item.code} height={20} />
               <Text style={[styles.name, { color: colors.text }]} numberOfLines={1}>
                 {item.name}
               </Text>
@@ -81,6 +82,5 @@ const styles = StyleSheet.create({
     minHeight: 52,
     borderBottomWidth: StyleSheet.hairlineWidth,
   },
-  flag: { fontSize: 24 },
   name: { flex: 1, fontFamily: fonts.textMedium, fontSize: 16 },
 });

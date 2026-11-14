@@ -20,7 +20,8 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { countryLabel } from '@/i18n/countries';
+import { countryName } from '@/i18n/countries';
+import { Flag as CountryFlag } from '@/ui/flag';
 import { useFollow, useProfile, useReport } from '@/api/community';
 import { useAddFriend } from '@/api/queries';
 import type { PublicProfile } from '@/api/types';
@@ -73,7 +74,7 @@ function ProfileView({ profile }: { profile: PublicProfile }) {
   const won = medals.filter((m) => m.metal !== 'locked');
   const place = [
     `@${walker.username}`,
-    [profile.home_city, countryLabel(profile.country)].filter(Boolean).join(', '),
+    [profile.home_city, countryName(profile.country)].filter(Boolean).join(', '),
     t('me.since', {
       date: formatDate(new Date(profile.created_at), { month: 'long', year: 'numeric' }),
     }),
@@ -115,7 +116,12 @@ function ProfileView({ profile }: { profile: PublicProfile }) {
           <Text style={[styles.name, { color: colors.text }]}>{walker.first_name}</Text>
           <NameBadge badges={profile.badges} />
         </View>
-        <Text style={[styles.place, { color: colors.textSecondary }]}>{place}</Text>
+        <View style={styles.placeRow}>
+          <CountryFlag code={profile.country} height={13} />
+          <Text style={[styles.place, styles.placeText, { color: colors.textSecondary }]}>
+            {place}
+          </Text>
+        </View>
         <BadgeRow badges={profile.badges} />
         <Text style={[styles.small, { color: colors.textMuted }]}>
           {t('walker.follows', {
@@ -296,6 +302,8 @@ const styles = StyleSheet.create({
   nameRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 4 },
   name: { fontFamily: fonts.display, fontSize: 28, letterSpacing: -0.8, marginTop: 4 },
   place: { fontFamily: fonts.text, fontSize: 14, textAlign: 'center' },
+  placeRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 7 },
+  placeText: { flexShrink: 1 },
   row: { flexDirection: 'row', gap: 10 },
   card: { padding: 16, gap: 14 },
   cardTitle: { fontFamily: fonts.display, fontSize: 19, letterSpacing: -0.38 },

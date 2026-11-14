@@ -115,6 +115,7 @@ export function RankRow({
   rank,
   name,
   detail,
+  detailIcon,
   value,
   unit,
   avatar,
@@ -126,6 +127,8 @@ export function RankRow({
   rank: number | string;
   name: string;
   detail?: string;
+  /** Before the detail, e.g. a flag. */
+  detailIcon?: ReactNode;
   value: string;
   unit?: string;
   avatar: ReactNode;
@@ -167,9 +170,15 @@ export function RankRow({
           {name}
         </Text>
         {detail ? (
-          <Text style={[styles.detail, { color: colors.textSecondary }]} numberOfLines={1}>
-            {detail}
-          </Text>
+          <View style={styles.detailRow}>
+            {detailIcon}
+            <Text
+              style={[styles.detail, styles.shrink, { color: colors.textSecondary }]}
+              numberOfLines={1}
+            >
+              {detail}
+            </Text>
+          </View>
         ) : null}
       </View>
       <Amount value={value} unit={unit} size={compact ? 16 : 17} />
@@ -210,6 +219,8 @@ export function RankCard({
 }
 
 const styles = StyleSheet.create({
+  detailRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  shrink: { flexShrink: 1 },
   amount: { fontFamily: fonts.display, fontVariant: ['tabular-nums'] },
   unit: { fontFamily: fonts.textSemiBold, letterSpacing: 0 },
   tile: {

@@ -4,7 +4,8 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, Text } from 'react-native';
 
-import { countryLabel } from '@/i18n/countries';
+import { countryName } from '@/i18n/countries';
+import { Flag } from '@/ui/flag';
 import { useLeaderboard } from '@/api/queries';
 import type {
   Leaderboard,
@@ -33,7 +34,6 @@ export function Rankings() {
   const entries = current?.entries ?? [];
   const me = current?.me ?? null;
   const streak = period === 'streak';
-  const countryName = (code: string) => countryLabel(code);
   const value = (entry: LeaderboardEntry) =>
     streak ? formatNumber(entry.value) : formatKm(entry.value, entry.value >= 100_000 ? 0 : 1);
   const unit = (entry: LeaderboardEntry) =>
@@ -46,6 +46,7 @@ export function Rankings() {
       rank={entry.rank}
       name={entry.me ? t('rankings.you') : entry.first_name}
       detail={scope === 'world' ? countryName(entry.country) : `@${entry.username}`}
+      detailIcon={scope === 'world' ? <Flag code={entry.country} height={11} /> : undefined}
       value={value(entry)}
       unit={unit(entry)}
       onPress={
@@ -125,7 +126,7 @@ type T = TFunction;
 
 function subtitle(board: Leaderboard, t: T): string {
   const scope = t(`rankings.scopeLabel.${board.scope}`, {
-    country: countryLabel(board.country),
+    country: countryName(board.country),
   });
   // Dates come as `YYYY-MM-DD`: read them at noon to stay on the right day.
   const day = (iso: string) => new Date(`${iso}T12:00:00`);
