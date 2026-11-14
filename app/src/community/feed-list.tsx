@@ -3,7 +3,6 @@ import { Ellipsis, Flag, Newspaper, PenLine, Route as RouteIcon } from 'lucide-r
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-  ActionSheetIOS,
   ActivityIndicator,
   Alert,
   Pressable,
@@ -11,6 +10,7 @@ import {
   Text,
   TextInput,
   View,
+  type GestureResponderEvent,
 } from 'react-native';
 
 import {
@@ -21,6 +21,7 @@ import {
   useFeed,
   useReport,
 } from '@/api/community';
+import { showActions } from '@/ui/action-sheet';
 import { useMe } from '@/api/queries';
 import type { FeedPost } from '@/api/types';
 import { formatAgo, formatKm, formatNumber } from '@/i18n/format';
@@ -209,11 +210,12 @@ export function PostCard({ post, now }: { post: FeedPost; now: number }) {
         edited: formatAgo(post.edited_at, now).toLowerCase(),
       })
     : formatAgo(post.created_at, now);
-  const more = () => {
+  const more = (from?: GestureResponderEvent) => {
     const options = post.mine
       ? [post.text ? t('feed.editWord') : t('feed.addWord'), t('feed.delete'), t('journeys.cancel')]
       : [t('feed.report'), t('journeys.cancel')];
-    ActionSheetIOS.showActionSheetWithOptions(
+    showActions(
+      from,
       { options, cancelButtonIndex: options.length - 1, destructiveButtonIndex: post.mine ? 1 : 0 },
       (i) => {
         if (post.mine && i === 0) {

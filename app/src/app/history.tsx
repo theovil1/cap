@@ -1,9 +1,18 @@
 import { router } from 'expo-router';
 import { ChevronLeft, CloudOff, Hand, Plus } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
-import { ActionSheetIOS, Alert, FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import {
+  Alert,
+  FlatList,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+  type GestureResponderEvent,
+} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { showActions } from '@/ui/action-sheet';
 import { useDeleteSessions, useSessions } from '@/api/queries';
 import { formatDate, formatDuration, formatKm, formatSpeed } from '@/i18n/format';
 import { pendingSessions } from '@/session/store';
@@ -32,8 +41,9 @@ export default function HistoryScreen() {
       { text: t('journeys.cancel'), style: 'cancel' },
       { text: t('history.delete'), style: 'destructive', onPress: run },
     ]);
-  const openMenu = (localId: string) =>
-    ActionSheetIOS.showActionSheetWithOptions(
+  const openMenu = (localId: string, from?: GestureResponderEvent) =>
+    showActions(
+      from,
       {
         options: [t('history.deleteOne'), t('journeys.cancel')],
         destructiveButtonIndex: 0,
@@ -111,7 +121,7 @@ export default function HistoryScreen() {
       }
       renderItem={({ item }) => (
         <Pressable
-          onPress={() => openMenu(item.id)}
+          onPress={(e) => openMenu(item.id, e)}
           accessibilityRole="button"
           accessibilityHint={t('history.deleteOne')}
           style={[styles.row, { backgroundColor: colors.surface, borderColor: colors.border }]}

@@ -3,7 +3,6 @@ import { Camera, ChevronLeft, ChevronRight } from 'lucide-react-native';
 import { useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-  ActionSheetIOS,
   ActivityIndicator,
   Alert,
   Pressable,
@@ -13,9 +12,11 @@ import {
   Switch,
   Text,
   View,
+  type GestureResponderEvent,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { showActions } from '@/ui/action-sheet';
 import { countryName } from '@/i18n/countries';
 import { useAuth } from '@/api/auth';
 import { api, ApiError } from '@/api/client';
@@ -69,11 +70,13 @@ export default function AccountScreen() {
 
   /** iOS menu to pick one value. */
   const choose = <T extends string>(
+    from: GestureResponderEvent,
     title: string,
     options: { value: T; label: string }[],
     pick: (value: T) => void,
   ) =>
-    ActionSheetIOS.showActionSheetWithOptions(
+    showActions(
+      from,
       {
         title,
         options: [...options.map((o) => o.label), t('journeys.cancel')],
@@ -166,8 +169,9 @@ export default function AccountScreen() {
     <Row
       label={t('account.language')}
       value={t(`account.languages.${user.language}`)}
-      onPress={() =>
+      onPress={(e) =>
         choose(
+          e,
           t('account.language'),
           (['fr', 'en'] as const).map((l) => ({ value: l, label: t(`account.languages.${l}`) })),
           (language) => save({ language }),
@@ -179,8 +183,9 @@ export default function AccountScreen() {
     <Row
       label={t('account.units')}
       value={t(`account.unitNames.${user.units}`)}
-      onPress={() =>
+      onPress={(e) =>
         choose(
+          e,
           t('account.units'),
           (['km', 'mi'] as const).map((u) => ({ value: u, label: t(`account.unitNames.${u}`) })),
           (units) => save({ units }),
@@ -197,8 +202,9 @@ export default function AccountScreen() {
     <Row
       label={t('account.visibility')}
       value={t(`account.visibilities.${user.visibility}`)}
-      onPress={() =>
+      onPress={(e) =>
         choose(
+          e,
           t('account.visibilityHint'),
           (['everyone', 'friends'] as const).map((v) => ({
             value: v,
@@ -385,7 +391,7 @@ function Row({
 }: {
   label: string;
   value?: string;
-  onPress?: () => void;
+  onPress?: (e: GestureResponderEvent) => void;
   tone?: 'link' | 'danger';
   children?: ReactNode;
 }) {

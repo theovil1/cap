@@ -2,8 +2,9 @@ import { router } from 'expo-router';
 import { Plus } from 'lucide-react-native';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActionSheetIOS, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View, type GestureResponderEvent } from 'react-native';
 
+import { showActions } from '@/ui/action-sheet';
 import { useEvents, type EventFilter } from '@/api/community';
 import { EVENT_FILTERS, EventsExplorer } from '@/community/events-explorer';
 import { ROUTE_FILTERS, RoutesExplorer, type RouteFilter } from '@/community/routes-explorer';
@@ -29,8 +30,9 @@ export default function ExploreScreen() {
   const [search, setSearch] = useState('');
 
   // New journey, or publish one of mine for the community.
-  const add = () =>
-    ActionSheetIOS.showActionSheetWithOptions(
+  const add = (from?: GestureResponderEvent) =>
+    showActions(
+      from,
       {
         options: [t('journeys.new'), t('publish.title'), t('journeys.cancel')],
         cancelButtonIndex: 2,

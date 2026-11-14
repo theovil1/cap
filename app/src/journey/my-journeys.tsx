@@ -1,8 +1,9 @@
 import { router } from 'expo-router';
 import { CalendarDays, ChevronRight, Ellipsis, Flag, Swords } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
-import { ActionSheetIOS, Alert, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Alert, Pressable, StyleSheet, Text, View, type GestureResponderEvent } from 'react-native';
 
+import { showActions } from '@/ui/action-sheet';
 import { useDeleteJourney, useJourneys, useResetJourney } from '@/api/queries';
 import type { JourneySummary } from '@/api/types';
 import { formatDate, formatKm, formatNumber } from '@/i18n/format';
@@ -66,8 +67,9 @@ function useJourneyMenu(journey: JourneySummary) {
       { text: t('journeys.cancel'), style: 'cancel' },
       { text: action, style: 'destructive', onPress: run },
     ]);
-  return () =>
-    ActionSheetIOS.showActionSheetWithOptions(
+  return (from?: GestureResponderEvent) =>
+    showActions(
+      from,
       {
         title: journeyTitle(journey),
         options: [t('journeys.restart'), t('journeys.delete'), t('journeys.cancel')],

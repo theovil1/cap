@@ -1,8 +1,9 @@
 import { CalendarDays } from 'lucide-react-native';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActionSheetIOS, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View, type GestureResponderEvent } from 'react-native';
 
+import { showActions } from '@/ui/action-sheet';
 import { formatDate } from '@/i18n/format';
 import { fonts, useColors } from '@/theme';
 import { Toggle } from '@/ui/controls';
@@ -43,14 +44,15 @@ export function PlanFields({
   const withStart = (start: Date) =>
     onChange({ ...plan, startsAt: start, endsAt: new Date(start.getTime() + lengthDays * DAY_MS) });
 
-  const pickDay = () => {
+  const pickDay = (from?: GestureResponderEvent) => {
     const days = Array.from({ length: 30 }, (_, i) => {
       const d = new Date(plan.startsAt);
       const today = new Date();
       d.setFullYear(today.getFullYear(), today.getMonth(), today.getDate() + i + 1);
       return d;
     });
-    ActionSheetIOS.showActionSheetWithOptions(
+    showActions(
+      from,
       {
         title: t('plan.day'),
         options: [
@@ -62,8 +64,9 @@ export function PlanFields({
       (i) => i < days.length && withStart(days[i]),
     );
   };
-  const pickHour = () =>
-    ActionSheetIOS.showActionSheetWithOptions(
+  const pickHour = (from?: GestureResponderEvent) =>
+    showActions(
+      from,
       {
         title: t('plan.hour'),
         options: [
@@ -83,8 +86,9 @@ export function PlanFields({
         withStart(d);
       },
     );
-  const pickLength = () =>
-    ActionSheetIOS.showActionSheetWithOptions(
+  const pickLength = (from?: GestureResponderEvent) =>
+    showActions(
+      from,
       {
         title: t('plan.length'),
         options: [...LENGTHS.map((d) => t('plan.days', { count: d })), t('journeys.cancel')],

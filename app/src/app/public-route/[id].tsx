@@ -11,7 +11,6 @@ import {
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-  ActionSheetIOS,
   ActivityIndicator,
   Alert,
   Pressable,
@@ -21,9 +20,11 @@ import {
   Text,
   useWindowDimensions,
   View,
+  type GestureResponderEvent,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { showActions } from '@/ui/action-sheet';
 import { ApiError } from '@/api/client';
 import { useReport, useStartPublicRoute, useUnpublish, usePublicRoute } from '@/api/community';
 import type { PublicRouteDetail, RoutePhoto } from '@/api/types';
@@ -99,7 +100,7 @@ function useActions(route: PublicRouteDetail) {
         ),
     });
   };
-  const more = () => {
+  const more = (from?: GestureResponderEvent) => {
     const options = route.mine
       ? [
           t('plan.schedule'),
@@ -108,7 +109,8 @@ function useActions(route: PublicRouteDetail) {
           t('journeys.cancel'),
         ]
       : [t('plan.schedule'), t('publicRoute.report'), t('journeys.cancel')];
-    ActionSheetIOS.showActionSheetWithOptions(
+    showActions(
+      from,
       {
         options,
         cancelButtonIndex: options.length - 1,

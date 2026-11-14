@@ -340,7 +340,9 @@
     "measureOnTreadmill": "Measure on the treadmill",
     "treadmillConnected": "Connected",
     "treadmill": "Treadmill",
-    "seeMine": "See my profile"
+    "seeMine": "See my profile",
+    "arrivalAtThisPace_one": "At one session a week, you get to:",
+    "arrivalAtThisPace_other": "At {{count}} sessions a week, you get to:"
   },
   "units": {
     "km": "{{unit}}",

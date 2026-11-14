@@ -4,6 +4,7 @@ import {
   Bluetooth,
   Check,
   ChevronRight,
+  Flag,
   Footprints,
   History,
   Minus,
@@ -17,7 +18,7 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { useAuth } from '@/api/auth';
 import { useUpdateProfile, type ProfilePatch } from '@/api/profile';
-import { useActiveJourney, useJourneys, useSessions } from '@/api/queries';
+import { useJourneys, useSessions } from '@/api/queries';
 import type { UserProfile } from '@/api/types';
 import { formatDate, formatKm, formatNumber } from '@/i18n/format';
 import { MedalView } from '@/journey/medal-view';
@@ -313,38 +314,47 @@ function PerWeekCard({ user, wide }: { user: UserProfile; wide?: boolean }) {
   const { t } = useTranslation();
   const colors = useColors();
   const update = useUpdateProfile();
-  const { summary } = useActiveJourney();
-  const arrival = summary
-    ? estimateArrival(
-        summary.route_distance_m - summary.distance_m,
+  const { data: journeys = [] } = useJourneys();
+  // Every session counts for each journey under way: each gets its own date.
+  const arrivals = journeys
+    .filter((j) => j.status === 'active' && j.joined && !j.arrived_at)
+    .map((j) => {
+      const arrival = estimateArrival(
+        j.route_distance_m - j.distance_m,
         user.sessions_per_week,
         DEFAULT_SESSION_M,
-      )
-    : null;
-  const when =
-    arrival && summary
-      ? t('profile.arrivalAround', {
-          place: summary.end_town ?? '',
-          date: formatDate(arrival.date, { day: 'numeric', month: 'long' }),
-        })
-      : null;
+      );
+      return arrival
+        ? {
+            id: j.id,
+            text: t('profile.arrivalAround', {
+              place: j.title ?? j.end_town ?? j.end.label,
+              date: formatDate(arrival.date, { day: 'numeric', month: 'long' }),
+            }),
+          }
+        : null;
+    })
+    .filter((a) => a !== null);
   return (
     <Card style={[styles.card, wide && styles.flex]}>
-      <View style={styles.cardHead}>
-        <Text style={[styles.cardTitle, { color: colors.text }]}>{t('profile.perWeekTitle')}</Text>
-        {when && !wide ? (
-          <Text style={[styles.sub, { color: colors.textSecondary }]} numberOfLines={1}>
-            {when}
-          </Text>
-        ) : null}
-      </View>
+      <Text style={[styles.cardTitle, { color: colors.text }]}>{t('profile.perWeekTitle')}</Text>
       <Segment
         options={[2, 3, 4, 5].map((n) => ({ value: n, label: String(n) }))}
         value={user.sessions_per_week}
         onChange={(n) => update.mutate({ sessions_per_week: n })}
       />
-      {when && wide ? (
-        <Text style={[styles.sub, { color: colors.textSecondary }]}>{when}</Text>
+      {arrivals.length > 0 ? (
+        <View style={styles.arrivals}>
+          <Text style={[styles.sub, { color: colors.textSecondary }]}>
+            {t('profile.arrivalAtThisPace', { count: user.sessions_per_week })}
+          </Text>
+          {arrivals.map((a) => (
+            <View key={a.id} style={styles.arrival}>
+              <Flag size={14} color={colors.accentText} strokeWidth={2.2} />
+              <Text style={[styles.arrivalText, { color: colors.text }]}>{a.text}</Text>
+            </View>
+          ))}
+        </View>
       ) : null}
     </Card>
   );
@@ -542,6 +552,9 @@ function StepButton({
 }
 
 const styles = StyleSheet.create({
+  arrivals: { gap: 6 },
+  arrival: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  arrivalText: { flex: 1, fontFamily: fonts.textMedium, fontSize: 14.5 },
   flex: { flex: 1 },
   header: { flexDirection: 'row', alignItems: 'center', gap: 14, marginBottom: 4 },
   name: { fontFamily: fonts.display, fontSize: 28, letterSpacing: -0.6 },

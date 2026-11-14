@@ -10,16 +10,17 @@ import {
 } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 import {
-  ActionSheetIOS,
   ActivityIndicator,
   Alert,
   ScrollView,
   StyleSheet,
   Text,
   View,
+  type GestureResponderEvent,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { showActions } from '@/ui/action-sheet';
 import { countryName } from '@/i18n/countries';
 import { Flag as CountryFlag } from '@/ui/flag';
 import { useFollow, useProfile, useReport } from '@/api/community';
@@ -95,8 +96,9 @@ function ProfileView({ profile }: { profile: PublicProfile }) {
       Alert.alert(t('walker.pending', { name: walker.first_name }));
     }
   };
-  const more = () =>
-    ActionSheetIOS.showActionSheetWithOptions(
+  const more = (from?: GestureResponderEvent) =>
+    showActions(
+      from,
       {
         options: [t('walker.report'), t('journeys.cancel')],
         destructiveButtonIndex: 0,

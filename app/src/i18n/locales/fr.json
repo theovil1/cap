@@ -340,7 +340,9 @@
     "measureOnTreadmill": "Mesurer sur le tapis",
     "treadmillConnected": "Connecté",
     "treadmill": "Tapis",
-    "seeMine": "Voir mon profil"
+    "seeMine": "Voir mon profil",
+    "arrivalAtThisPace_one": "À une séance par semaine, tu arrives :",
+    "arrivalAtThisPace_other": "À {{count}} séances par semaine, tu arrives :"
   },
   "units": {
     "km": "{{unit}}",

@@ -3,7 +3,6 @@ import { ChevronLeft, SendHorizontal } from 'lucide-react-native';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-  ActionSheetIOS,
   Alert,
   KeyboardAvoidingView,
   Pressable,
@@ -12,9 +11,11 @@ import {
   Text,
   TextInput,
   View,
+  type GestureResponderEvent,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { showActions } from '@/ui/action-sheet';
 import { useAddComment, useComments, useDeleteComment, useFeed, useReport } from '@/api/community';
 import type { Comment } from '@/api/types';
 import { PostCard } from '@/community/feed-list';
@@ -42,25 +43,22 @@ export default function PostScreen() {
     if (!value || !id) return;
     add.mutate({ id, text: value }, { onSuccess: () => setText('') });
   };
-  const more = (comment: Comment) => {
+  const more = (comment: Comment, from?: GestureResponderEvent) => {
     const options = [
       comment.mine ? t('feed.delete') : t('feed.reportComment'),
       t('journeys.cancel'),
     ];
-    ActionSheetIOS.showActionSheetWithOptions(
-      { options, cancelButtonIndex: 1, destructiveButtonIndex: 0 },
-      (i) => {
-        if (i !== 0 || !id) return;
-        if (comment.mine || post?.mine) {
-          remove.mutate({ commentId: comment.id, postId: id });
-        } else {
-          report.mutate(
-            { target_type: 'comment', target_id: comment.id },
-            { onSuccess: () => Alert.alert(t('publicRoute.reported')) },
-          );
-        }
-      },
-    );
+    showActions(from, { options, cancelButtonIndex: 1, destructiveButtonIndex: 0 }, (i) => {
+      if (i !== 0 || !id) return;
+      if (comment.mine || post?.mine) {
+        remove.mutate({ commentId: comment.id, postId: id });
+      } else {
+        report.mutate(
+          { target_type: 'comment', target_id: comment.id },
+          { onSuccess: () => Alert.alert(t('publicRoute.reported')) },
+        );
+      }
+    });
   };
 
   return (
@@ -82,7 +80,7 @@ export default function PostScreen() {
         </View>
         {post ? <PostCard post={post} now={now} /> : null}
         {comments.map((c) => (
-          <Pressable key={c.id} onLongPress={() => more(c)} style={styles.comment}>
+          <Pressable key={c.id} onLongPress={(e) => more(c, e)} style={styles.comment}>
             <Pressable
               onPress={() => router.push({ pathname: '/walker/[id]', params: { id: c.author.id } })}
             >
