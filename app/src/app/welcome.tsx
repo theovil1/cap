@@ -2,22 +2,16 @@ import * as AppleAuthentication from 'expo-apple-authentication';
 import { ChevronLeft } from 'lucide-react-native';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  Image,
-  KeyboardAvoidingView,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { KeyboardAvoidingView, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Path } from 'react-native-svg';
 
 import { useAuth } from '@/api/auth';
 import { ApiError } from '@/api/client';
+import { CityLights } from '@/onboarding/city-lights';
 import { Headline } from '@/onboarding/frame';
 import { CapLogo } from '@/onboarding/logo';
+import { PHONE_WINDOWS, WIDE_WINDOWS } from '@/onboarding/windows';
 import { useDark } from '@/settings/appearance';
 import { fonts, useColors } from '@/theme';
 import { TextField } from '@/ui/controls';
@@ -203,11 +197,11 @@ export default function WelcomeScreen() {
     <View style={[styles.screen, { backgroundColor: colors.background }]}>
       {mode === 'welcome' || wide ? (
         <>
-          <Image
+          <CityLights
             source={map}
+            size={wide ? [2388, 1668] : [1170, 2532]}
+            windows={dark ? (wide ? WIDE_WINDOWS : PHONE_WINDOWS) : []}
             style={wide ? StyleSheet.absoluteFill : styles.map}
-            resizeMode="cover"
-            accessibilityIgnoresInvertColors
           />
           <View
             pointerEvents="none"
