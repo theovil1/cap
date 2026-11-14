@@ -13,7 +13,7 @@ import {
 } from 'lucide-react-native';
 import { useCallback, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Pressable, StyleSheet, Text, View, type LayoutChangeEvent } from 'react-native';
+import { ScrollView, StyleSheet, Text, View, type LayoutChangeEvent } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useAuth } from '@/api/auth';
@@ -36,7 +36,7 @@ import { useDayStats } from '@/session/stats';
 import { pendingSessions } from '@/session/store';
 import { fonts, useColors, type Colors } from '@/theme';
 import { useWide } from '@/ui/layout';
-import { Avatar, Figure, Glass, GlassButton, Label, ProgressBar } from '@/ui/primitives';
+import { Avatar, Button, Figure, Glass, GlassButton, Label, ProgressBar } from '@/ui/primitives';
 import { Sheet } from '@/ui/sheet';
 
 /** Height of the top bar (minimise button, journey and place) over the map. */
@@ -164,7 +164,7 @@ export default function SessionScreen() {
       >
         <View style={{ gap: 8, flexShrink: 1 }}>
           <Label>{t('session.today')}</Label>
-          <Figure value={formatKm(sessionM, 2)} unit={t('units.km')} size={wide ? 120 : 82} />
+          <Figure value={formatKm(sessionM, 2)} unit={t('units.km')} size={wide ? 100 : 82} />
         </View>
         <SpeedBlock
           wide={wide}
@@ -215,22 +215,23 @@ export default function SessionScreen() {
         <View style={{ gap: 9 }}>
           <ProgressBar ratio={walked / total} marks={marks} />
           <View style={styles.progressRow}>
-            <Text style={[styles.caption, { color: colors.textSecondary }]}>
+            <Text style={[styles.caption, { color: colors.textSecondary }]} numberOfLines={1}>
               <Text style={{ color: colors.text, fontFamily: fonts.textSemiBold }}>
                 {formatKm(walked)} {t('units.km')}
               </Text>{' '}
               {t('session.fromStart', { place: summary.start_town ?? '' })}
             </Text>
-            <Text style={[styles.caption, { color: colors.textSecondary }]}>
+            <Text
+              style={[styles.caption, styles.right, { color: colors.textSecondary }]}
+              numberOfLines={1}
+            >
               {t('session.toEnd', { place: summary.end_town ?? '', km: formatKm(total - walked) })}
             </Text>
           </View>
         </View>
       )}
       {live && (
-        <Pressable onPress={finishNow} style={[styles.finish, { borderColor: colors.border }]}>
-          <Text style={[styles.finishText, { color: colors.text }]}>{t('session.finish')}</Text>
-        </Pressable>
+        <Button tone="light" size="medium" title={t('session.finish')} onPress={finishNow} />
       )}
     </>
   );
@@ -347,7 +348,14 @@ export default function SessionScreen() {
                 },
               ]}
             >
-              {content}
+              {/* Scrolls when the tiles, the rival and the progress do not all fit. */}
+              <ScrollView
+                style={styles.panelScroll}
+                contentContainerStyle={styles.panelContent}
+                showsVerticalScrollIndicator={false}
+              >
+                {content}
+              </ScrollView>
             </View>
           )}
         </>
@@ -477,7 +485,11 @@ const styles = StyleSheet.create({
     shadowOpacity: 1,
     shadowRadius: 40,
   },
+  panelScroll: { flex: 1, marginHorizontal: -20 },
+  panelContent: { flexGrow: 1, gap: 18, paddingHorizontal: 20, paddingBottom: 22 },
+  right: { textAlign: 'right' },
   panelWide: {
+    overflow: 'hidden',
     position: 'absolute',
     right: 20,
     width: 404,
@@ -514,13 +526,4 @@ const styles = StyleSheet.create({
   tileLabel: { fontFamily: fonts.textMedium, fontSize: 12.5 },
   progressRow: { flexDirection: 'row', justifyContent: 'space-between', gap: 8 },
   caption: { fontFamily: fonts.text, fontSize: 12.5, fontVariant: ['tabular-nums'], flexShrink: 1 },
-  finish: {
-    alignSelf: 'center',
-    paddingHorizontal: 18,
-    height: 38,
-    borderRadius: 999,
-    borderWidth: 1,
-    justifyContent: 'center',
-  },
-  finishText: { fontFamily: fonts.textSemiBold, fontSize: 14 },
 });

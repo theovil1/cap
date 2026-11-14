@@ -5,8 +5,8 @@ import type { TreadmillData } from '@/treadmill/ftms';
 export const STOP_AFTER_MS = 90_000;
 /** One point of the speed curve every this many milliseconds. */
 const SAMPLE_EVERY_MS = 15_000;
-/** Shorter sessions are treated as accidental and dropped. */
-export const MIN_DISTANCE_M = 50;
+/** Shorter sessions are a belt nudged by accident and are dropped; anything walked counts. */
+export const MIN_DISTANCE_M = 10;
 
 /** Everything needed to resume a session after the app was killed. */
 export type LiveSnapshot = {

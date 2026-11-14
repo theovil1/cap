@@ -30,7 +30,8 @@
     "login": "Se connecter",
     "register": "Créer mon compte",
     "toRegister": "Pas encore de compte ? Créer un compte",
-    "toLogin": "Déjà un compte ? Se connecter"
+    "toLogin": "Déjà un compte ? Se connecter",
+    "appleFailed": "Apple n'a pas pu te connecter. Vérifie que l'iPad est connecté à un identifiant Apple (Réglages, en haut) avec la double authentification, ou continue avec un e-mail."
   },
   "errors": {
     "generic": "Quelque chose n'a pas marché. Réessaie.",

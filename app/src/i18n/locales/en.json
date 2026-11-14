@@ -30,7 +30,8 @@
     "login": "Sign in",
     "register": "Create my account",
     "toRegister": "No account yet? Create one",
-    "toLogin": "Already have an account? Sign in"
+    "toLogin": "Already have an account? Sign in",
+    "appleFailed": "Apple could not sign you in. Check that this device is signed in to an Apple Account (Settings, at the top) with two-factor authentication, or continue with an e-mail."
   },
   "errors": {
     "generic": "Something went wrong. Please try again.",

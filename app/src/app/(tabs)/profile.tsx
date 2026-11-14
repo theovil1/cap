@@ -378,7 +378,7 @@ function ColorCard({ user, wide }: { user: UserProfile; wide?: boolean }) {
     </View>
   );
   const moods = wide ? (
-    <View style={{ width: 300 }}>
+    <View style={styles.moodTabs}>
       <Tabs
         options={MOODS.map((m) => ({ value: m, label: t(`profile.moods.${m}`) }))}
         value={user.map_mood}
@@ -403,9 +403,9 @@ function ColorCard({ user, wide }: { user: UserProfile; wide?: boolean }) {
         </Text>
       </View>
       {wide ? (
-        <View style={styles.moodRow}>
+        <View style={[styles.moodRow, styles.wrap]}>
           {swatches}
-          <View style={styles.row}>
+          <View style={[styles.row, styles.moodPick]}>
             <Text style={[styles.label, { color: colors.textSecondary }]}>{t('profile.map')}</Text>
             {moods}
           </View>
@@ -609,6 +609,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  // Wraps under the swatches when the column is too narrow for both.
+  wrap: { flexWrap: 'wrap', rowGap: 16 },
+  moodPick: { flexGrow: 1, flexShrink: 1, minWidth: 260, maxWidth: 380 },
+  moodTabs: { flex: 1 },
   moodRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12 },
   label: { fontFamily: fonts.textMedium, fontSize: 15 },
   link: { fontFamily: fonts.textSemiBold, fontSize: 14 },

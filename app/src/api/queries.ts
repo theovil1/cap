@@ -134,9 +134,12 @@ export function useDeleteJourney() {
   });
 }
 
+/** Friends and requests, checked again every half minute and on each screen that shows them. */
 export function useFriends() {
   return useQuery({
     queryKey: keys.friends,
+    refetchInterval: 30_000,
+    refetchOnMount: 'always',
     ...cached('friends', () => api<FriendList>('/friends')),
   });
 }

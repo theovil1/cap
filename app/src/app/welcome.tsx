@@ -55,8 +55,11 @@ export default function WelcomeScreen() {
     } catch (e) {
       if (e instanceof ApiError)
         setError(t(`errors.${e.code}`, { defaultValue: t('errors.generic') }));
-      else if ((e as { code?: string }).code !== 'ERR_REQUEST_CANCELED')
-        setError(t('errors.network'));
+      else if ((e as { code?: string }).code === 'ERR_REQUEST_CANCELED') return;
+      // Apple refused before reaching Cap: say so, not that the server is down.
+      else if ((e as { code?: string }).code?.startsWith('ERR_'))
+        setError(t('welcome.appleFailed'));
+      else setError(t('errors.network'));
     } finally {
       setBusy(false);
     }

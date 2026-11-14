@@ -5,12 +5,13 @@ import {
   Inter_700Bold,
 } from '@expo-google-fonts/inter';
 import { SpaceGrotesk_500Medium, SpaceGrotesk_700Bold } from '@expo-google-fonts/space-grotesk';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { focusManager, QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
+import { AppState } from 'react-native';
 
 import { AuthProvider, useAuth } from '@/api/auth';
 import '@/i18n';
@@ -19,6 +20,14 @@ import { SessionProvider } from '@/session/session-context';
 import { useColors } from '@/theme';
 
 SplashScreen.preventAutoHideAsync();
+
+// Coming back to the app refreshes what is on screen (friend requests, feed...).
+focusManager.setEventListener((setFocused) => {
+  const subscription = AppState.addEventListener('change', (state) =>
+    setFocused(state === 'active'),
+  );
+  return () => subscription.remove();
+});
 
 export default function RootLayout() {
   const [queryClient] = useState(

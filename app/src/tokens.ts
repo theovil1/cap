@@ -269,9 +269,9 @@ export const blur = { glass: 24, chip: 14 };
 
 /** Paper grain: multiplied by day, screened at night, overlaid on orange. */
 export const grain = {
-  background: { light: [0.1, 'multiply'], dark: [0.16, 'screen'] },
-  picture: { light: [0.16, 'multiply'], dark: [0.12, 'screen'] },
-  accent: { light: [0.28, 'overlay'], dark: [0.28, 'overlay'] },
+  background: { light: [0.05, 'multiply'], dark: [0.07, 'screen'] },
+  picture: { light: [0.08, 'multiply'], dark: [0.06, 'screen'] },
+  accent: { light: [0.16, 'overlay'], dark: [0.16, 'overlay'] },
 } as const;
 
 /** Medal metals: three stop gradient (light, mid, deep) and engraving colour. */
