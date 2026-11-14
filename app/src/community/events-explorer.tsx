@@ -1,13 +1,13 @@
 import { router } from 'expo-router';
-import { CalendarDays } from 'lucide-react-native';
+import { CalendarDays, Plus } from 'lucide-react-native';
 import { useDeferredValue, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, StyleSheet, Text, View, Pressable } from 'react-native';
 
 import { useEvents, type EventFilter } from '@/api/community';
 import type { EventCard, RoutePhoto } from '@/api/types';
 import { formatAgo, formatDate, formatKm, formatNumber } from '@/i18n/format';
-import { useColors } from '@/theme';
+import { fonts, useColors } from '@/theme';
 import { type } from '@/tokens';
 import { EventRow, LiveEventCard } from '@/ui/cards';
 import { EmptyState, useWide } from '@/ui/layout';
@@ -32,7 +32,16 @@ export function formatHour(iso: string): string {
 }
 
 /** The Planifiés part of the Explorer: under way first, then the next ones. */
-export function EventsExplorer({ search, filter }: { search: string; filter: EventFilter }) {
+export function EventsExplorer({
+  search,
+  filter,
+  height,
+}: {
+  search: string;
+  filter: EventFilter;
+  /** iPad: the height under the filters, which the two columns fill. */
+  height?: number;
+}) {
   const { t } = useTranslation();
   const colors = useColors();
   const wide = useWide();
@@ -71,6 +80,7 @@ export function EventsExplorer({ search, filter }: { search: string; filter: Eve
       })}
       action={event.me_registered ? t('events.watch') : t('events.join')}
       onPress={() => openEvent(event)}
+      fill={wide}
     />
   ));
   const upcomingTitle = upcoming.length > 0 && (
@@ -90,6 +100,7 @@ export function EventsExplorer({ search, filter }: { search: string; filter: Eve
           name: event.organizer.first_name,
         })}
         walkers={walkers(event)}
+        wide={wide}
         people={[
           t('events.registered', {
             count: event.registered,
@@ -107,20 +118,43 @@ export function EventsExplorer({ search, filter }: { search: string; filter: Eve
       />
     );
   });
-  // iPad, as in the mockup: under way on the left, the next ones on the right.
+  // iPad, as in the mockup: under way on the left, the next ones in 470 on
+  // the right, with "Organise ton départ" at the bottom.
   if (wide) {
+    const organise = (
+      <Pressable
+        onPress={() => router.push('/plan')}
+        accessibilityRole="button"
+        style={[styles.organise, { borderColor: colors.track }]}
+      >
+        <View style={[styles.organiseIcon, { backgroundColor: colors.accentSoft }]}>
+          <CalendarDays size={22} color={colors.accentText} />
+        </View>
+        <View style={styles.organiseText}>
+          <Text style={[styles.organiseTitle, { color: colors.text }]}>{t('events.organise')}</Text>
+          <Text style={[styles.organiseSub, { color: colors.textSecondary }]}>
+            {t('events.organiseText')}
+          </Text>
+        </View>
+        <Plus size={20} color={colors.textSecondary} />
+      </Pressable>
+    );
+    const heading = (label: string) => (
+      <Text style={[styles.heading, { color: colors.text }]}>{label}</Text>
+    );
     return (
-      <View style={styles.columns}>
-        {live.length > 0 ? <View style={styles.column}>{liveCards}</View> : null}
-        <View style={styles.column}>
-          {upcomingTitle}
-          <View style={live.length > 0 ? styles.column : styles.grid}>
-            {upcomingRows.map((row, i) => (
-              <View key={i} style={live.length > 0 ? null : styles.cell}>
-                {row}
-              </View>
-            ))}
+      <View style={[styles.columns, { minHeight: height }]}>
+        {live.length > 0 ? (
+          <View style={styles.liveColumn}>
+            {heading(t('events.underWay'))}
+            {liveCards}
           </View>
+        ) : null}
+        <View style={live.length > 0 ? styles.upcomingColumn : styles.liveColumn}>
+          {upcoming.length > 0 ? heading(t('events.upcoming')) : null}
+          {upcomingRows}
+          <View style={styles.spacer} />
+          {organise}
         </View>
       </View>
     );
@@ -136,8 +170,29 @@ export function EventsExplorer({ search, filter }: { search: string; filter: Eve
 
 const styles = StyleSheet.create({
   loading: { marginTop: 40 },
-  columns: { flexDirection: 'row', gap: 20, alignItems: 'flex-start' },
-  column: { flex: 1, gap: 12 },
-  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
-  cell: { flexBasis: 320, flexGrow: 1, maxWidth: '50%' },
+  columns: { flexDirection: 'row', gap: 20, alignItems: 'stretch' },
+  liveColumn: { flex: 1, gap: 12 },
+  upcomingColumn: { width: 470, gap: 12 },
+  heading: { fontFamily: fonts.display, fontSize: 20, letterSpacing: -0.4 },
+  spacer: { flex: 1 },
+  organise: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
+    paddingVertical: 16,
+    paddingHorizontal: 18,
+    borderRadius: 22,
+    borderWidth: 1.5,
+    borderStyle: 'dashed',
+  },
+  organiseIcon: {
+    width: 46,
+    height: 46,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  organiseText: { flex: 1, gap: 2 },
+  organiseTitle: { fontFamily: fonts.textSemiBold, fontSize: 16 },
+  organiseSub: { fontFamily: fonts.text, fontSize: 13 },
 });

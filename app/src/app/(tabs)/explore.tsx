@@ -78,25 +78,36 @@ export default function ExploreScreen() {
           />
         </View>
       </View>
-      <ChipRow>
-        {part === 'routes'
-          ? ROUTE_FILTERS.map((key) => (
-              <Chip
-                key={key}
-                label={t(`explore.filters.${key}`)}
-                on={routeFilter === key}
-                onPress={() => setRouteFilter(key)}
-              />
-            ))
-          : EVENT_FILTERS.map((key) => (
-              <Chip
-                key={key}
-                label={t(`explore.filters.${key}`)}
-                on={plannedFilter === key}
-                onPress={() => setPlannedFilter(key)}
-              />
-            ))}
-      </ChipRow>
+      {/* iPad (Planifiés): the chips and the one-line intro share a row. */}
+      <View style={wide && part === 'planned' ? styles.chipsWide : null}>
+        <ChipRow>
+          {part === 'routes'
+            ? ROUTE_FILTERS.map((key) => (
+                <Chip
+                  key={key}
+                  label={t(`explore.filters.${key}`)}
+                  on={routeFilter === key}
+                  onPress={() => setRouteFilter(key)}
+                />
+              ))
+            : EVENT_FILTERS.map((key) => (
+                <Chip
+                  key={key}
+                  label={t(`explore.filters.${key}`)}
+                  on={plannedFilter === key}
+                  onPress={() => setPlannedFilter(key)}
+                />
+              ))}
+        </ChipRow>
+        {wide && part === 'planned' ? (
+          <Text
+            style={[type.subhead, styles.flex, { color: colors.textSecondary }]}
+            numberOfLines={1}
+          >
+            {t('explore.plannedIntro')}
+          </Text>
+        ) : null}
+      </View>
       {part === 'routes' ? (
         <RoutesExplorer
           search={search}
@@ -105,10 +116,16 @@ export default function ExploreScreen() {
         />
       ) : (
         <>
-          <Text style={[type.subhead, { color: colors.textSecondary }]}>
-            {t('explore.plannedIntro')}
-          </Text>
-          <EventsExplorer search={search} filter={plannedFilter} />
+          {wide ? null : (
+            <Text style={[type.subhead, { color: colors.textSecondary }]}>
+              {t('explore.plannedIntro')}
+            </Text>
+          )}
+          <EventsExplorer
+            search={search}
+            filter={plannedFilter}
+            height={wide ? listHeight : undefined}
+          />
         </>
       )}
     </TabScreen>
@@ -117,6 +134,7 @@ export default function ExploreScreen() {
 
 const styles = StyleSheet.create({
   stack: { gap: 12 },
+  chipsWide: { flexDirection: 'row', alignItems: 'center', gap: 16 },
   bar: { flexDirection: 'row', alignItems: 'center', gap: 14 },
   parts: { width: 300 },
   flex: { flex: 1 },

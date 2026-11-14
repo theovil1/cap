@@ -228,6 +228,7 @@ export function EventRow({
   walkers,
   people,
   onPress,
+  wide,
 }: {
   day: string;
   month: string;
@@ -237,6 +238,8 @@ export function EventRow({
   /** "248 inscrits · tu y es". */
   people?: string;
   onPress: () => void;
+  /** iPad mockup: 60 by 66 date, 16 pt title, 22 round. */
+  wide?: boolean;
 }) {
   const colors = useColors();
   const shadows = useShadows();
@@ -246,16 +249,20 @@ export function EventRow({
       accessibilityRole="button"
       style={[
         styles.event,
+        wide && styles.eventWide,
         { backgroundColor: colors.surface, borderColor: colors.border },
         shadows.card,
       ]}
     >
-      <View style={[styles.date, { backgroundColor: colors.inset }]}>
-        <Text style={[styles.day, { color: colors.text }]}>{day}</Text>
+      <View style={[styles.date, wide && styles.dateWide, { backgroundColor: colors.inset }]}>
+        <Text style={[styles.day, wide && styles.dayWide, { color: colors.text }]}>{day}</Text>
         <Text style={[type.overline, { color: colors.textSecondary }]}>{month}</Text>
       </View>
       <View style={styles.rowBody}>
-        <Text style={[styles.eventTitle, { color: colors.text }]} numberOfLines={1}>
+        <Text
+          style={[styles.eventTitle, wide && styles.eventTitleWide, { color: colors.text }]}
+          numberOfLines={1}
+        >
           {title}
         </Text>
         <Text style={[type.footnote, { color: colors.textSecondary }]} numberOfLines={1}>
@@ -285,6 +292,7 @@ export function LiveEventCard({
   subtitle,
   action,
   onPress,
+  fill,
 }: {
   cover: ReactNode;
   live: string;
@@ -294,6 +302,8 @@ export function LiveEventCard({
   title: string;
   subtitle: string;
   action: string;
+  /** iPad: fills its column, the picture taking what the words leave. */
+  fill?: boolean;
   onPress: () => void;
 }) {
   const colors = useColors();
@@ -304,11 +314,12 @@ export function LiveEventCard({
       accessibilityRole="button"
       style={[
         styles.hero,
+        fill && styles.heroFill,
         { backgroundColor: colors.surface, borderColor: colors.border },
         shadows.card,
       ]}
     >
-      <View style={[styles.heroCover, styles.liveCover]}>
+      <View style={[styles.heroCover, styles.liveCover, fill && styles.coverFill]}>
         {cover}
         <Grain on="picture" />
         <Shade from={40} />
@@ -318,16 +329,19 @@ export function LiveEventCard({
           <Text style={styles.captionText}>{walking}</Text>
         </View>
       </View>
-      <View style={styles.liveBody}>
+      <View style={[styles.liveBody, fill && styles.liveBodyFill]}>
         <View style={styles.rowBody}>
-          <Text style={[styles.eventTitleLarge, { color: colors.text }]} numberOfLines={1}>
+          <Text
+            style={[styles.eventTitleLarge, fill && styles.liveTitleFill, { color: colors.text }]}
+            numberOfLines={1}
+          >
             {title}
           </Text>
           <Text style={[type.footnote, styles.tnum, { color: colors.textSecondary }]}>
             {subtitle}
           </Text>
         </View>
-        <View style={[styles.join, { backgroundColor: colors.accent }]}>
+        <View style={[styles.join, fill && styles.joinFill, { backgroundColor: colors.accent }]}>
           <Text style={[styles.joinText, { color: colors.onAccent }]}>{action}</Text>
           <ChevronRight size={15} color={colors.onAccent} strokeWidth={2.4} />
         </View>
@@ -419,6 +433,13 @@ const styles = StyleSheet.create({
     letterSpacing: -0.38,
   },
   people: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  eventWide: { borderRadius: 22 },
+  dateWide: { width: 60, height: 66, borderRadius: 16 },
+  dayWide: { fontSize: 25, lineHeight: 25 },
+  eventTitleWide: { fontSize: 16 },
+  liveBodyFill: { gap: 14, paddingTop: 18, paddingHorizontal: 22, paddingBottom: 20 },
+  liveTitleFill: { fontSize: 24, lineHeight: 28, letterSpacing: -0.48 },
+  joinFill: { height: 46, paddingHorizontal: 20 },
   liveBody: {
     flexDirection: 'row',
     alignItems: 'center',

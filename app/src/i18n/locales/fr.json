@@ -741,7 +741,10 @@
     "gained_other": "+{{count}} places en 10 min",
     "lost_one": "−{{count}} place en 10 min",
     "lost_other": "−{{count}} places en 10 min",
-    "kmOf": "{{walked}} km sur {{total}}"
+    "kmOf": "{{walked}} km sur {{total}}",
+    "underWay": "En cours",
+    "organise": "Organise ton départ",
+    "organiseText": "Choisis un trajet, une date, et invite tes amis"
   },
   "plan": {
     "title": "Trajet planifié",
