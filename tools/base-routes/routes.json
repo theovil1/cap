@@ -1,0 +1,194 @@
+[
+  {
+    "title": "De Notre-Dame au château de Versailles",
+    "description": "La première marche de beaucoup de Parisiens : on quitte l'île de la Cité, on longe la Seine puis on monte vers les bois de Meudon jusqu'aux grilles dorées du château.",
+    "tags": ["city", "castles"],
+    "start": {
+      "label": "Notre-Dame de Paris",
+      "lat": 48.853,
+      "lon": 2.3499
+    },
+    "end": {
+      "label": "Château de Versailles",
+      "lat": 48.8049,
+      "lon": 2.1204
+    },
+    "photo": "File:Parterre du Midi Garden pond and Palace of Versailles at golden hour with blue sky in France.jpg"
+  },
+  {
+    "title": "Paris - Giverny, chez Monet",
+    "description": "La Seine en fil rouge, des boucles du Vexin aux nymphéas : une marche de peintre, de la capitale au jardin de Claude Monet.",
+    "tags": ["river", "countryside"],
+    "start": {
+      "label": "Paris",
+      "lat": 48.8566,
+      "lon": 2.3522
+    },
+    "end": {
+      "label": "Giverny",
+      "lat": 49.0755,
+      "lon": 1.5339
+    },
+    "photo": "File:Le jardin d'eau de Claude Monet (Giverny) (48743477716).jpg"
+  },
+  {
+    "title": "Tours - Amboise par la Loire",
+    "description": "Une étape douce sur la Loire à vélo, version marcheur : vignes de Vouvray, coteaux de tuffeau et le château d'Amboise au bout du chemin.",
+    "tags": ["castles", "river"],
+    "start": {
+      "label": "Place Plumereau, Tours",
+      "lat": 47.3949,
+      "lon": 0.6836
+    },
+    "end": {
+      "label": "Château d'Amboise",
+      "lat": 47.413,
+      "lon": 0.9862
+    },
+    "photo": "File:Château d'Amboise from below.JPG"
+  },
+  {
+    "title": "Blois - Chambord",
+    "description": "Du château royal de Blois à la silhouette de Chambord, à travers la Sologne et le plus grand parc clos d'Europe.",
+    "tags": ["castles", "countryside"],
+    "start": {
+      "label": "Château de Blois",
+      "lat": 47.5857,
+      "lon": 1.3311
+    },
+    "end": {
+      "label": "Château de Chambord",
+      "lat": 47.6161,
+      "lon": 1.517
+    },
+    "photo": "File:Château de Chambord at dawn.jpg"
+  },
+  {
+    "title": "Romorantin - Chambord",
+    "description": "La Sologne des étangs et des forêts, de la capitale de la Sologne jusqu'au domaine de Chambord. Le trajet maison de Cap.",
+    "tags": ["castles", "countryside"],
+    "start": {
+      "label": "Romorantin-Lanthenay",
+      "lat": 47.3586,
+      "lon": 1.7417
+    },
+    "end": {
+      "label": "Château de Chambord",
+      "lat": 47.6161,
+      "lon": 1.517
+    },
+    "photo": "File:Château de Chambord at dawn.jpg"
+  },
+  {
+    "title": "Du Puy-en-Velay à Conques",
+    "description": "Le début de la via Podiensis vers Compostelle : l'Aubrac, ses burons et ses grands espaces, jusqu'à l'abbatiale de Conques.",
+    "tags": ["mountain", "countryside"],
+    "start": {
+      "label": "Cathédrale du Puy-en-Velay",
+      "lat": 45.0459,
+      "lon": 3.8848
+    },
+    "end": {
+      "label": "Conques",
+      "lat": 44.5995,
+      "lon": 2.3977
+    },
+    "photo": "File:View of Conques 04.jpg"
+  },
+  {
+    "title": "Annecy - Chamonix",
+    "description": "Du lac le plus pur d'Europe au pied du mont Blanc, par les Aravis et la vallée de l'Arve.",
+    "tags": ["mountain"],
+    "start": {
+      "label": "Annecy",
+      "lat": 45.8992,
+      "lon": 6.1294
+    },
+    "end": {
+      "label": "Chamonix-Mont-Blanc",
+      "lat": 45.9237,
+      "lon": 6.8694
+    },
+    "photo": "File:Chamonix - Lac Blanc 4.jpg"
+  },
+  {
+    "title": "Marseille - Cassis",
+    "description": "Du Vieux-Port au port de Cassis, en longeant les calanques et leur eau turquoise.",
+    "tags": ["sea"],
+    "start": {
+      "label": "Vieux-Port, Marseille",
+      "lat": 43.2951,
+      "lon": 5.374
+    },
+    "end": {
+      "label": "Port de Cassis",
+      "lat": 43.214,
+      "lon": 5.5375
+    },
+    "photo": "File:Port-Miou calanque 2.jpg"
+  },
+  {
+    "title": "Nice - Menton",
+    "description": "La Riviera de bout en bout : la promenade des Anglais, Villefranche, Monaco et les façades colorées de Menton.",
+    "tags": ["sea", "city"],
+    "start": {
+      "label": "Promenade des Anglais, Nice",
+      "lat": 43.695,
+      "lon": 7.265
+    },
+    "end": {
+      "label": "Menton",
+      "lat": 43.7747,
+      "lon": 7.5048
+    },
+    "photo": "File:Menton-Côte d'Azur.jpg"
+  },
+  {
+    "title": "Saint-Malo - Mont-Saint-Michel",
+    "description": "Des remparts de la cité corsaire à la merveille de l'Occident, par la côte d'Émeraude et la baie.",
+    "tags": ["sea"],
+    "start": {
+      "label": "Intra-muros, Saint-Malo",
+      "lat": 48.6493,
+      "lon": -2.0257
+    },
+    "end": {
+      "label": "Mont-Saint-Michel",
+      "lat": 48.6361,
+      "lon": -1.5115
+    },
+    "photo": "File:Mont St Michel at sunrise.jpg"
+  },
+  {
+    "title": "Bordeaux - Saint-Émilion",
+    "description": "De la place de la Bourse aux coteaux classés de Saint-Émilion, à travers l'Entre-deux-Mers et ses vignes.",
+    "tags": ["countryside", "city"],
+    "start": {
+      "label": "Place de la Bourse, Bordeaux",
+      "lat": 44.8412,
+      "lon": -0.5697
+    },
+    "end": {
+      "label": "Saint-Émilion",
+      "lat": 44.894,
+      "lon": -0.1556
+    },
+    "photo": "File:Saint-Emilion 33 Place 2013.jpg"
+  },
+  {
+    "title": "Strasbourg - Colmar",
+    "description": "La route des vins d'Alsace à pied : villages fleuris, vignobles au pied des Vosges et la Petite Venise pour finir.",
+    "tags": ["countryside", "city"],
+    "start": {
+      "label": "Cathédrale de Strasbourg",
+      "lat": 48.5818,
+      "lon": 7.751
+    },
+    "end": {
+      "label": "Colmar",
+      "lat": 48.0758,
+      "lon": 7.358
+    },
+    "photo": "File:Little Venice in Colmar 01.jpg"
+  }
+]
