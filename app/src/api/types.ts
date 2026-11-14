@@ -200,7 +200,12 @@ export type Walker = {
   avatar_url: string | null;
 };
 
-export type RoutePhoto = { kind: 'start' | 'end' | 'path'; url: string };
+export type RoutePhoto = {
+  kind: 'start' | 'end' | 'path';
+  url: string;
+  /** Author and licence of a photo from elsewhere. */
+  credit?: string | null;
+};
 
 export type PublicRouteCard = {
   id: string;

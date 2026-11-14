@@ -638,6 +638,7 @@
     "shareText": "{{name}} on Cap: {{km}} km walked on the treadmill and {{count}} medals."
   },
   "publicRoute": {
+    "credit": "Photo: {{credit}}",
     "gone": "This route is no longer published.",
     "by": "Published by {{name}} · {{stages}}",
     "walkers": "Walkers",

@@ -949,15 +949,17 @@ async fn public_routes_from_publication_to_reports(db: PgPool) {
     assert!(detail["fastest"][0]["walking_s"].as_i64().unwrap() > 0);
     assert_eq!(detail["my_journey_id"], journey["id"]);
 
-    // A photo, served without a token.
+    // A photo with its credit, served without a token.
     let jpeg = [0xFF, 0xD8, 0xFF, 0xE0, 0, 0x10];
     let with_photo: Value = server
         .put(&format!("/public-routes/{id}/photos/end"))
+        .add_query_param("credit", "Jane Doe, CC BY-SA 4.0")
         .add_header("authorization", bearer(&theo))
         .add_header("content-type", "image/jpeg")
         .bytes(jpeg.to_vec().into())
         .await
         .json();
+    assert_eq!(with_photo["photos"][0]["credit"], "Jane Doe, CC BY-SA 4.0");
     let url = with_photo["photos"][0]["url"].as_str().unwrap();
     assert_eq!(server.get(url).await.as_bytes().as_ref(), &jpeg);
 

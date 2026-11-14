@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT p.id, p.route_id, p.title, p.description, p.visibility, p.tags, p.featured_at, p.created_at,\n                u.id AS author_id, u.first_name, u.username, u.avatar_url,\n                r.start_label, r.start_lat, r.start_lon, r.end_label, r.end_lat, r.end_lon, r.distance_m,\n                (SELECT name FROM route_stages WHERE route_id = r.id ORDER BY position LIMIT 1) AS start_town,\n                (SELECT name FROM route_stages WHERE route_id = r.id ORDER BY position DESC LIMIT 1) AS end_town,\n                (SELECT count(*) FROM route_stages WHERE route_id = r.id AND position > 0) AS \"stages!\",\n                (SELECT count(DISTINCT jp.user_id) FROM journeys j JOIN journey_participants jp ON jp.journey_id = j.id\n                 WHERE j.public_route_id = p.id AND jp.joined_at IS NOT NULL) AS \"walkers!\",\n                (SELECT count(*) FROM journeys j JOIN journey_participants jp ON jp.journey_id = j.id\n                 WHERE j.public_route_id = p.id AND jp.arrived_at IS NOT NULL) AS \"finished!\",\n                (SELECT COALESCE(array_agg(ph.kind || ':' || extract(epoch FROM ph.updated_at)::bigint ORDER BY ph.kind), '{}')\n                 FROM public_route_photos ph WHERE ph.public_route_id = p.id) AS \"photos!\"\n         FROM public_routes p\n         JOIN users u ON u.id = p.author_id\n         JOIN routes r ON r.id = p.route_id\n         WHERE p.id = ANY($1) AND (NOT p.hidden OR p.author_id = $2)",
+  "query": "SELECT p.id, p.route_id, p.title, p.description, p.visibility, p.tags, p.featured_at, p.created_at,\n                u.id AS author_id, u.first_name, u.username, u.avatar_url,\n                r.start_label, r.start_lat, r.start_lon, r.end_label, r.end_lat, r.end_lon, r.distance_m,\n                (SELECT name FROM route_stages WHERE route_id = r.id ORDER BY position LIMIT 1) AS start_town,\n                (SELECT name FROM route_stages WHERE route_id = r.id ORDER BY position DESC LIMIT 1) AS end_town,\n                (SELECT count(*) FROM route_stages WHERE route_id = r.id AND position > 0) AS \"stages!\",\n                (SELECT count(DISTINCT jp.user_id) FROM journeys j JOIN journey_participants jp ON jp.journey_id = j.id\n                 WHERE j.public_route_id = p.id AND jp.joined_at IS NOT NULL) AS \"walkers!\",\n                (SELECT count(*) FROM journeys j JOIN journey_participants jp ON jp.journey_id = j.id\n                 WHERE j.public_route_id = p.id AND jp.arrived_at IS NOT NULL) AS \"finished!\",\n                (SELECT COALESCE(array_agg(ph.kind || ':' || extract(epoch FROM ph.updated_at)::bigint ORDER BY ph.kind), '{}')\n                 FROM public_route_photos ph WHERE ph.public_route_id = p.id) AS \"photos!\",\n                (SELECT COALESCE(array_agg(COALESCE(ph.credit, '') ORDER BY ph.kind), '{}')\n                 FROM public_route_photos ph WHERE ph.public_route_id = p.id) AS \"credits!\"\n         FROM public_routes p\n         JOIN users u ON u.id = p.author_id\n         JOIN routes r ON r.id = p.route_id\n         WHERE p.id = ANY($1) AND (NOT p.hidden OR p.author_id = $2)",
   "describe": {
     "columns": [
       {
@@ -247,6 +247,12 @@
         "name": "photos!",
         "type_info": "TextArray",
         "origin": "Expression"
+      },
+      {
+        "ordinal": 25,
+        "name": "credits!",
+        "type_info": "TextArray",
+        "origin": "Expression"
       }
     ],
     "parameters": {
@@ -280,8 +286,9 @@
       null,
       null,
       null,
+      null,
       null
     ]
   },
-  "hash": "9369cbca271ce47beeb87158a7ad9933a5abb0d83d1c0e48d6051324a832e1ec"
+  "hash": "9ff7aa52eaa3dae80a2d965f1960fae3fb20299d250dd0f85222c0591f96654d"
 }

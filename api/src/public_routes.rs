@@ -58,6 +58,8 @@ pub struct Photo {
     /// `start`, `end` or `path`.
     kind: String,
     url: String,
+    /// Author and licence, for photos taken from elsewhere (Wikimedia Commons...).
+    credit: Option<String>,
 }
 
 /// A public route as a card in the Explorer.
@@ -164,7 +166,9 @@ async fn cards(db: &PgPool, me: Uuid, ids: &[Uuid]) -> AppResult<Vec<PublicRoute
                 (SELECT count(*) FROM journeys j JOIN journey_participants jp ON jp.journey_id = j.id
                  WHERE j.public_route_id = p.id AND jp.arrived_at IS NOT NULL) AS \"finished!\",
                 (SELECT COALESCE(array_agg(ph.kind || ':' || extract(epoch FROM ph.updated_at)::bigint ORDER BY ph.kind), '{}')
-                 FROM public_route_photos ph WHERE ph.public_route_id = p.id) AS \"photos!\"
+                 FROM public_route_photos ph WHERE ph.public_route_id = p.id) AS \"photos!\",
+                (SELECT COALESCE(array_agg(COALESCE(ph.credit, '') ORDER BY ph.kind), '{}')
+                 FROM public_route_photos ph WHERE ph.public_route_id = p.id) AS \"credits!\"
          FROM public_routes p
          JOIN users u ON u.id = p.author_id
          JOIN routes r ON r.id = p.route_id
@@ -180,10 +184,12 @@ async fn cards(db: &PgPool, me: Uuid, ids: &[Uuid]) -> AppResult<Vec<PublicRoute
             photos: r
                 .photos
                 .iter()
-                .filter_map(|p| p.split_once(':'))
-                .map(|(kind, version)| Photo {
+                .zip(&r.credits)
+                .filter_map(|(p, credit)| p.split_once(':').map(|(kind, version)| (kind, version, credit)))
+                .map(|(kind, version, credit)| Photo {
                     url: format!("/public-routes/{}/photos/{kind}?v={version}", r.id),
                     kind: kind.to_owned(),
+                    credit: Some(credit.clone()).filter(|c| !c.is_empty()),
                 })
                 .collect(),
             id: r.id,
@@ -512,29 +518,42 @@ fn photo_kind(kind: &str) -> AppResult<()> {
     }
 }
 
+#[derive(Deserialize, IntoParams)]
+pub struct PhotoQuery {
+    /// Author and licence of a photo taken from elsewhere, 200 characters at most.
+    credit: Option<String>,
+}
+
 /// Set a photo of a public route (its author): the raw JPEG or PNG image.
 #[utoipa::path(put, path = "/public-routes/{id}/photos/{kind}", tag = "public routes", security(("bearer" = [])),
-    params(("id" = Uuid, Path), ("kind" = String, Path, description = "start, end or path")),
+    params(("id" = Uuid, Path), ("kind" = String, Path, description = "start, end or path"), PhotoQuery),
     request_body(content = Vec<u8>, content_type = "image/jpeg"),
     responses((status = 200, body = PublicRouteDetail), (status = 400, body = ErrorBody), (status = 404, body = ErrorBody), (status = 413, body = ErrorBody)))]
 async fn set_photo(
     State(state): State<AppState>,
     AuthUser(me): AuthUser,
     Path((id, kind)): Path<(Uuid, String)>,
+    Query(query): Query<PhotoQuery>,
     headers: HeaderMap,
     body: Bytes,
 ) -> AppResult<Json<PublicRouteDetail>> {
     photo_kind(&kind)?;
+    let credit = query.credit.as_deref().map(str::trim).filter(|c| !c.is_empty());
+    if credit.is_some_and(|c| c.chars().count() > 200) {
+        return Err(AppError::bad_request("invalid_credit", "the credit is 200 characters at most"));
+    }
     let content_type = check_image(&headers, &body, MAX_PHOTO_BYTES)?;
     let saved = sqlx::query!(
-        "INSERT INTO public_route_photos (public_route_id, kind, content_type, image)
-         SELECT id, $3, $4, $5 FROM public_routes WHERE id = $1 AND author_id = $2
-         ON CONFLICT (public_route_id, kind) DO UPDATE SET content_type = $4, image = $5, updated_at = now()",
+        "INSERT INTO public_route_photos (public_route_id, kind, content_type, image, credit)
+         SELECT id, $3, $4, $5, $6 FROM public_routes WHERE id = $1 AND author_id = $2
+         ON CONFLICT (public_route_id, kind)
+         DO UPDATE SET content_type = $4, image = $5, credit = $6, updated_at = now()",
         id,
         me,
         kind,
         content_type,
-        body.as_ref()
+        body.as_ref(),
+        credit
     )
     .execute(&state.db)
     .await?;

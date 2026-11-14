@@ -638,6 +638,7 @@
     "shareText": "{{name}} sur Cap : {{km}} km marchés sur le tapis et {{count}} médailles."
   },
   "publicRoute": {
+    "credit": "Photo : {{credit}}",
     "gone": "Ce trajet n'est plus publié.",
     "by": "Publié par {{name}} · {{stages}}",
     "walkers": "Marcheurs",

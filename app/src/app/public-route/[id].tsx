@@ -181,6 +181,13 @@ function Gallery({
               icon={kind === 'end' ? Flag : MapPin}
               style={[styles.chip, { bottom: 52 }]}
             />
+            {route.photos.find((p) => p.kind === kind)?.credit ? (
+              <Text style={[styles.credit, { bottom: 24 }]} numberOfLines={1}>
+                {t('publicRoute.credit', {
+                  credit: route.photos.find((p) => p.kind === kind)?.credit,
+                })}
+              </Text>
+            ) : null}
           </View>
         ))}
       </ScrollView>
@@ -400,6 +407,17 @@ const styles = StyleSheet.create({
       'linear-gradient(180deg, rgba(0,0,0,0.18) 0%, rgba(0,0,0,0) 30%, rgba(0,0,0,0) 55%, rgba(20,10,6,0.45) 92%)',
   },
   chip: { position: 'absolute', left: 20 },
+  // Licences of photos from elsewhere ask for the author's name.
+  credit: {
+    position: 'absolute',
+    right: 16,
+    maxWidth: '70%',
+    color: 'rgba(255,255,255,0.8)',
+    fontFamily: fonts.text,
+    fontSize: 10.5,
+    textShadowColor: 'rgba(0,0,0,0.5)',
+    textShadowRadius: 3,
+  },
   dots: { position: 'absolute', right: 20, flexDirection: 'row', gap: 5 },
   dot: { width: 6, height: 6, borderRadius: 9 },
   dotOn: { width: 18 },
