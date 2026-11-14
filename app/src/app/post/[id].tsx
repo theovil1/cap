@@ -97,7 +97,7 @@ export default function PostScreen() {
                 size={34}
               />
             </Pressable>
-            <ActionMenu longPress items={commentItems(c)} style={styles.bubbleMenu}>
+            <ActionMenu full longPress items={commentItems(c)} style={styles.bubbleMenu}>
               <View
                 style={[
                   styles.bubble,

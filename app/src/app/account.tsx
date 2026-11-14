@@ -9,12 +9,12 @@ import {
   ScrollView,
   Share,
   StyleSheet,
-  Switch,
   Text,
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { Toggle } from '@/ui/controls';
 import { ActionMenu, type MenuItem } from '@/ui/action-menu';
 import { countryName } from '@/i18n/countries';
 import { useAuth } from '@/api/auth';
@@ -186,7 +186,11 @@ export default function AccountScreen() {
   );
   const notificationsRow = (
     <Row label={t('account.notifications')}>
-      <Switch value={user.notifications} onValueChange={(on) => save({ notifications: on })} />
+      <Toggle
+        value={user.notifications}
+        onChange={(on) => save({ notifications: on })}
+        label={t('account.notifications')}
+      />
     </Row>
   );
   const visibilityRow = (
@@ -391,7 +395,7 @@ function Row({
   const color = tone === 'link' ? colors.blueText : tone === 'danger' ? colors.danger : colors.text;
   if (menu) {
     return (
-      <ActionMenu title={menu.title} items={menu.items} label={label}>
+      <ActionMenu full title={menu.title} items={menu.items} label={label}>
         <View style={[styles.row, { borderColor: colors.border }]}>
           <Text style={[styles.label, { color }]}>{label}</Text>
           {value !== undefined && (

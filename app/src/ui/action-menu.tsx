@@ -2,7 +2,7 @@ import { MenuView } from '@expo/ui/community/menu';
 import { requireOptionalNativeModule } from 'expo';
 import { t as translate } from 'i18next';
 import type { ReactNode } from 'react';
-import { Pressable, View, type StyleProp, type ViewStyle } from 'react-native';
+import { Pressable, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
 import type { SFSymbol } from 'sf-symbols-typescript';
 
 import { showActions } from './action-sheet';
@@ -33,6 +33,7 @@ export function ActionMenu({
   longPress = false,
   label,
   style,
+  full = false,
   children,
 }: {
   items: MenuItem[];
@@ -42,6 +43,8 @@ export function ActionMenu({
   /** For VoiceOver: what the trigger does. */
   label?: string;
   style?: StyleProp<ViewStyle>;
+  /** Takes the whole width, like a row of a list (the trigger hugs its content otherwise). */
+  full?: boolean;
   children: ReactNode;
 }) {
   if (!NATIVE) {
@@ -62,9 +65,11 @@ export function ActionMenu({
         onLongPress={longPress ? open : undefined}
         accessibilityRole="button"
         accessibilityLabel={label}
-        style={style}
+        style={[full && styles.full, style]}
       >
-        <View pointerEvents="none">{children}</View>
+        <View pointerEvents="none" style={full && styles.full}>
+          {children}
+        </View>
       </Pressable>
     );
   }
@@ -72,7 +77,7 @@ export function ActionMenu({
     <MenuView
       title={title}
       shouldOpenOnLongPress={longPress}
-      style={style}
+      style={[full && styles.full, style]}
       actions={items.map((item, i) => ({
         id: String(i),
         title: item.label,
@@ -82,9 +87,19 @@ export function ActionMenu({
       }))}
       onPressAction={({ nativeEvent }) => items[Number(nativeEvent.event)]?.onPress()}
     >
-      <View pointerEvents="none" accessible accessibilityRole="button" accessibilityLabel={label}>
+      <View
+        pointerEvents="none"
+        accessible
+        accessibilityRole="button"
+        accessibilityLabel={label}
+        style={full && styles.full}
+      >
         {children}
       </View>
     </MenuView>
   );
 }
+
+const styles = StyleSheet.create({
+  full: { alignSelf: 'stretch', width: '100%' },
+});

@@ -73,7 +73,13 @@ export function PlanFields({
   }));
 
   const tile = (label: string, items: MenuItem[], a11y: string, inRow = true) => (
-    <ActionMenu title={a11y} items={items} label={a11y} style={inRow ? styles.flex : undefined}>
+    <ActionMenu
+      full
+      title={a11y}
+      items={items}
+      label={a11y}
+      style={inRow ? styles.flex : undefined}
+    >
       <View style={[styles.tile, { backgroundColor: colors.inset }]}>
         <Text style={[styles.tileText, { color: colors.text }]} numberOfLines={1}>
           {label}

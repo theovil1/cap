@@ -4,12 +4,18 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
-  Switch,
   Text,
   TextInput,
   View,
   type TextInputProps,
 } from 'react-native';
+import Animated, {
+  interpolateColor,
+  useAnimatedStyle,
+  useDerivedValue,
+  useReducedMotion,
+  withSpring,
+} from 'react-native-reanimated';
 
 import { fonts, useColors, useShadows } from '@/theme';
 import { radius, size, type } from '@/tokens';
@@ -203,6 +209,10 @@ export function TextField({ label, multiline, ...input }: TextInputProps & { lab
   );
 }
 
+/**
+ * On/off switch drawn by the app: the iOS 26 native switch no longer fits the
+ * frame React Native gives it, and sat off-centre in rows.
+ */
 export function Toggle({
   value,
   onChange,
@@ -213,15 +223,26 @@ export function Toggle({
   label: string;
 }) {
   const colors = useColors();
+  const still = useReducedMotion();
+  const on = useDerivedValue(() =>
+    still ? (value ? 1 : 0) : withSpring(value ? 1 : 0, { damping: 18, stiffness: 260 }),
+  );
+  const track = useAnimatedStyle(() => ({
+    backgroundColor: interpolateColor(on.value, [0, 1], [colors.track, colors.success]),
+  }));
+  const thumb = useAnimatedStyle(() => ({ transform: [{ translateX: on.value * 20 }] }));
   return (
-    <Switch
-      value={value}
-      onValueChange={onChange}
+    <Pressable
+      onPress={() => onChange(!value)}
+      accessibilityRole="switch"
+      accessibilityState={{ checked: value }}
       accessibilityLabel={label}
-      trackColor={{ true: colors.success, false: colors.track }}
-      thumbColor="#FFFFFF"
-      ios_backgroundColor={colors.track}
-    />
+      hitSlop={8}
+    >
+      <Animated.View style={[styles.switchTrack, track]}>
+        <Animated.View style={[styles.switchThumb, thumb]} />
+      </Animated.View>
+    </Pressable>
   );
 }
 
@@ -331,6 +352,17 @@ export function SectionHeader({
 }
 
 const styles = StyleSheet.create({
+  switchTrack: { width: 51, height: 31, borderRadius: 99, padding: 2 },
+  switchThumb: {
+    width: 27,
+    height: 27,
+    borderRadius: 99,
+    backgroundColor: '#FFFFFF',
+    shadowColor: '#000000',
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    shadowOffset: { width: 0, height: 2 },
+  },
   chipLabel: { flexShrink: 1 },
   tabs: { flexDirection: 'row', gap: 6 },
   tab: {

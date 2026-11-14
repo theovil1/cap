@@ -101,6 +101,7 @@ export default function HistoryScreen() {
       }
       renderItem={({ item }) => (
         <ActionMenu
+          full
           label={t('history.deleteOne')}
           items={[
             {
