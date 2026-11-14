@@ -144,7 +144,8 @@ export default function NewJourneyScreen() {
       <ScrollView
         contentContainerStyle={[
           styles.content,
-          { paddingTop: insets.top + 12, paddingBottom: 140 },
+          wide && styles.contentWide,
+          { paddingTop: wide ? insets.top + 2 : insets.top + 12, paddingBottom: 140 },
         ]}
         keyboardShouldPersistTaps="handled"
       >
@@ -366,7 +367,7 @@ function PlacesMap({ start, end }: { start: Place | null; end: Place | null }) {
           ))}
         </Map>
       )}
-      <Glass style={[styles.footChip, { top: insets.top + 20 }]}>
+      <Glass style={[styles.footChip, { top: 28 }]}>
         <Footprints size={16} color={colors.accentText} />
         <Text style={[styles.pillText, { color: colors.text }]}>{t('newJourney.footSafe')}</Text>
       </Glass>
@@ -442,7 +443,9 @@ function MapPicker({
 const styles = StyleSheet.create({
   flex: { flex: 1 },
   wide: { flex: 1, flexDirection: 'row' },
-  formWide: { flex: 0, width: 470 },
+  // iPad mockup: the form in 494 on the left, 32 from the edges.
+  formWide: { flex: 0, width: 494 },
+  contentWide: { paddingHorizontal: 32 },
   ideas: { gap: 4, marginTop: 8 },
   ideasHeader: { flexDirection: 'row', alignItems: 'baseline', gap: 8, marginBottom: 4 },
   idea: { paddingHorizontal: 0 },
@@ -457,7 +460,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 8,
     height: 44,
-    paddingHorizontal: 18,
+    paddingHorizontal: 16,
   },
   content: { paddingHorizontal: 20 },
   column: { width: '100%', maxWidth: 560, alignSelf: 'center', gap: 14 },

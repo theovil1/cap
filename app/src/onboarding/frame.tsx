@@ -63,7 +63,7 @@ export function OnboardingFrame({
       style={[
         styles.column,
         wide
-          ? [styles.columnWide, { paddingTop: insets.top + 40, paddingBottom: insets.bottom + 36 }]
+          ? [styles.columnWide, { paddingTop: 40, paddingBottom: 36 }]
           : {
               paddingTop: insets.top + 6,
               paddingBottom: Math.max(insets.bottom, 20),

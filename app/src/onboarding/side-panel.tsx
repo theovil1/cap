@@ -65,11 +65,11 @@ export function SidePanel({ rows }: { rows: SideRow[] }) {
           },
         ]}
       />
-      <Glass style={[styles.brand, { top: insets.top + 28 }, shadows.floating]}>
+      <Glass style={[styles.brand, { top: 28 }, shadows.floating]}>
         <CapLogo size={32} />
         <Text style={[styles.brandText, { color: colors.text }]}>Cap</Text>
       </Glass>
-      <Glass style={[styles.card, { bottom: insets.bottom + 28 }, shadows.floating]}>
+      <Glass style={[styles.card, { bottom: 28 }, shadows.floating]}>
         <Text style={[styles.overline, { color: colors.textSecondary }]}>
           {t('onboarding.side.title')}
         </Text>

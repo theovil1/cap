@@ -287,7 +287,7 @@ export default function PreviewScreen() {
     <View
       style={[
         styles.widePanel,
-        { backgroundColor: colors.surface, top: insets.top + 20, bottom: insets.bottom + 20 },
+        { backgroundColor: colors.surface, top: 20, bottom: 20 },
         shadows.floating,
       ]}
     >
@@ -362,7 +362,13 @@ export default function PreviewScreen() {
           }
           style={StyleSheet.absoluteFill}
         />
-        <View style={[styles.top, { top: insets.top + 12 }, wide && styles.topWide]}>
+        <View
+          style={[
+            styles.top,
+            wide ? { top: 28, left: 28 } : { top: insets.top + 12 },
+            wide && styles.topWide,
+          ]}
+        >
           <GlassButton
             icon={<ChevronLeft size={22} color={colors.text} />}
             onPress={router.back}
@@ -466,9 +472,9 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: 20,
     width: 412,
-    gap: 16,
+    gap: 14,
     padding: 26,
-    borderRadius: 30,
+    borderRadius: 34,
     borderCurve: 'continuous',
   },
   wideTitle: { fontFamily: fonts.display, fontSize: 30, letterSpacing: -0.9 },
