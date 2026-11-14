@@ -85,7 +85,6 @@ export function SettingsWide({
           icon={<ChevronLeft size={22} color={colors.text} />}
           onPress={() => router.back()}
           label={t('common.back')}
-          size={48}
         />
         <Text style={[styles.title, { color: colors.text }]}>{t('settings.title')}</Text>
       </View>
