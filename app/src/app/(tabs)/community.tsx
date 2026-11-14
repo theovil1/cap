@@ -8,8 +8,9 @@ import { useFriends } from '@/api/queries';
 import { FeedList } from '@/community/feed-list';
 import { Rankings } from '@/community/rankings';
 import { fonts, useColors } from '@/theme';
+import { MeAvatar } from '@/ui/me-avatar';
 import { Tabs } from '@/ui/controls';
-import { ScreenHeader, TabScreen } from '@/ui/layout';
+import { ScreenHeader, TabScreen, useWide } from '@/ui/layout';
 import { RoundButton } from '@/ui/primitives';
 
 type Part = 'feed' | 'rankings';
@@ -18,6 +19,7 @@ type Part = 'feed' | 'rankings';
 export default function CommunityScreen() {
   const { t } = useTranslation();
   const colors = useColors();
+  const wide = useWide();
   const [part, setPart] = useState<Part>('feed');
   const { data: friends } = useFriends();
   const waiting = friends?.incoming.length ?? 0;
@@ -38,21 +40,26 @@ export default function CommunityScreen() {
             </View>
           )}
         </View>
+        {wide ? <MeAvatar /> : null}
       </ScreenHeader>
-      <Tabs
-        options={[
-          { value: 'feed', label: t('community.feed') },
-          { value: 'rankings', label: t('community.rankings') },
-        ]}
-        value={part}
-        onChange={setPart}
-      />
+      <View style={wide ? styles.partsWide : null}>
+        <Tabs
+          options={[
+            { value: 'feed', label: t('community.feed') },
+            { value: 'rankings', label: t('community.rankings') },
+          ]}
+          value={part}
+          onChange={setPart}
+        />
+      </View>
       {part === 'feed' ? <FeedList /> : <Rankings />}
     </TabScreen>
   );
 }
 
 const styles = StyleSheet.create({
+  // iPad mockups: the two parts take 360 on the left.
+  partsWide: { width: 360 },
   count: {
     position: 'absolute',
     top: -3,

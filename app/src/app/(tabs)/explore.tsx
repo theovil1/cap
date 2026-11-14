@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, Text, View } from 'react-native';
 
+import { MeAvatar } from '@/ui/me-avatar';
 import { ActionMenu } from '@/ui/action-menu';
 import { useEvents, type EventFilter } from '@/api/community';
 import { EVENT_FILTERS, EventsExplorer } from '@/community/events-explorer';
@@ -50,6 +51,7 @@ export default function ExploreScreen() {
             label={t('explore.add')}
           />
         </ActionMenu>
+        {wide ? <MeAvatar /> : null}
       </ScreenHeader>
       {/* iPad: the two parts and the search side by side, as in the mockup. */}
       <View style={wide ? styles.bar : styles.stack}>

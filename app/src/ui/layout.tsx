@@ -24,12 +24,13 @@ export function useWide(): boolean {
 export function useNavSpace(): { top: number; bottom: number } {
   const insets = useSafeAreaInsets();
   const wide = useWide();
+  // iPad (mockups): the screen title sits on the row of the nav bar.
   return wide
-    ? { top: insets.top + 80, bottom: insets.bottom + 24 }
+    ? { top: insets.top + 2, bottom: insets.bottom + 32 }
     : { top: insets.top + 12, bottom: insets.bottom + 110 };
 }
 
-/** Scrollable tab screen, centred and limited in width on iPad. */
+/** Scrollable tab screen; on iPad the whole width, 32 from the edges, as in the mockups. */
 export function TabScreen({
   children,
   style,
@@ -39,16 +40,17 @@ export function TabScreen({
 }) {
   const colors = useColors();
   const space = useNavSpace();
+  const wide = useWide();
   return (
     <View style={[styles.screen, { backgroundColor: colors.background }]}>
       <Grain />
       <ScrollView
         contentContainerStyle={[
-          styles.content,
+          wide ? styles.contentWide : styles.content,
           { paddingTop: space.top, paddingBottom: space.bottom },
         ]}
       >
-        <View style={[styles.column, style]}>{children}</View>
+        <View style={[wide ? styles.columnWide : styles.column, style]}>{children}</View>
       </ScrollView>
     </View>
   );
@@ -57,21 +59,38 @@ export function TabScreen({
 const styles = StyleSheet.create({
   screen: { flex: 1, overflow: 'hidden' },
   content: { paddingHorizontal: 19 },
+  contentWide: { paddingHorizontal: 32, flexGrow: 1 },
   column: { width: '100%', maxWidth: 760, alignSelf: 'center', gap: 12 },
+  columnWide: { flexGrow: 1, gap: 20 },
 });
 
 /** Large title of a tab screen with its round buttons on the right. */
-export function ScreenHeader({ title, children }: { title: string; children?: ReactNode }) {
+export function ScreenHeader({
+  title,
+  kicker,
+  children,
+}: {
+  title: string;
+  /** Small line above the title: "Mercredi 11 novembre". */
+  kicker?: string;
+  children?: ReactNode;
+}) {
   const colors = useColors();
+  const wide = useWide();
   return (
-    <View style={headerStyles.header}>
-      <Text
-        style={[headerStyles.title, { color: colors.text }]}
-        numberOfLines={1}
-        accessibilityRole="header"
-      >
-        {title}
-      </Text>
+    <View style={[headerStyles.header, wide && headerStyles.headerWide]}>
+      <View style={headerStyles.titles}>
+        {kicker ? (
+          <Text style={[headerStyles.kicker, { color: colors.textSecondary }]}>{kicker}</Text>
+        ) : null}
+        <Text
+          style={[headerStyles.title, wide && headerStyles.titleWide, { color: colors.text }]}
+          numberOfLines={1}
+          accessibilityRole="header"
+        >
+          {title}
+        </Text>
+      </View>
       {children ? <View style={headerStyles.actions}>{children}</View> : null}
     </View>
   );
@@ -79,7 +98,12 @@ export function ScreenHeader({ title, children }: { title: string; children?: Re
 
 const headerStyles = StyleSheet.create({
   header: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 2 },
-  title: { flex: 1, fontFamily: fonts.display, fontSize: 31, lineHeight: 34, letterSpacing: -0.93 },
+  // iPad mockups: a 54 high row, 30 pt title, on the line of the nav bar.
+  headerWide: { height: 54, marginBottom: 0 },
+  titles: { flex: 1, gap: 2 },
+  kicker: { fontFamily: fonts.text, fontSize: 14 },
+  title: { fontFamily: fonts.display, fontSize: 31, lineHeight: 34, letterSpacing: -0.93 },
+  titleWide: { fontSize: 30, lineHeight: 34, letterSpacing: -0.9 },
   actions: { flexDirection: 'row', gap: 10 },
 });
 

@@ -15,8 +15,9 @@ import { RouteMap } from '@/map/route-map';
 import { useSession } from '@/session/session-context';
 import { useDayStats } from '@/session/stats';
 import { fonts, useColors } from '@/theme';
+import { MeAvatar } from '@/ui/me-avatar';
 import { Ring } from '@/ui/charts';
-import { TabScreen, useWide } from '@/ui/layout';
+import { ScreenHeader, TabScreen, useWide } from '@/ui/layout';
 import { Avatar, Button, Card, Figure, Glass, Label, ProgressBar } from '@/ui/primitives';
 
 export default function HomeScreen() {
@@ -34,22 +35,31 @@ export default function HomeScreen() {
 
   return (
     <TabScreen>
-      <View style={styles.header}>
-        <View style={{ gap: 3 }}>
-          <Text style={[styles.date, { color: colors.textSecondary }]}>
-            {formatDate(new Date(), { weekday: 'long', day: 'numeric', month: 'long' })}
-          </Text>
-          <Text style={[styles.hello, { color: colors.text }]}>
-            {t('home.hello', { name: user?.first_name ?? '' })}
-          </Text>
-        </View>
-        <Pressable
-          onPress={() => router.navigate('/profile')}
-          accessibilityLabel={t('nav.profile')}
+      {wide ? (
+        <ScreenHeader
+          kicker={formatDate(new Date(), { weekday: 'long', day: 'numeric', month: 'long' })}
+          title={t('home.hello', { name: user?.first_name ?? '' })}
         >
-          <Avatar name={user?.first_name ?? '?'} />
-        </Pressable>
-      </View>
+          <MeAvatar />
+        </ScreenHeader>
+      ) : (
+        <View style={styles.header}>
+          <View style={{ gap: 3 }}>
+            <Text style={[styles.date, { color: colors.textSecondary }]}>
+              {formatDate(new Date(), { weekday: 'long', day: 'numeric', month: 'long' })}
+            </Text>
+            <Text style={[styles.hello, { color: colors.text }]}>
+              {t('home.hello', { name: user?.first_name ?? '' })}
+            </Text>
+          </View>
+          <Pressable
+            onPress={() => router.navigate('/profile')}
+            accessibilityLabel={t('nav.profile')}
+          >
+            <Avatar name={user?.first_name ?? '?'} photo={user?.avatar_url} />
+          </Pressable>
+        </View>
+      )}
 
       <View style={[styles.columns, wide && styles.columnsWide]}>
         <View style={[styles.column, wide && styles.mapColumn]}>

@@ -29,7 +29,8 @@ export function FloatingNav({ state, navigateToTab }: BottomTabBarProps) {
       style={[
         styles.wrapper,
         wide
-          ? { top: insets.top + 10, alignItems: 'center' }
+          ? // Mockup: 22 from the top of the screen, on the row of the screen title.
+            { top: Math.max(insets.top - 2, 10), alignItems: 'center' }
           : { bottom: Math.max(insets.bottom - 8, 12) },
       ]}
     >
@@ -55,7 +56,7 @@ export function FloatingNav({ state, navigateToTab }: BottomTabBarProps) {
               ]}
             >
               <Icon
-                size={wide ? 18 : 22}
+                size={wide ? 19 : 22}
                 color={focused ? colors.accent : color}
                 strokeWidth={focused ? 2 : 1.7}
               />
