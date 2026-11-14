@@ -289,6 +289,15 @@ export function useBravo() {
   });
 }
 
+/** Posts a few words of my own at the top of the feed. */
+export function useAddNote() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (text: string) => api<FeedPost>('/feed', { method: 'POST', body: { text } }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: feedKeys.feed }),
+  });
+}
+
 export function useEditPost() {
   const queryClient = useQueryClient();
   return useMutation({

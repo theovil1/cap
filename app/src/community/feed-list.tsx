@@ -1,5 +1,5 @@
 import { router } from 'expo-router';
-import { Ellipsis, Flag, Newspaper, Route as RouteIcon } from 'lucide-react-native';
+import { Ellipsis, Flag, Newspaper, PenLine, Route as RouteIcon } from 'lucide-react-native';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
@@ -8,21 +8,31 @@ import {
   Alert,
   Pressable,
   StyleSheet,
+  Text,
+  TextInput,
   View,
 } from 'react-native';
 
-import { useBravo, useDeletePost, useEditPost, useFeed, useReport } from '@/api/community';
+import {
+  useAddNote,
+  useBravo,
+  useDeletePost,
+  useEditPost,
+  useFeed,
+  useReport,
+} from '@/api/community';
+import { useMe } from '@/api/queries';
 import type { FeedPost } from '@/api/types';
 import { formatAgo, formatKm, formatNumber } from '@/i18n/format';
 import { ArrivalMedal } from '@/journey/arrival-medal';
-import { useColors } from '@/theme';
+import { fonts, useColors } from '@/theme';
 
 import { useBadgeName } from './profile-badges';
 import { BravoButton, FeedAttachment, FeedCard } from '@/ui/feed';
 import { EmptyState } from '@/ui/layout';
 import { Badge } from '@/ui/badge';
 import { Medal } from '@/ui/medal';
-import { Avatar, Button } from '@/ui/primitives';
+import { Avatar, Button, Card } from '@/ui/primitives';
 
 const DISTANCE_LEVELS = [100, 500, 1_000, 5_000];
 const STREAK_LEVELS = [7, 30, 100, 365];
@@ -114,6 +124,8 @@ function Attachment({ post }: { post: FeedPost }) {
         />
       );
     }
+    case 'note':
+      return null;
     case 'published':
       return (
         <Pressable
@@ -146,6 +158,20 @@ export function PostCard({ post, now }: { post: FeedPost; now: number }) {
   const remove = useDeletePost();
   const report = useReport();
   const badgeName = useBadgeName();
+  const word = () =>
+    Alert.prompt(
+      t('feed.wordTitle'),
+      undefined,
+      [
+        { text: t('journeys.cancel'), style: 'cancel' },
+        {
+          text: t('account.save'),
+          onPress: (text?: string) => edit.mutate({ id: post.id, text: text ?? '' }),
+        },
+      ],
+      'plain-text',
+      post.text ?? '',
+    );
   const more = () => {
     const options = post.mine
       ? [post.text ? t('feed.editWord') : t('feed.addWord'), t('feed.delete'), t('journeys.cancel')]
@@ -154,19 +180,7 @@ export function PostCard({ post, now }: { post: FeedPost; now: number }) {
       { options, cancelButtonIndex: options.length - 1, destructiveButtonIndex: post.mine ? 1 : 0 },
       (i) => {
         if (post.mine && i === 0) {
-          Alert.prompt(
-            t('feed.wordTitle'),
-            undefined,
-            [
-              { text: t('journeys.cancel'), style: 'cancel' },
-              {
-                text: t('account.save'),
-                onPress: (text?: string) => edit.mutate({ id: post.id, text: text ?? '' }),
-              },
-            ],
-            'plain-text',
-            post.text ?? '',
-          );
+          word();
         } else if (post.mine && i === 1) {
           remove.mutate(post.id);
         } else if (!post.mine && i === 0) {
@@ -200,6 +214,21 @@ export function PostCard({ post, now }: { post: FeedPost; now: number }) {
         }
         when={formatAgo(post.created_at, now)}
         text={post.text ?? undefined}
+        addText={
+          post.mine ? (
+            <Pressable
+              onPress={word}
+              accessibilityRole="button"
+              hitSlop={6}
+              style={[styles.addWord, { backgroundColor: colors.inset }]}
+            >
+              <PenLine size={15} color={colors.textSecondary} />
+              <Text style={[styles.addWordText, { color: colors.textSecondary }]}>
+                {t('feed.addWord')}
+              </Text>
+            </Pressable>
+          ) : undefined
+        }
         attachment={<Attachment post={post} />}
         bravo={
           <BravoButton
@@ -224,6 +253,54 @@ export function PostCard({ post, now }: { post: FeedPost; now: number }) {
   );
 }
 
+/** A few words of my own, at the top of the Fil. */
+function Composer() {
+  const { t } = useTranslation();
+  const colors = useColors();
+  const me = useMe();
+  const add = useAddNote();
+  const [text, setText] = useState('');
+  const post = () =>
+    add.mutate(text.trim(), {
+      onSuccess: () => setText(''),
+      onError: () => Alert.alert(t('feed.postFailed')),
+    });
+  return (
+    <Card style={styles.composer}>
+      <View style={styles.composerRow}>
+        <Avatar
+          name={me.data?.first_name ?? ''}
+          seed={me.data?.id}
+          photo={me.data?.avatar_url}
+          tone="accent"
+          size={40}
+        />
+        <TextInput
+          value={text}
+          onChangeText={setText}
+          placeholder={t('feed.notePlaceholder')}
+          placeholderTextColor={colors.textMuted}
+          maxLength={280}
+          multiline
+          style={[styles.composerInput, { color: colors.text }]}
+        />
+      </View>
+      {text.trim() ? (
+        <View style={styles.composerActions}>
+          <Text style={[styles.count, { color: colors.textMuted }]}>{280 - text.length}</Text>
+          <Button
+            size="small"
+            tone="accent"
+            title={t('feed.post')}
+            onPress={post}
+            loading={add.isPending}
+          />
+        </View>
+      ) : null}
+    </Card>
+  );
+}
+
 /** The Fil part of the Community tab. */
 export function FeedList() {
   const { t } = useTranslation();
@@ -234,15 +311,19 @@ export function FeedList() {
   if (feed.isLoading) return <ActivityIndicator color={colors.textMuted} style={styles.loading} />;
   if (posts.length === 0) {
     return (
-      <EmptyState
-        icon={<Newspaper size={22} color={colors.accentText} />}
-        title={t('feed.empty')}
-        text={t('feed.emptyText')}
-      />
+      <>
+        <Composer />
+        <EmptyState
+          icon={<Newspaper size={22} color={colors.accentText} />}
+          title={t('feed.empty')}
+          text={t('feed.emptyText')}
+        />
+      </>
     );
   }
   return (
     <>
+      <Composer />
       {posts.map((post) => (
         <PostCard key={post.id} post={post} now={now} />
       ))}
@@ -263,4 +344,31 @@ const styles = StyleSheet.create({
   loading: { marginTop: 40 },
   tile: { width: 44, height: 44, borderRadius: 13, alignItems: 'center', justifyContent: 'center' },
   more: { position: 'absolute', right: 16, top: 18 },
+  addWord: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    gap: 6,
+    height: 32,
+    paddingHorizontal: 12,
+    borderRadius: 999,
+  },
+  addWordText: { fontFamily: fonts.textMedium, fontSize: 13.5 },
+  composer: { paddingVertical: 14, paddingHorizontal: 16, gap: 10 },
+  composerRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 10 },
+  composerInput: {
+    flex: 1,
+    minHeight: 40,
+    paddingTop: 10,
+    fontFamily: fonts.text,
+    fontSize: 15,
+    lineHeight: 21,
+  },
+  composerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    gap: 12,
+  },
+  count: { fontFamily: fonts.text, fontSize: 12.5, fontVariant: ['tabular-nums'] },
 });

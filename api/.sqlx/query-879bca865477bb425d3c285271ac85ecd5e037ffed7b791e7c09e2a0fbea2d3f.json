@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO posts (id, author_id, kind, text) VALUES ($1, $2, 'note', $3)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "879bca865477bb425d3c285271ac85ecd5e037ffed7b791e7c09e2a0fbea2d3f"
+}

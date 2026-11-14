@@ -331,7 +331,8 @@ export type PublicProfile = {
   } | null;
 };
 
-export type FeedKind = 'arrived' | 'stage' | 'medal' | 'published';
+/** `note` is a few words of the author's own, with nothing attached. */
+export type FeedKind = 'arrived' | 'stage' | 'medal' | 'published' | 'note';
 
 /** A post of the feed; `data` depends on the kind. */
 export type FeedPost = {

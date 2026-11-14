@@ -29,7 +29,7 @@ const STREAK_DAYS: [i64; 4] = [7, 30, 100, 365];
 
 pub fn router() -> OpenApiRouter<AppState> {
     OpenApiRouter::new()
-        .routes(routes!(feed))
+        .routes(routes!(feed, add_note))
         .routes(routes!(edit_post, delete_post))
         .routes(routes!(bravo, unbravo))
         .routes(routes!(list_comments, add_comment))
@@ -170,7 +170,7 @@ pub struct FeedPost {
     author: Walker,
     /// The author's rarest badge.
     author_badge: Option<Badge>,
-    /// `arrived`, `stage`, `medal` or `published`.
+    /// `arrived`, `stage`, `medal`, `published` or `note` (text only).
     kind: String,
     /// What the card shows, frozen when it happened.
     #[schema(value_type = Object)]
@@ -286,6 +286,33 @@ async fn visible(db: &PgPool, me: Uuid, post: Uuid) -> AppResult<()> {
 }
 
 #[derive(Deserialize, ToSchema)]
+pub struct NewNote {
+    /// 1 to 280 characters.
+    text: String,
+}
+
+/// Post a few words of my own in the feed.
+#[utoipa::path(post, path = "/feed", tag = "feed", security(("bearer" = [])), request_body = NewNote,
+    responses((status = 201, body = FeedPost), (status = 400, body = ErrorBody)))]
+async fn add_note(
+    State(state): State<AppState>,
+    AuthUser(me): AuthUser,
+    Json(body): Json<NewNote>,
+) -> AppResult<(StatusCode, Json<FeedPost>)> {
+    let text = body.text.trim();
+    if text.is_empty() || text.chars().count() > 280 {
+        return Err(AppError::bad_request("invalid_text", "1 to 280 characters"));
+    }
+    let id = Uuid::now_v7();
+    sqlx::query!("INSERT INTO posts (id, author_id, kind, text) VALUES ($1, $2, 'note', $3)", id, me, text)
+        .execute(&state.db)
+        .await?;
+    let post =
+        posts(&state.db, me, &[id]).await?.pop().ok_or_else(|| AppError::not_found("post not found"))?;
+    Ok((StatusCode::CREATED, Json(post)))
+}
+
+#[derive(Deserialize, ToSchema)]
 pub struct EditPost {
     /// A word about it, 280 characters at most; empty removes it.
     text: String,
@@ -304,13 +331,16 @@ async fn edit_post(
     if text.chars().count() > 280 {
         return Err(AppError::bad_request("invalid_text", "280 characters at most"));
     }
-    let updated =
-        sqlx::query!("UPDATE posts SET text = NULLIF($3, '') WHERE id = $1 AND author_id = $2", id, me, text)
-            .execute(&state.db)
-            .await?;
-    if updated.rows_affected() == 0 {
-        return Err(AppError::not_found("post not found"));
+    let kind = sqlx::query_scalar!("SELECT kind FROM posts WHERE id = $1 AND author_id = $2", id, me)
+        .fetch_optional(&state.db)
+        .await?
+        .ok_or_else(|| AppError::not_found("post not found"))?;
+    if kind == "note" && text.is_empty() {
+        return Err(AppError::bad_request("invalid_text", "a note needs a few words"));
     }
+    sqlx::query!("UPDATE posts SET text = NULLIF($3, '') WHERE id = $1 AND author_id = $2", id, me, text)
+        .execute(&state.db)
+        .await?;
     posts(&state.db, me, &[id]).await?.pop().map(Json).ok_or_else(|| AppError::not_found("post not found"))
 }
 

@@ -43,6 +43,7 @@ export function FeedCard({
   badge,
   when,
   text,
+  addText,
   attachment,
   bravo,
   comments,
@@ -55,6 +56,8 @@ export function FeedCard({
   /** "Il y a 2 h · 4,6 km sur le tapis". */
   when: string;
   text?: string;
+  /** Shown instead of the text when there is none, e.g. "Ajouter un mot". */
+  addText?: ReactNode;
   attachment?: ReactNode;
   bravo: ReactNode;
   comments?: string;
@@ -77,7 +80,7 @@ export function FeedCard({
           </Text>
         </View>
       </View>
-      {text ? <Text style={[styles.text, { color: colors.text }]}>{text}</Text> : null}
+      {text ? <Text style={[styles.text, { color: colors.text }]}>{text}</Text> : addText}
       {attachment}
       <View style={styles.actions}>
         {bravo}

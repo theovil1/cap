@@ -1403,3 +1403,37 @@ async fn badges_given_and_earned(db: PgPool) {
         .json();
     assert_eq!(after["badges"][0]["kind"], "supporter");
 }
+
+#[sqlx::test(migrator = "cap_api::MIGRATOR")]
+async fn notes_in_the_feed(db: PgPool) {
+    let server = server(db).await;
+    let theo = register(&server, "theo").await;
+    let lilou = register(&server, "lilou").await;
+    befriend(&server, &theo, &lilou).await;
+
+    let note: Value = server
+        .post("/feed")
+        .add_header("authorization", bearer(&lilou))
+        .json(&json!({ "text": "  Qui marche ce soir ?  " }))
+        .await
+        .json();
+    assert_eq!(note["kind"], "note");
+    assert_eq!(note["text"], "Qui marche ce soir ?");
+    let feed: Value = server.get("/feed").add_header("authorization", bearer(&theo)).await.json();
+    assert_eq!(feed[0]["id"], note["id"]);
+
+    // A note always says something.
+    server
+        .post("/feed")
+        .add_header("authorization", bearer(&lilou))
+        .json(&json!({ "text": "   " }))
+        .await
+        .assert_status(StatusCode::BAD_REQUEST);
+    let id = note["id"].as_str().unwrap();
+    server
+        .patch(&format!("/posts/{id}"))
+        .add_header("authorization", bearer(&lilou))
+        .json(&json!({ "text": "" }))
+        .await
+        .assert_status(StatusCode::BAD_REQUEST);
+}
