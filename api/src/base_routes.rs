@@ -34,6 +34,9 @@ struct BaseRoute {
 
 /// Publish the base routes that are not there yet. Errors are logged, not fatal.
 pub async fn publish_missing(state: AppState) {
+    if let Err(e) = crate::photos::backfill(&state.db).await {
+        tracing::warn!(error = ?e, "photo thumbnails not filled");
+    }
     let routes: Vec<BaseRoute> = match serde_json::from_str(ROUTES) {
         Ok(routes) => routes,
         Err(e) => return tracing::error!(error = %e, "invalid base-routes.json"),
@@ -77,11 +80,13 @@ async fn publish(state: &AppState, route: &BaseRoute) -> AppResult<()> {
     .execute(&state.db)
     .await?;
     if let Some((image, credit)) = photo {
+        let (image, thumb) = crate::photos::prepare(image).await?;
         sqlx::query!(
-            "INSERT INTO public_route_photos (public_route_id, kind, content_type, image, credit)
-             VALUES ($1, 'end', 'image/jpeg', $2, $3)",
+            "INSERT INTO public_route_photos (public_route_id, kind, content_type, image, thumb, credit)
+             VALUES ($1, 'end', 'image/jpeg', $2, $3, $4)",
             id,
             image,
+            thumb,
             credit
         )
         .execute(&state.db)

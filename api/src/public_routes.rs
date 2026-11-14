@@ -542,17 +542,18 @@ async fn set_photo(
     if credit.is_some_and(|c| c.chars().count() > 200) {
         return Err(AppError::bad_request("invalid_credit", "the credit is 200 characters at most"));
     }
-    let content_type = check_image(&headers, &body, MAX_PHOTO_BYTES)?;
+    check_image(&headers, &body, MAX_PHOTO_BYTES)?;
+    let (image, thumb) = crate::photos::prepare(body.to_vec()).await?;
     let saved = sqlx::query!(
-        "INSERT INTO public_route_photos (public_route_id, kind, content_type, image, credit)
-         SELECT id, $3, $4, $5, $6 FROM public_routes WHERE id = $1 AND author_id = $2
+        "INSERT INTO public_route_photos (public_route_id, kind, content_type, image, thumb, credit)
+         SELECT id, $3, 'image/jpeg', $4, $5, $6 FROM public_routes WHERE id = $1 AND author_id = $2
          ON CONFLICT (public_route_id, kind)
-         DO UPDATE SET content_type = $4, image = $5, credit = $6, updated_at = now()",
+         DO UPDATE SET content_type = 'image/jpeg', image = $4, thumb = $5, credit = $6, updated_at = now()",
         id,
         me,
         kind,
-        content_type,
-        body.as_ref(),
+        image,
+        thumb,
         credit
     )
     .execute(&state.db)
@@ -588,16 +589,25 @@ async fn delete_photo(
     Ok(Json(detail(&state.db, me, id).await?))
 }
 
-/// `GET /public-routes/{id}/photos/{kind}`: a photo, cached for a day (its URL changes with it).
+#[derive(Deserialize)]
+pub struct PhotoSize {
+    /// `small`: the 720 px thumbnail.
+    size: Option<String>,
+}
+
+/// `GET /public-routes/{id}/photos/{kind}`: a photo, cached for good (its URL changes with it).
 pub async fn get_photo(
     State(state): State<AppState>,
     Path((id, kind)): Path<(Uuid, String)>,
+    Query(query): Query<PhotoSize>,
 ) -> AppResult<Response> {
     let photo = sqlx::query!(
-        "SELECT ph.content_type, ph.image FROM public_route_photos ph JOIN public_routes p ON p.id = ph.public_route_id
+        "SELECT ph.content_type, COALESCE(CASE WHEN $3 THEN ph.thumb END, ph.image) AS \"image!\"
+         FROM public_route_photos ph JOIN public_routes p ON p.id = ph.public_route_id
          WHERE ph.public_route_id = $1 AND ph.kind = $2 AND NOT p.hidden",
         id,
-        kind
+        kind,
+        query.size.as_deref() == Some("small")
     )
     .fetch_optional(&state.db)
     .await?
@@ -605,7 +615,7 @@ pub async fn get_photo(
     Ok((
         [
             (header::CONTENT_TYPE, photo.content_type),
-            (header::CACHE_CONTROL, "public, max-age=86400".to_owned()),
+            (header::CACHE_CONTROL, "public, max-age=31536000, immutable".to_owned()),
         ],
         photo.image,
     )

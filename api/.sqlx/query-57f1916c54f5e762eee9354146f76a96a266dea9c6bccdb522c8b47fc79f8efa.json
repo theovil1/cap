@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT p.id, p.kind, p.data, p.journey_id, p.text, p.created_at,\n                u.id AS author_id, u.first_name, u.username, u.avatar_url,\n                (SELECT count(*) FROM bravos b WHERE b.post_id = p.id) AS \"bravos!\",\n                EXISTS (SELECT 1 FROM bravos b WHERE b.post_id = p.id AND b.user_id = $2) AS \"i_bravo!\",\n                (SELECT count(*) FROM comments c WHERE c.post_id = p.id AND NOT c.hidden) AS \"comments!\"\n         FROM posts p JOIN users u ON u.id = p.author_id WHERE p.id = ANY($1)",
+  "query": "SELECT p.id, p.kind, p.data, p.journey_id, p.text, p.edited_at, p.created_at,\n                u.id AS author_id, u.first_name, u.username, u.avatar_url,\n                (SELECT count(*) FROM bravos b WHERE b.post_id = p.id) AS \"bravos!\",\n                EXISTS (SELECT 1 FROM bravos b WHERE b.post_id = p.id AND b.user_id = $2) AS \"i_bravo!\",\n                (SELECT count(*) FROM comments c WHERE c.post_id = p.id AND NOT c.hidden) AS \"comments!\"\n         FROM posts p JOIN users u ON u.id = p.author_id WHERE p.id = ANY($1)",
   "describe": {
     "columns": [
       {
@@ -60,6 +60,17 @@
       },
       {
         "ordinal": 5,
+        "name": "edited_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "posts",
+            "name": "edited_at"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
         "name": "created_at",
         "type_info": "Timestamptz",
         "origin": {
@@ -70,7 +81,7 @@
         }
       },
       {
-        "ordinal": 6,
+        "ordinal": 7,
         "name": "author_id",
         "type_info": "Uuid",
         "origin": {
@@ -81,7 +92,7 @@
         }
       },
       {
-        "ordinal": 7,
+        "ordinal": 8,
         "name": "first_name",
         "type_info": "Text",
         "origin": {
@@ -92,7 +103,7 @@
         }
       },
       {
-        "ordinal": 8,
+        "ordinal": 9,
         "name": "username",
         "type_info": "Text",
         "origin": {
@@ -103,7 +114,7 @@
         }
       },
       {
-        "ordinal": 9,
+        "ordinal": 10,
         "name": "avatar_url",
         "type_info": "Text",
         "origin": {
@@ -114,19 +125,19 @@
         }
       },
       {
-        "ordinal": 10,
+        "ordinal": 11,
         "name": "bravos!",
         "type_info": "Int8",
         "origin": "Expression"
       },
       {
-        "ordinal": 11,
+        "ordinal": 12,
         "name": "i_bravo!",
         "type_info": "Bool",
         "origin": "Expression"
       },
       {
-        "ordinal": 12,
+        "ordinal": 13,
         "name": "comments!",
         "type_info": "Int8",
         "origin": "Expression"
@@ -144,6 +155,7 @@
       false,
       true,
       true,
+      true,
       false,
       false,
       false,
@@ -154,5 +166,5 @@
       null
     ]
   },
-  "hash": "97e8132dc2233c384debaf4e65de8df578b96492af6b9a60cdd107b63ab1d8b2"
+  "hash": "57f1916c54f5e762eee9354146f76a96a266dea9c6bccdb522c8b47fc79f8efa"
 }

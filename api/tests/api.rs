@@ -950,18 +950,24 @@ async fn public_routes_from_publication_to_reports(db: PgPool) {
     assert_eq!(detail["my_journey_id"], journey["id"]);
 
     // A photo with its credit, served without a token.
-    let jpeg = [0xFF, 0xD8, 0xFF, 0xE0, 0, 0x10];
+    let mut jpeg = Vec::new();
+    image::DynamicImage::ImageRgb8(image::RgbImage::from_pixel(1000, 500, image::Rgb([20, 90, 160])))
+        .write_to(&mut std::io::Cursor::new(&mut jpeg), image::ImageFormat::Jpeg)
+        .unwrap();
     let with_photo: Value = server
         .put(&format!("/public-routes/{id}/photos/end"))
         .add_query_param("credit", "Jane Doe, CC BY-SA 4.0")
         .add_header("authorization", bearer(&theo))
         .add_header("content-type", "image/jpeg")
-        .bytes(jpeg.to_vec().into())
+        .bytes(jpeg.clone().into())
         .await
         .json();
     assert_eq!(with_photo["photos"][0]["credit"], "Jane Doe, CC BY-SA 4.0");
     let url = with_photo["photos"][0]["url"].as_str().unwrap();
-    assert_eq!(server.get(url).await.as_bytes().as_ref(), &jpeg);
+    let full = server.get(url).await;
+    let small = server.get(&format!("{url}&size=small")).await;
+    assert_eq!(image::load_from_memory(full.as_bytes()).unwrap().width(), 1000);
+    assert_eq!(image::load_from_memory(small.as_bytes()).unwrap().width(), 720);
 
     // Three reports hide it; an admin shows it again and makes it the route of the week.
     for name in ["ines", "marc", "nadia"] {
@@ -1432,6 +1438,14 @@ async fn notes_in_the_feed(db: PgPool) {
         .await
         .assert_status(StatusCode::BAD_REQUEST);
     let id = note["id"].as_str().unwrap();
+    assert!(note["edited_at"].is_null());
+    let edited: Value = server
+        .patch(&format!("/posts/{id}"))
+        .add_header("authorization", bearer(&lilou))
+        .json(&json!({ "text": "Qui marche demain ?" }))
+        .await
+        .json();
+    assert!(edited["edited_at"].is_string());
     server
         .patch(&format!("/posts/{id}"))
         .add_header("authorization", bearer(&lilou))

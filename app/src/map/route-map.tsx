@@ -54,6 +54,8 @@ type Props = {
   rivals?: Rival[];
   /** Distances of many other walkers (a scheduled journey), drawn as small dots. */
   crowd?: number[];
+  /** No gestures, e.g. a picture in a swipeable gallery. */
+  still?: boolean;
 };
 
 export type Rival = {
@@ -78,6 +80,7 @@ export function RouteMap({
   speedMps = 0,
   rivals = [],
   crowd = [],
+  still = false,
 }: Props) {
   const colors = useColors();
   const mapStyle = useMapStyle();
@@ -150,7 +153,7 @@ export function RouteMap({
             duration: 900,
             easing: 'linear' as const,
           };
-  const interactive = mode !== 'card';
+  const interactive = mode !== 'card' && !still;
 
   return (
     <Map

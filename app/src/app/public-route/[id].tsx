@@ -28,6 +28,9 @@ import { ApiError } from '@/api/client';
 import { useReport, useStartPublicRoute, useUnpublish, usePublicRoute } from '@/api/community';
 import type { PublicRouteDetail, RoutePhoto } from '@/api/types';
 import { RouteCover } from '@/community/route-cover';
+import { isTeam, WalkerAvatar } from '@/community/team';
+import { RouteMap } from '@/map/route-map';
+import { Badge } from '@/ui/badge';
 import { formatKm, formatNumber } from '@/i18n/format';
 import { fonts, useColors, useShadows } from '@/theme';
 import { HOME } from '@/ui/routes';
@@ -152,13 +155,17 @@ function Gallery({
 }) {
   const { t } = useTranslation();
   const [page, setPage] = useState(0);
-  const slides = KINDS.filter((k) => k !== 'path' || route.photos.some((p) => p.kind === 'path'));
-  const label = (kind: RoutePhoto['kind']) =>
-    kind === 'start'
-      ? t('publicRoute.startAt', { place: route.start_town ?? route.start.label })
-      : kind === 'end'
-        ? t('publicRoute.endAt', { place: route.end_town ?? route.end.label })
-        : t('publicRoute.path');
+  const photos = KINDS.filter((k) => k !== 'path' || route.photos.some((p) => p.kind === 'path'));
+  // The whole route seen from above comes after the pictures.
+  const slides = [...photos, 'map' as const];
+  const label = (kind: RoutePhoto['kind'] | 'map') =>
+    kind === 'map'
+      ? t('publicRoute.mapSlide', { km: formatKm(route.distance_m, 0) })
+      : kind === 'start'
+        ? t('publicRoute.startAt', { place: route.start_town ?? route.start.label })
+        : kind === 'end'
+          ? t('publicRoute.endAt', { place: route.end_town ?? route.end.label })
+          : t('publicRoute.path');
   return (
     <View style={{ height, width }}>
       <ScrollView
@@ -169,16 +176,30 @@ function Gallery({
       >
         {slides.map((kind) => (
           <View key={kind} style={{ width, height }}>
-            <RouteCover
-              photos={route.photos}
-              kind={kind}
-              place={kind === 'start' ? route.start : route.end}
-              zoom={15}
-            />
+            {kind === 'map' ? (
+              <View style={StyleSheet.absoluteFill} pointerEvents="none">
+                <RouteMap
+                  path={route.path}
+                  walkedM={0}
+                  stages={route.stage_list}
+                  mode="overview"
+                  still
+                  padding={{ top: 110, bottom: 110, left: 40, right: 40 }}
+                  style={StyleSheet.absoluteFill}
+                />
+              </View>
+            ) : (
+              <RouteCover
+                photos={route.photos}
+                kind={kind}
+                place={kind === 'start' ? route.start : route.end}
+                zoom={15}
+              />
+            )}
             <View style={[StyleSheet.absoluteFill, styles.shade]} pointerEvents="none" />
             <PhotoChip
               label={label(kind)}
-              icon={kind === 'end' ? Flag : MapPin}
+              icon={kind === 'end' ? Flag : kind === 'map' ? RouteIcon : MapPin}
               style={[styles.chip, { bottom: 52 }]}
             />
             {route.photos.find((p) => p.kind === kind)?.credit ? (
@@ -219,19 +240,18 @@ function Body({ route }: { route: PublicRouteDetail }) {
         onPress={() => router.push({ pathname: '/walker/[id]', params: { id: route.author.id } })}
         accessibilityRole="link"
       >
-        <Avatar
-          name={route.author.first_name}
-          seed={route.author.id}
-          photo={route.author.avatar_url}
-          tone="walker"
-          size={22}
-        />
-        <Text style={[styles.small, { color: colors.textSecondary }]}>
-          {t('publicRoute.by', {
-            name: route.author.first_name,
-            stages: t('explore.stages', { count: route.stages }),
-          })}
+        <WalkerAvatar walker={route.author} size={22} />
+        <Text style={[styles.small, styles.shrink, { color: colors.textSecondary }]}>
+          {isTeam(route.author.id)
+            ? t('publicRoute.byTeam', { stages: t('explore.stages', { count: route.stages }) })
+            : t('publicRoute.by', {
+                name: route.author.first_name,
+                stages: t('explore.stages', { count: route.stages }),
+              })}
         </Text>
+        {isTeam(route.author.id) ? (
+          <Badge kind="certified" size={17} label={t('badges.names.certified')} />
+        ) : null}
       </Pressable>
       {route.description ? (
         <Text style={[styles.description, { color: colors.textSecondary }]}>
@@ -348,9 +368,15 @@ function Phone({ route }: { route: PublicRouteDetail }) {
   const { width } = useWindowDimensions();
   return (
     <View style={[styles.screen, { backgroundColor: colors.background }]}>
-      <ScrollView contentContainerStyle={{ paddingBottom: insets.bottom + 110 }}>
+      <ScrollView style={{ backgroundColor: colors.surface }} contentContainerStyle={styles.grow}>
         <Gallery route={route} width={width} height={330} />
-        <View style={[styles.sheet, { backgroundColor: colors.surface }, shadows.sheet]}>
+        <View
+          style={[
+            styles.sheet,
+            { backgroundColor: colors.surface, paddingBottom: insets.bottom + 120 },
+            shadows.sheet,
+          ]}
+        >
           <Body route={route} />
         </View>
       </ScrollView>
@@ -429,7 +455,11 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   wideTop: { position: 'absolute', left: 0, top: 0 },
+  grow: { flexGrow: 1 },
+  shrink: { flexShrink: 1 },
+  // Down to the bottom of the screen, behind the action bar.
   sheet: {
+    flexGrow: 1,
     marginTop: -34,
     borderTopLeftRadius: 34,
     borderTopRightRadius: 34,

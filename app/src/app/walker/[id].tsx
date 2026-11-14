@@ -30,7 +30,8 @@ import { medalsFor } from '@/journey/medals';
 import { journeyTitle } from '@/journey/names';
 import { fonts, useColors } from '@/theme';
 import { useWide } from '@/ui/layout';
-import { Avatar, Button, Card, ProgressBar, RoundButton } from '@/ui/primitives';
+import { WalkerAvatar } from '@/community/team';
+import { Button, Card, ProgressBar, RoundButton } from '@/ui/primitives';
 import { StatTile } from '@/ui/stats';
 
 /** Another walker's profile: follow, challenge, their numbers and medals. */
@@ -113,13 +114,7 @@ function ProfileView({ profile }: { profile: PublicProfile }) {
   const identity = (
     <>
       <View style={styles.identity}>
-        <Avatar
-          name={walker.first_name}
-          seed={walker.id}
-          photo={walker.avatar_url}
-          tone="walker"
-          size={92}
-        />
+        <WalkerAvatar walker={walker} size={92} />
         <View style={styles.nameRow}>
           <Text style={[styles.name, { color: colors.text }]}>{walker.first_name}</Text>
           <NameBadge badges={profile.badges} />

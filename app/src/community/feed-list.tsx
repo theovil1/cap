@@ -28,6 +28,7 @@ import { ArrivalMedal } from '@/journey/arrival-medal';
 import { fonts, useColors } from '@/theme';
 
 import { useBadgeName } from './profile-badges';
+import { WalkerAvatar } from './team';
 import { BravoButton, FeedAttachment, FeedCard } from '@/ui/feed';
 import { EmptyState } from '@/ui/layout';
 import { Badge } from '@/ui/badge';
@@ -158,20 +159,56 @@ export function PostCard({ post, now }: { post: FeedPost; now: number }) {
   const remove = useDeletePost();
   const report = useReport();
   const badgeName = useBadgeName();
-  const word = () =>
-    Alert.prompt(
-      t('feed.wordTitle'),
-      undefined,
-      [
-        { text: t('journeys.cancel'), style: 'cancel' },
-        {
-          text: t('account.save'),
-          onPress: (text?: string) => edit.mutate({ id: post.id, text: text ?? '' }),
-        },
-      ],
-      'plain-text',
-      post.text ?? '',
+  const [draft, setDraft] = useState<string | null>(null);
+  const word = () => setDraft(post.text ?? '');
+  const save = () =>
+    edit.mutate(
+      { id: post.id, text: draft?.trim() ?? '' },
+      {
+        onSuccess: () => setDraft(null),
+        onError: () => Alert.alert(t('feed.postFailed')),
+      },
     );
+  const editor =
+    draft === null ? null : (
+      <View style={styles.editor}>
+        <TextInput
+          value={draft}
+          onChangeText={setDraft}
+          placeholder={t('feed.wordTitle')}
+          placeholderTextColor={colors.textMuted}
+          maxLength={280}
+          multiline
+          autoFocus
+          style={[
+            styles.editorInput,
+            { color: colors.text, backgroundColor: colors.inset, borderColor: colors.track },
+          ]}
+        />
+        <View style={styles.composerActions}>
+          <Button
+            size="small"
+            tone="light"
+            title={t('journeys.cancel')}
+            onPress={() => setDraft(null)}
+          />
+          <Button
+            size="small"
+            tone="accent"
+            title={t('account.save')}
+            onPress={save}
+            loading={edit.isPending}
+            disabled={post.kind === 'note' && !draft.trim()}
+          />
+        </View>
+      </View>
+    );
+  const when = post.edited_at
+    ? t('feed.whenEdited', {
+        when: formatAgo(post.created_at, now),
+        edited: formatAgo(post.edited_at, now).toLowerCase(),
+      })
+    : formatAgo(post.created_at, now);
   const more = () => {
     const options = post.mine
       ? [post.text ? t('feed.editWord') : t('feed.addWord'), t('feed.delete'), t('journeys.cancel')]
@@ -197,13 +234,7 @@ export function PostCard({ post, now }: { post: FeedPost; now: number }) {
       <FeedCard
         avatar={
           <Pressable onPress={() => walker(post.author.id)} accessibilityRole="link">
-            <Avatar
-              name={post.author.first_name}
-              seed={post.author.id}
-              photo={post.author.avatar_url}
-              tone={post.mine ? 'accent' : 'walker'}
-              size={40}
-            />
+            <WalkerAvatar walker={post.author} tone={post.mine ? 'accent' : 'walker'} size={40} />
           </Pressable>
         }
         name={post.author.first_name}
@@ -212,10 +243,11 @@ export function PostCard({ post, now }: { post: FeedPost; now: number }) {
             <Badge kind={post.author_badge.kind} size={17} label={badgeName(post.author_badge)} />
           ) : undefined
         }
-        when={formatAgo(post.created_at, now)}
-        text={post.text ?? undefined}
+        when={when}
+        text={editor ? undefined : (post.text ?? undefined)}
         addText={
-          post.mine ? (
+          editor ??
+          (post.mine ? (
             <Pressable
               onPress={word}
               accessibilityRole="button"
@@ -227,7 +259,7 @@ export function PostCard({ post, now }: { post: FeedPost; now: number }) {
                 {t('feed.addWord')}
               </Text>
             </Pressable>
-          ) : undefined
+          ) : undefined)
         }
         attachment={<Attachment post={post} />}
         bravo={
@@ -344,6 +376,17 @@ const styles = StyleSheet.create({
   loading: { marginTop: 40 },
   tile: { width: 44, height: 44, borderRadius: 13, alignItems: 'center', justifyContent: 'center' },
   more: { position: 'absolute', right: 16, top: 18 },
+  editor: { gap: 10 },
+  editorInput: {
+    minHeight: 64,
+    padding: 12,
+    borderRadius: 14,
+    borderWidth: 1,
+    fontFamily: fonts.text,
+    fontSize: 14.5,
+    lineHeight: 21,
+    textAlignVertical: 'top',
+  },
   addWord: {
     flexDirection: 'row',
     alignItems: 'center',

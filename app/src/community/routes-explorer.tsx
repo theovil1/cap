@@ -72,7 +72,7 @@ export function RoutesExplorer({ search, filter }: { search: string; filter: Rou
 
   const hero = showFeatured && featured.data && (
     <RouteCard
-      cover={<RouteCover photos={featured.data.photos} place={featured.data.end} />}
+      cover={<RouteCover photos={featured.data.photos} place={featured.data.end} small />}
       tag={t('explore.ofTheWeek')}
       tagIcon={Sparkles}
       caption={t('explore.arrival', {
@@ -109,7 +109,7 @@ export function RoutesExplorer({ search, filter }: { search: string; filter: Rou
   const rows = routes.map((route) => (
     <View key={route.id} style={wide && styles.cell}>
       <RouteRow
-        cover={<RouteCover photos={route.photos} place={route.end} zoom={13} />}
+        cover={<RouteCover photos={route.photos} place={route.end} zoom={13} small />}
         title={route.title}
         subtitle={subtitle(route)}
         {...facts(route)}

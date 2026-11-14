@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE posts SET text = NULLIF($3, ''),\n                edited_at = CASE WHEN text IS NOT NULL AND text IS DISTINCT FROM NULLIF($3, '') THEN now() ELSE edited_at END\n         WHERE id = $1 AND author_id = $2",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "b5176b6923a81bd6830b7b9c64434777e8a4503bb7962fc3fcbaeff631582e5f"
+}

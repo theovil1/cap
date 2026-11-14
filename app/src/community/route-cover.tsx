@@ -16,12 +16,15 @@ export function RouteCover({
   place,
   kind = 'end',
   zoom = 14,
+  small = false,
 }: {
   photos: RoutePhoto[];
   /** Where the aerial view looks when there is no photo. */
   place: Place;
   kind?: RoutePhoto['kind'];
   zoom?: number;
+  /** The 720 px thumbnail, for lists. */
+  small?: boolean;
 }) {
   const colors = useColors();
   const [box, setBox] = useState<{ width: number; height: number } | null>(null);
@@ -33,7 +36,10 @@ export function RouteCover({
     >
       {photo ? (
         <Image
-          source={{ uri: `${API_URL}${photo.url}` }}
+          source={{
+            uri: `${API_URL}${photo.url}${small ? (photo.url.includes('?') ? '&' : '?') + 'size=small' : ''}`,
+          }}
+          cachePolicy="memory-disk"
           style={StyleSheet.absoluteFill}
           contentFit="cover"
           transition={200}

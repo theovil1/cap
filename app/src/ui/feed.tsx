@@ -1,13 +1,56 @@
 import { Heart, MessageCircle } from 'lucide-react-native';
 import type { ReactNode } from 'react';
+import * as Haptics from 'expo-haptics';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import Animated, {
+  Easing,
+  type SharedValue,
+  useAnimatedStyle,
+  useReducedMotion,
+  useSharedValue,
+  withSequence,
+  withSpring,
+  withTiming,
+} from 'react-native-reanimated';
 
 import { fonts, useColors } from '@/theme';
 import { radius, type } from '@/tokens';
 
 import { Card } from './primitives';
 
-/** Bravo button: soft accent once given. */
+/** A few hearts that fly off when a Bravo is given. */
+const BURST = [-60, -25, 15, 50].map((deg, i) => ({ deg, rise: 22 + (i % 2) * 8 }));
+
+function Spark({
+  deg,
+  rise,
+  go,
+  color,
+}: {
+  deg: number;
+  rise: number;
+  go: SharedValue<number>;
+  color: string;
+}) {
+  const style = useAnimatedStyle(() => {
+    const rad = (deg * Math.PI) / 180;
+    return {
+      opacity: go.value === 0 ? 0 : 1 - go.value,
+      transform: [
+        { translateX: Math.sin(rad) * rise * go.value },
+        { translateY: -Math.cos(rad) * rise * go.value },
+        { scale: 0.5 + go.value * 0.4 },
+      ],
+    };
+  });
+  return (
+    <Animated.View style={[styles.spark, style]} pointerEvents="none">
+      <Heart size={9} color={color} fill={color} strokeWidth={0} />
+    </Animated.View>
+  );
+}
+
+/** Bravo button: the heart fills and pops once given. */
 export function BravoButton({
   label,
   given,
@@ -19,15 +62,43 @@ export function BravoButton({
   onPress: () => void;
 }) {
   const colors = useColors();
+  const still = useReducedMotion();
+  const scale = useSharedValue(1);
+  const burst = useSharedValue(0);
   const color = given ? colors.accentText : colors.text;
+  const press = () => {
+    if (!given && !still) {
+      scale.value = withSequence(
+        withTiming(0.7, { duration: 90 }),
+        withSpring(1, { damping: 6, stiffness: 260 }),
+      );
+      burst.value = 0;
+      burst.value = withTiming(1, { duration: 650, easing: Easing.out(Easing.cubic) });
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+    onPress();
+  };
+  const heart = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
   return (
     <Pressable
-      onPress={onPress}
+      onPress={press}
       accessibilityRole="button"
       accessibilityState={{ selected: given }}
       style={[styles.bravo, { backgroundColor: given ? colors.accentSoft : colors.inset }]}
     >
-      <Heart size={17} color={color} strokeWidth={2} fill="none" />
+      <View>
+        {BURST.map((b) => (
+          <Spark key={b.deg} {...b} go={burst} color={colors.accent} />
+        ))}
+        <Animated.View style={heart}>
+          <Heart
+            size={17}
+            color={given ? colors.accent : color}
+            fill={given ? colors.accent : 'none'}
+            strokeWidth={2}
+          />
+        </Animated.View>
+      </View>
       <Text style={[type.label, styles.tnum, { color }]}>{label}</Text>
     </Pressable>
   );
@@ -155,6 +226,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     borderRadius: 999,
   },
+  spark: { position: 'absolute', left: 4, top: 4 },
   comments: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   tnum: { fontVariant: ['tabular-nums'] },
 });

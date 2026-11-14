@@ -58,7 +58,7 @@ export function EventsExplorer({ search, filter }: { search: string; filter: Eve
       {live.map((event) => (
         <LiveEventCard
           key={event.id}
-          cover={<RouteCover photos={eventPhotos(event)} place={event.end} />}
+          cover={<RouteCover photos={eventPhotos(event)} place={event.end} small />}
           live={t('events.live')}
           walkers={walkers(event)}
           walking={t('events.walkingNow', {

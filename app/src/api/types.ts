@@ -363,6 +363,8 @@ export type FeedPost = {
   };
   journey_id: string | null;
   text: string | null;
+  /** Set once the author changed words they had already written. */
+  edited_at: string | null;
   bravos: number;
   i_bravo: boolean;
   comments: number;

@@ -1,0 +1,17 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO public_route_photos (public_route_id, kind, content_type, image, thumb, credit)\n             VALUES ($1, 'end', 'image/jpeg', $2, $3, $4)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Bytea",
+        "Bytea",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "335288915e3ffb1c10077ce9d6c8466b8d52ecbfb139d25bd208bb83eb7ceea0"
+}

@@ -178,6 +178,9 @@ pub struct FeedPost {
     journey_id: Option<Uuid>,
     /// The author's word about it.
     text: Option<String>,
+    /// Set once the author changed words they had already written.
+    #[serde(with = "time::serde::rfc3339::option")]
+    edited_at: Option<OffsetDateTime>,
     bravos: i64,
     i_bravo: bool,
     comments: i64,
@@ -226,7 +229,7 @@ async fn feed(
 
 async fn posts(db: &PgPool, me: Uuid, ids: &[Uuid]) -> AppResult<Vec<FeedPost>> {
     let mut rows: Vec<FeedPost> = sqlx::query!(
-        "SELECT p.id, p.kind, p.data, p.journey_id, p.text, p.created_at,
+        "SELECT p.id, p.kind, p.data, p.journey_id, p.text, p.edited_at, p.created_at,
                 u.id AS author_id, u.first_name, u.username, u.avatar_url,
                 (SELECT count(*) FROM bravos b WHERE b.post_id = p.id) AS \"bravos!\",
                 EXISTS (SELECT 1 FROM bravos b WHERE b.post_id = p.id AND b.user_id = $2) AS \"i_bravo!\",
@@ -252,6 +255,7 @@ async fn posts(db: &PgPool, me: Uuid, ids: &[Uuid]) -> AppResult<Vec<FeedPost>> 
         data: r.data,
         journey_id: r.journey_id,
         text: r.text,
+        edited_at: r.edited_at,
         bravos: r.bravos,
         i_bravo: r.i_bravo,
         comments: r.comments,
@@ -338,7 +342,14 @@ async fn edit_post(
     if kind == "note" && text.is_empty() {
         return Err(AppError::bad_request("invalid_text", "a note needs a few words"));
     }
-    sqlx::query!("UPDATE posts SET text = NULLIF($3, '') WHERE id = $1 AND author_id = $2", id, me, text)
+    sqlx::query!(
+        "UPDATE posts SET text = NULLIF($3, ''),
+                edited_at = CASE WHEN text IS NOT NULL AND text IS DISTINCT FROM NULLIF($3, '') THEN now() ELSE edited_at END
+         WHERE id = $1 AND author_id = $2",
+        id,
+        me,
+        text
+    )
         .execute(&state.db)
         .await?;
     posts(&state.db, me, &[id]).await?.pop().map(Json).ok_or_else(|| AppError::not_found("post not found"))
