@@ -441,7 +441,8 @@
     "deleteOneBody": "Its distance is taken off your journeys, races and stats.",
     "deleteAll": "Clear the whole history",
     "deleteAllTitle": "Delete all your sessions?",
-    "deleteAllBody": "Every journey goes back to the start and your stats reset. This cannot be undone."
+    "deleteAllBody": "Every journey goes back to the start and your stats reset. This cannot be undone.",
+    "emptyText": "Your treadmill sessions will show here, with their distance and time."
   },
   "manual": {
     "title": "Add a session",
@@ -622,7 +623,10 @@
         "short": "Give it a name"
       }
     },
-    "onText": "Turn on your treadmill and keep your phone close by."
+    "onText": "Turn on your treadmill and keep your phone close by.",
+    "yesSame": "Yes, it's the same",
+    "noOther": "No, my console says something else",
+    "gapHint": "If the gap is above 0.3 km/h, your distances are corrected automatically."
   },
   "me": {
     "since": "since {{date}}",

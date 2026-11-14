@@ -1,5 +1,5 @@
 import { router } from 'expo-router';
-import { Bluetooth, Check, Power, RefreshCw, X } from 'lucide-react-native';
+import { Bluetooth, Check, ChevronLeft, Power, RefreshCw, X } from 'lucide-react-native';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
@@ -11,7 +11,7 @@ import { fonts, useColors, useShadows } from '@/theme';
 import { correction, factorFor, saveTreadmill, useSavedTreadmill } from '@/treadmill/calibration';
 import { StepProgress, TextField } from '@/ui/controls';
 import { useWide } from '@/ui/layout';
-import { Button, Card, RoundButton } from '@/ui/primitives';
+import { Button, Card, Figure, RoundButton } from '@/ui/primitives';
 
 const STEPS = 5;
 /** Speed the walker sets on the console for the check. */
@@ -275,6 +275,264 @@ export default function TreadmillScreen() {
       />
     );
 
+  // iPad mockup: a full screen with the step as title, the step's big card
+  // on the left, the five steps and the question in 400 on the right.
+  if (wide) {
+    const stepText = t(`treadmillSetup.steps.${step}.text`, { speed: formatSpeed(CHECK_KMH) });
+    const area = (() => {
+      switch (step) {
+        case 1:
+          return (
+            <>
+              <View style={[styles.areaIcon, { backgroundColor: colors.accentSoft }]}>
+                <Power size={40} color={colors.accentText} />
+              </View>
+              <Text style={[styles.areaLabel, { color: colors.textSecondary }]}>
+                {t('treadmillSetup.onText')}
+              </Text>
+            </>
+          );
+        case 2:
+          return (
+            <>
+              {connection.status === 'bluetoothOff' ||
+              connection.status === 'unauthorized' ? null : (
+                <ActivityIndicator size="large" color={colors.textMuted} />
+              )}
+              <Text style={[styles.areaLabel, { color: colors.textSecondary }]}>
+                {t(`treadmill.status.${connection.status}`, { name: hardware ?? '' })}
+              </Text>
+            </>
+          );
+        case 3:
+          return (
+            <>
+              <View style={styles.wideBars}>{bars}</View>
+              <View style={styles.checks}>
+                {(
+                  [
+                    [!!data, t('treadmillSetup.speedFound')],
+                    [data?.distanceM !== undefined, t('treadmillSetup.distanceFound')],
+                    [data?.inclinePct !== undefined, t('treadmillSetup.inclineFound')],
+                  ] as const
+                ).map(([ok, text]) => (
+                  <View
+                    key={text}
+                    style={[
+                      styles.check,
+                      { backgroundColor: ok ? colors.successSoft : colors.surface },
+                    ]}
+                  >
+                    {ok ? (
+                      <Check size={14} color={colors.success} strokeWidth={2.6} />
+                    ) : (
+                      <ActivityIndicator size="small" color={colors.textMuted} />
+                    )}
+                    <Text
+                      style={[
+                        styles.checkText,
+                        { color: ok ? colors.success : colors.textSecondary },
+                      ]}
+                    >
+                      {text}
+                    </Text>
+                  </View>
+                ))}
+              </View>
+            </>
+          );
+        case 4:
+          return (
+            <>
+              <Text
+                style={[styles.areaLabel, styles.areaLabelStrong, { color: colors.textSecondary }]}
+              >
+                {t('treadmillSetup.detected')}
+              </Text>
+              <Figure
+                value={formatSpeed(rawKmh)}
+                unit={t('units.kmh')}
+                size={120}
+                unitSize={30}
+                color={colors.accentText}
+              />
+              <View style={styles.wideBars}>{bars}</View>
+            </>
+          );
+        default:
+          return (
+            <View style={styles.nameArea}>
+              <TextField
+                label={t('treadmillSetup.nameLabel')}
+                value={label ?? saved?.label ?? ''}
+                placeholder={t('treadmillSetup.namePlaceholder')}
+                onChangeText={setLabel}
+                autoFocus
+              />
+              {factor !== null && factor !== 1 ? (
+                <Text style={[styles.small, { color: colors.textSecondary }]}>
+                  {t('treadmillSetup.corrected', {
+                    percent: formatSpeed(Math.abs(factor - 1) * 100),
+                  })}
+                </Text>
+              ) : null}
+            </View>
+          );
+      }
+    })();
+    const buttons =
+      step === 4 ? (
+        <>
+          <Button
+            tone="accent"
+            title={t('treadmillSetup.yesSame')}
+            icon={<Check size={18} color={colors.onAccent} />}
+            onPress={() => {
+              setFactor(1);
+              next();
+            }}
+            disabled={!data || rawKmh <= 0}
+            style={styles.tallButton}
+          />
+          <Button
+            tone="light"
+            title={t('treadmillSetup.noOther')}
+            onPress={disagree}
+            disabled={!data}
+            style={styles.tallButton}
+          />
+        </>
+      ) : (
+        <Button
+          tone={step === STEPS ? 'accent' : 'dark'}
+          title={step === STEPS ? t('treadmillSetup.done') : t('treadmillSetup.continue')}
+          onPress={step === STEPS ? finish : next}
+          disabled={
+            (step === 2 && !connected) || (step === 3 && !data) || (step === STEPS && !hardware)
+          }
+          style={styles.tallButton}
+        />
+      );
+    return (
+      <View
+        style={[
+          styles.screen,
+          styles.wideScreen,
+          {
+            backgroundColor: colors.background,
+            paddingTop: insets.top + 2,
+            paddingBottom: insets.bottom + 32,
+          },
+        ]}
+      >
+        <View style={styles.wideHeader}>
+          <RoundButton
+            icon={
+              step > 1 ? (
+                <ChevronLeft size={22} color={colors.text} />
+              ) : (
+                <X size={20} color={colors.text} />
+              )
+            }
+            onPress={back}
+            label={step > 1 ? t('common.back') : t('common.close')}
+            size={48}
+          />
+          <View style={styles.headerText}>
+            <Text style={[styles.kicker, { color: colors.textSecondary }]}>
+              {t('treadmillSetup.progress', { step, total: STEPS })}
+            </Text>
+            <Text style={[styles.wideTitle, { color: colors.text }]} numberOfLines={1}>
+              {t(`treadmillSetup.steps.${step}.title`, { speed: formatSpeed(CHECK_KMH) })}
+            </Text>
+          </View>
+        </View>
+        <View style={styles.wideRow}>
+          <Card style={styles.mainCard}>
+            {step > 1 && hardware ? (
+              <View style={styles.device}>
+                <View style={[styles.deviceIconWide, { backgroundColor: colors.blueSoft }]}>
+                  <Bluetooth size={24} color={colors.blueText} />
+                </View>
+                <View style={styles.flex}>
+                  <Text style={[styles.deviceNameWide, { color: colors.text }]}>{hardware}</Text>
+                  <Text style={[styles.deviceSub, { color: colors.textSecondary }]}>
+                    {hardware.startsWith('FS-')
+                      ? t('treadmillSetup.fitshow')
+                      : t('treadmillSetup.ftms')}
+                  </Text>
+                </View>
+                {data ? (
+                  <View style={[styles.receivingPill, { backgroundColor: colors.successSoft }]}>
+                    <View style={[styles.pillDot, { backgroundColor: colors.success }]} />
+                    <Text style={[styles.receivingText, { color: colors.success }]}>
+                      {t('treadmillSetup.receiving')}
+                    </Text>
+                  </View>
+                ) : null}
+              </View>
+            ) : null}
+            <View style={[styles.area, { backgroundColor: colors.inset }]}>{area}</View>
+            <Text style={[styles.stepText, { color: colors.textSecondary }]}>{stepText}</Text>
+          </Card>
+          <View style={styles.side}>
+            <Card style={styles.stepsCardWide}>
+              {Array.from({ length: STEPS }, (_, i) => i + 1).map((n) => (
+                <View key={n} style={styles.stepRowWide}>
+                  <View
+                    style={[
+                      styles.stepDotWide,
+                      {
+                        backgroundColor:
+                          n < step ? colors.success : n === step ? colors.accent : colors.inset,
+                      },
+                    ]}
+                  >
+                    {n < step ? (
+                      <Check size={14} color="#FFFFFF" strokeWidth={3} />
+                    ) : (
+                      <Text
+                        style={[
+                          styles.stepNumber,
+                          { color: n === step ? colors.onAccent : colors.textSecondary },
+                        ]}
+                      >
+                        {n}
+                      </Text>
+                    )}
+                  </View>
+                  <Text
+                    style={[
+                      styles.stepName,
+                      { color: n > step ? colors.textSecondary : colors.text },
+                      n === step && { fontFamily: fonts.textSemiBold },
+                    ]}
+                  >
+                    {t(`treadmillSetup.steps.${n}.short`)}
+                  </Text>
+                </View>
+              ))}
+            </Card>
+            <Card style={styles.actionCard}>
+              {step === 4 ? (
+                <>
+                  <Text style={[styles.questionWide, { color: colors.text }]}>
+                    {t('treadmillSetup.question', { speed: formatSpeed(rawKmh) })}
+                  </Text>
+                  <Text style={[styles.hint, { color: colors.textSecondary }]}>
+                    {t('treadmillSetup.gapHint')}
+                  </Text>
+                </>
+              ) : null}
+              <View style={styles.flex} />
+              <View style={styles.buttons}>{buttons}</View>
+            </Card>
+          </View>
+        </View>
+      </View>
+    );
+  }
+
   return (
     <View style={[styles.screen, { backgroundColor: colors.background }]}>
       <ScrollView
@@ -417,6 +675,66 @@ const styles = StyleSheet.create({
   row: { flexDirection: 'row', gap: 12 },
   back: { fontFamily: fonts.textSemiBold, fontSize: 15, textAlign: 'center', paddingVertical: 6 },
   stepsCard: { width: 380 },
+  wideScreen: { paddingHorizontal: 32, gap: 20 },
+  wideHeader: { height: 54, flexDirection: 'row', alignItems: 'center', gap: 14 },
+  headerText: { flex: 1, gap: 2 },
+  kicker: { fontFamily: fonts.text, fontSize: 14 },
+  wideTitle: { fontFamily: fonts.display, fontSize: 30, letterSpacing: -0.9 },
+  wideRow: { flex: 1, flexDirection: 'row', gap: 20 },
+  mainCard: { flex: 1, borderRadius: 30, paddingVertical: 30, paddingHorizontal: 34, gap: 22 },
+  deviceIconWide: {
+    width: 52,
+    height: 52,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  deviceNameWide: { fontFamily: fonts.display, fontSize: 20 },
+  deviceSub: { fontFamily: fonts.text, fontSize: 13.5 },
+  receivingPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 7,
+    height: 32,
+    paddingHorizontal: 12,
+    borderRadius: 999,
+  },
+  pillDot: { width: 8, height: 8, borderRadius: 99 },
+  area: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10,
+    borderRadius: 24,
+    padding: 24,
+  },
+  areaIcon: {
+    width: 96,
+    height: 96,
+    borderRadius: 28,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  areaLabel: { fontFamily: fonts.textMedium, fontSize: 15, textAlign: 'center' },
+  areaLabelStrong: { fontFamily: fonts.textSemiBold },
+  wideBars: { width: 300 },
+  nameArea: { alignSelf: 'stretch', gap: 12, paddingHorizontal: 40 },
+  stepText: { fontFamily: fonts.text, fontSize: 15, lineHeight: 22.5 },
+  side: { width: 400, gap: 16 },
+  stepsCardWide: { borderRadius: 26, paddingVertical: 18, paddingHorizontal: 22, gap: 0 },
+  stepRowWide: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 9 },
+  stepDotWide: {
+    width: 28,
+    height: 28,
+    borderRadius: 99,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  actionCard: { flex: 1, borderRadius: 26, padding: 22, gap: 14 },
+  questionWide: { fontFamily: fonts.display, fontSize: 22, lineHeight: 26 },
+  hint: { fontFamily: fonts.text, fontSize: 14, lineHeight: 21 },
+  buttons: { gap: 10 },
+  tallButton: { height: 56, borderRadius: 18 },
   stepRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   stepDot: {
     width: 28,

@@ -1,15 +1,16 @@
 import { router } from 'expo-router';
-import { ChevronLeft, CloudOff, Hand, Plus } from 'lucide-react-native';
+import { ChevronLeft, CloudOff, Hand, Plus, History } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 import { Alert, FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { EmptyState, useWide } from '@/ui/layout';
+import { RoundButton, GlassButton } from '@/ui/primitives';
 import { ActionMenu } from '@/ui/action-menu';
 import { useDeleteSessions, useSessions } from '@/api/queries';
 import { formatDate, formatDuration, formatKm, formatSpeed } from '@/i18n/format';
 import { pendingSessions } from '@/session/store';
 import { fonts, useColors } from '@/theme';
-import { GlassButton } from '@/ui/primitives';
 
 type Item = {
   id: string;
@@ -25,6 +26,7 @@ export default function HistoryScreen() {
   const { t } = useTranslation();
   const colors = useColors();
   const insets = useSafeAreaInsets();
+  const wide = useWide();
   const { data: remote = [] } = useSessions();
   const remove = useDeleteSessions();
   const failed = () => Alert.alert(t('journeys.failed'));
@@ -68,27 +70,51 @@ export default function HistoryScreen() {
       style={{ backgroundColor: colors.background }}
       contentContainerStyle={[
         styles.content,
-        { paddingTop: insets.top + 12, paddingBottom: insets.bottom + 32 },
+        wide && styles.contentWide,
+        { paddingTop: wide ? insets.top + 2 : insets.top + 12, paddingBottom: insets.bottom + 32 },
       ]}
       data={items}
       keyExtractor={(item) => item.id}
       ListHeaderComponent={
-        <View style={styles.header}>
-          <GlassButton
-            icon={<ChevronLeft size={22} color={colors.text} />}
-            onPress={() => router.back()}
-            label={t('common.back')}
-          />
-          <Text style={[styles.title, { color: colors.text }]}>{t('history.title')}</Text>
-          <GlassButton
-            icon={<Plus size={22} color={colors.text} />}
-            onPress={() => router.push('/manual-session')}
-            label={t('history.add')}
-          />
-        </View>
+        wide ? (
+          // iPad: the title row of the other screens (back, 30 pt title, add).
+          <View style={styles.headerWide}>
+            <RoundButton
+              icon={<ChevronLeft size={22} color={colors.text} />}
+              onPress={() => router.back()}
+              label={t('common.back')}
+              size={48}
+            />
+            <Text style={[styles.titleWide, { color: colors.text }]}>{t('history.title')}</Text>
+            <RoundButton
+              icon={<Plus size={20} color={colors.text} />}
+              onPress={() => router.push('/manual-session')}
+              label={t('history.add')}
+              size={48}
+            />
+          </View>
+        ) : (
+          <View style={styles.header}>
+            <GlassButton
+              icon={<ChevronLeft size={22} color={colors.text} />}
+              onPress={() => router.back()}
+              label={t('common.back')}
+            />
+            <Text style={[styles.title, { color: colors.text }]}>{t('history.title')}</Text>
+            <GlassButton
+              icon={<Plus size={22} color={colors.text} />}
+              onPress={() => router.push('/manual-session')}
+              label={t('history.add')}
+            />
+          </View>
+        )
       }
       ListEmptyComponent={
-        <Text style={[styles.empty, { color: colors.textSecondary }]}>{t('history.empty')}</Text>
+        <EmptyState
+          icon={<History size={22} color={colors.accentText} />}
+          title={t('history.empty')}
+          text={t('history.emptyText')}
+        />
       }
       ListFooterComponent={
         items.length > 0 ? (
@@ -152,6 +178,9 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   title: { fontFamily: fonts.display, fontSize: 20 },
+  contentWide: { paddingHorizontal: 32, gap: 10, maxWidth: undefined },
+  headerWide: { height: 54, flexDirection: 'row', alignItems: 'center', gap: 14, marginBottom: 10 },
+  titleWide: { flex: 1, fontFamily: fonts.display, fontSize: 30, letterSpacing: -0.9 },
   empty: { fontFamily: fonts.text, fontSize: 15, textAlign: 'center', marginTop: 40 },
   row: {
     flexDirection: 'row',

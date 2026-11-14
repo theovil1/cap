@@ -23,6 +23,7 @@ import '@/i18n';
 import { useOnboarding } from '@/onboarding/state';
 import { SessionProvider } from '@/session/session-context';
 import { useColors } from '@/theme';
+import { useWide } from '@/ui/layout';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -71,6 +72,8 @@ function Screens() {
   const { status } = useAuth();
   const { pending } = useOnboarding();
   const colors = useColors();
+  // iPad: the treadmill setup is a full screen, as in its mockup.
+  const wide = useWide();
 
   useEffect(() => {
     if (status !== 'loading') SplashScreen.hideAsync();
@@ -104,7 +107,10 @@ function Screens() {
         <Stack.Screen name="stride" options={{ presentation: 'modal' }} />
         <Stack.Screen name="invite/[code]" options={{ presentation: 'modal' }} />
         <Stack.Screen name="arrival" options={{ presentation: 'fullScreenModal' }} />
-        <Stack.Screen name="treadmill" options={{ presentation: 'modal' }} />
+        <Stack.Screen
+          name="treadmill"
+          options={{ presentation: wide ? 'fullScreenModal' : 'modal' }}
+        />
         <Stack.Screen name="me" />
         <Stack.Screen name="walker/[id]" />
         <Stack.Screen name="public-route/[id]" />

@@ -78,17 +78,18 @@ export function SettingsWide({
 
   return (
     <View
-      style={[styles.screen, { backgroundColor: colors.background, paddingTop: insets.top + 20 }]}
+      style={[styles.screen, { backgroundColor: colors.background, paddingTop: insets.top + 2 }]}
     >
       <View style={styles.header}>
         <GlassButton
           icon={<ChevronLeft size={22} color={colors.text} />}
           onPress={() => router.back()}
           label={t('common.back')}
+          size={48}
         />
         <Text style={[styles.title, { color: colors.text }]}>{t('settings.title')}</Text>
       </View>
-      <View style={[styles.body, { paddingBottom: insets.bottom + 20 }]}>
+      <View style={[styles.body, { paddingBottom: insets.bottom + 32 }]}>
         <Card style={styles.sidebar}>
           {SECTIONS.map(({ key, icon: Icon }) => {
             const on = key === section;
@@ -251,10 +252,11 @@ export function SettingsWide({
 const styles = StyleSheet.create({
   screen: { flex: 1, paddingHorizontal: 32 },
   flex: { flex: 1 },
-  header: { flexDirection: 'row', alignItems: 'center', gap: 16, marginBottom: 20 },
-  title: { fontFamily: fonts.display, fontSize: 31, letterSpacing: -0.9 },
+  // Mockup: a 54 high title row, 20 above the cards.
+  header: { height: 54, flexDirection: 'row', alignItems: 'center', gap: 14, marginBottom: 20 },
+  title: { fontFamily: fonts.display, fontSize: 30, letterSpacing: -0.9 },
   body: { flex: 1, flexDirection: 'row', gap: 20 },
-  sidebar: { width: 280, padding: 10, gap: 2 },
+  sidebar: { width: 280, padding: 10, gap: 2, borderRadius: 28 },
   item: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -265,8 +267,8 @@ const styles = StyleSheet.create({
   },
   itemText: { fontFamily: fonts.textMedium, fontSize: 15 },
   version: { fontFamily: fonts.text, fontSize: 12.5, padding: 14 },
-  panel: { flex: 1, overflow: 'hidden' },
-  form: { padding: 32, gap: 18 },
+  panel: { flex: 1, overflow: 'hidden', borderRadius: 30 },
+  form: { paddingVertical: 28, paddingHorizontal: 32, gap: 22 },
   identity: { flexDirection: 'row', alignItems: 'center', gap: 20 },
   panelTitle: { fontFamily: fonts.display, fontSize: 24, letterSpacing: -0.4 },
   row: { flexDirection: 'row', alignItems: 'center', gap: 18 },
