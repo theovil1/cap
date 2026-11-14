@@ -614,7 +614,8 @@
         "text": "You will see this name in Cap instead of the Bluetooth one.",
         "short": "Give it a name"
       }
-    }
+    },
+    "onText": "Turn on your treadmill and keep your phone close by."
   },
   "me": {
     "since": "since {{date}}",

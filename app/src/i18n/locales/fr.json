@@ -614,7 +614,8 @@
         "text": "C'est ce nom que tu verras dans Cap, à la place du nom Bluetooth.",
         "short": "Donner un nom"
       }
-    }
+    },
+    "onText": "Allume ton tapis et garde ton téléphone à côté."
   },
   "me": {
     "since": "depuis {{date}}",
