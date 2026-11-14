@@ -30,7 +30,7 @@ import { RouteMap } from '@/map/route-map';
 import { useDayStats } from '@/session/stats';
 import { fonts, useColors } from '@/theme';
 import { useWide } from '@/ui/layout';
-import { Avatar, Button, Card, ProgressBar, RoundButton } from '@/ui/primitives';
+import { Avatar, Button, Card, ProgressBar, RoundButton, Figure } from '@/ui/primitives';
 import { StatTile } from '@/ui/stats';
 
 type Activity = {
@@ -117,7 +117,7 @@ export default function MyProfileScreen() {
   const identity = (
     <>
       <View style={styles.identity}>
-        <Avatar name={user.first_name} size={92} photo={user.avatar_url} />
+        <Avatar name={user.first_name} size={wide ? 112 : 92} photo={user.avatar_url} />
         <View style={styles.nameRow}>
           <Text style={[styles.name, { color: colors.text }]}>{user.first_name}</Text>
           <NameBadge badges={badges} />
@@ -155,9 +155,19 @@ export default function MyProfileScreen() {
         />
       </View>
       <View style={styles.row}>
-        <StatTile label={t('profile.total')} value={formatKm(walkedM, 0)} unit={t('units.km')} />
-        <StatTile label={t('profile.finished')} value={formatNumber(finished.length)} />
-        <StatTile
+        <SmallTile
+          wide={wide}
+          label={t('profile.total')}
+          value={formatKm(walkedM, 0)}
+          unit={t('units.km')}
+        />
+        <SmallTile
+          wide={wide}
+          label={t('profile.finished')}
+          value={formatNumber(finished.length)}
+        />
+        <SmallTile
+          wide={wide}
           label={t('profile.bestStreak')}
           value={formatNumber(day.bestStreak)}
           unit={t('profile.daysShort')}
@@ -167,8 +177,8 @@ export default function MyProfileScreen() {
   );
 
   const medalsCard = (
-    <Card style={styles.card}>
-      <Text style={[styles.cardTitle, { color: colors.text }]}>
+    <Card style={[styles.card, wide && styles.cardWide]}>
+      <Text style={[styles.cardTitle, wide && styles.cardTitleWide, { color: colors.text }]}>
         {t('me.medals')}
         <Text style={[styles.count, { color: colors.textSecondary }]}> {formatNumber(won)}</Text>
       </Text>
@@ -214,7 +224,7 @@ export default function MyProfileScreen() {
     return (
       <View style={[styles.screen, { backgroundColor: colors.background }]}>
         <View
-          style={[styles.wide, { paddingTop: insets.top + 20, paddingBottom: insets.bottom + 20 }]}
+          style={[styles.wide, { paddingTop: insets.top + 2, paddingBottom: insets.bottom + 32 }]}
         >
           {header}
           <View style={styles.columns}>
@@ -228,8 +238,12 @@ export default function MyProfileScreen() {
             <View style={styles.right}>
               {medalsCard}
               <View style={[styles.row, styles.flex]}>
-                <Card style={[styles.card, styles.flex]}>
-                  <Text style={[styles.cardTitle, { color: colors.text }]}>{t('me.underWay')}</Text>
+                <Card style={[styles.card, wide && styles.cardWide, styles.flex]}>
+                  <Text
+                    style={[styles.cardTitle, wide && styles.cardTitleWide, { color: colors.text }]}
+                  >
+                    {t('me.underWay')}
+                  </Text>
                   {summary && detail ? (
                     <Pressable onPress={() => router.push('/session')} style={{ gap: 12 }}>
                       <View style={styles.mapBox}>
@@ -259,8 +273,12 @@ export default function MyProfileScreen() {
                     </Text>
                   )}
                 </Card>
-                <Card style={[styles.card, styles.flex]}>
-                  <Text style={[styles.cardTitle, { color: colors.text }]}>{t('me.activity')}</Text>
+                <Card style={[styles.card, wide && styles.cardWide, styles.flex]}>
+                  <Text
+                    style={[styles.cardTitle, wide && styles.cardTitleWide, { color: colors.text }]}
+                  >
+                    {t('me.activity')}
+                  </Text>
                   {activity.length === 0 ? (
                     <Text style={[styles.small, { color: colors.textSecondary }]}>
                       {t('me.noActivity')}
@@ -311,7 +329,7 @@ export default function MyProfileScreen() {
         {medalsCard}
         {summary ? (
           <Pressable onPress={() => router.push('/session')} accessibilityRole="button">
-            <Card style={[styles.card, styles.under]}>
+            <Card style={[styles.card, wide && styles.cardWide, styles.under]}>
               <View style={[styles.activityIcon, { backgroundColor: colors.accentSoft }]}>
                 <RouteIcon size={19} color={colors.accentText} />
               </View>
@@ -345,15 +363,18 @@ const styles = StyleSheet.create({
   row: { flexDirection: 'row', gap: 10 },
   card: { padding: 16, gap: 14 },
   cardTitle: { fontFamily: fonts.display, fontSize: 19, letterSpacing: -0.38 },
+  // iPad mockup: 28 round cards, 20 by 22 inside, 20 pt titles.
+  cardWide: { borderRadius: 28, paddingVertical: 20, paddingHorizontal: 22, gap: 16 },
+  cardTitleWide: { fontSize: 20, letterSpacing: -0.4 },
   count: { fontFamily: fonts.textMedium, fontSize: 14, letterSpacing: 0 },
   medals: { gap: 4, alignItems: 'flex-start' },
   under: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   underTitle: { fontFamily: fonts.textSemiBold, fontSize: 15 },
   small: { fontFamily: fonts.text, fontSize: 12.5, fontVariant: ['tabular-nums'] },
-  wide: { flex: 1, paddingHorizontal: 32, gap: 20 },
+  wide: { flex: 1, paddingHorizontal: 32, gap: 18 },
   columns: { flex: 1, flexDirection: 'row', gap: 20 },
-  left: { width: 380, padding: 26, gap: 18 },
-  right: { flex: 1, gap: 20 },
+  left: { width: 380, paddingVertical: 30, paddingHorizontal: 26, gap: 18, borderRadius: 30 },
+  right: { flex: 1, gap: 16 },
   footer: { fontFamily: fonts.text, fontSize: 13, textAlign: 'center' },
   mapBox: { height: 150, borderRadius: 16, overflow: 'hidden' },
   spread: {
@@ -372,4 +393,38 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   activityText: { flex: 1, fontFamily: fonts.text, fontSize: 14.5 },
+});
+
+/** A figure tile: the mockup's small one on iPad, the usual one on the phone. */
+function SmallTile({
+  wide,
+  label,
+  value,
+  unit,
+}: {
+  wide: boolean;
+  label: string;
+  value: string;
+  unit?: string;
+}) {
+  const colors = useColors();
+  if (!wide) return <StatTile label={label} value={value} unit={unit} />;
+  return (
+    <View style={[tileStyles.tile, { backgroundColor: colors.inset }]}>
+      <Text style={[tileStyles.label, { color: colors.textSecondary }]}>{label}</Text>
+      <Figure value={value} unit={unit} size={20} unitSize={11} />
+    </View>
+  );
+}
+
+const tileStyles = StyleSheet.create({
+  tile: {
+    flex: 1,
+    justifyContent: 'space-between',
+    gap: 6,
+    paddingVertical: 13,
+    paddingHorizontal: 14,
+    borderRadius: 18,
+  },
+  label: { fontFamily: fonts.textMedium, fontSize: 12 },
 });
