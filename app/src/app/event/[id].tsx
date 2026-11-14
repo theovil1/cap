@@ -170,8 +170,10 @@ function EventView({ event }: { event: EventCard }) {
           </>
         )}
       </View>
-      <Text style={[styles.title, { color: colors.text }]}>{event.title}</Text>
-      <Text style={[styles.small, { color: colors.textSecondary }]}>
+      <Text style={[styles.title, wide && styles.titleWide, { color: colors.text }]}>
+        {event.title}
+      </Text>
+      <Text style={[styles.small, wide && styles.ruleWide, { color: colors.textSecondary }]}>
         {t('events.rule', {
           km: formatKm(event.distance_m, 0),
           stages: t('explore.stages', { count: event.stages }),
@@ -195,7 +197,7 @@ function EventView({ event }: { event: EventCard }) {
         }
         accessibilityRole="button"
       >
-        <Card style={styles.people}>
+        <Card style={[styles.people, wide && styles.peopleWide]}>
           {event.friends.length > 0 ? (
             <AvatarStack
               walkers={event.friends.map((f) => ({
@@ -239,7 +241,7 @@ function EventView({ event }: { event: EventCard }) {
       <PhotoChip
         label={t('publicRoute.startAt', { place: event.start_town ?? event.start.label })}
         icon={Flag}
-        style={[styles.chip, { bottom: wide ? 24 : 52 }]}
+        style={[styles.chip, { bottom: wide ? 68 : 52 }]}
       />
     </View>
   );
@@ -258,16 +260,35 @@ function EventView({ event }: { event: EventCard }) {
     </View>
   );
 
+  // Mockup: the picture beside a 412 panel 20 from the edges; back at 28, 28;
+  // share as a square next to the main button.
   if (wide) {
     return (
-      <View style={[styles.screen, styles.row, { backgroundColor: colors.background }]}>
-        <View style={styles.flex}>
-          {cover()}
-          {top}
+      <View style={[styles.screen, { backgroundColor: colors.background }]}>
+        <View style={[StyleSheet.absoluteFill, { right: 412 }]}>{cover()}</View>
+        <View style={styles.wideBack}>
+          <GlassButton
+            icon={<ChevronLeft size={22} color={colors.text} />}
+            onPress={() => router.back()}
+            label={t('common.back')}
+          />
         </View>
         <View style={[styles.panel, { backgroundColor: colors.surface }, shadows.floating]}>
           <ScrollView contentContainerStyle={styles.panelContent}>{body}</ScrollView>
-          <View style={styles.panelFooter}>{action}</View>
+          <View style={styles.panelFooter}>
+            <Pressable
+              onPress={share}
+              accessibilityRole="button"
+              accessibilityLabel={t('summary.share')}
+              style={[
+                styles.square,
+                { backgroundColor: colors.surface, borderColor: colors.border },
+              ]}
+            >
+              <ShareIcon size={20} color={colors.text} />
+            </Pressable>
+            {action ? <View style={styles.flex}>{action}</View> : null}
+          </View>
         </View>
       </View>
     );
@@ -336,7 +357,33 @@ const styles = StyleSheet.create({
     paddingTop: 12,
     paddingHorizontal: 20,
   },
-  panel: { width: 440, margin: 20, borderRadius: 30, overflow: 'hidden' },
-  panelContent: { padding: 26, gap: 14 },
-  panelFooter: { padding: 22, paddingTop: 8 },
+  panel: {
+    position: 'absolute',
+    right: 20,
+    top: 20,
+    bottom: 20,
+    width: 412,
+    borderRadius: 34,
+    overflow: 'hidden',
+  },
+  panelContent: { padding: 26, paddingBottom: 12, gap: 16 },
+  panelFooter: {
+    flexDirection: 'row',
+    gap: 10,
+    paddingHorizontal: 26,
+    paddingBottom: 26,
+    paddingTop: 10,
+  },
+  wideBack: { position: 'absolute', top: 28, left: 28 },
+  square: {
+    width: 56,
+    height: 56,
+    borderRadius: 18,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  titleWide: { fontSize: 30, lineHeight: 32, letterSpacing: -0.9 },
+  ruleWide: { fontSize: 14.5, lineHeight: 21 },
+  peopleWide: { paddingVertical: 14, paddingHorizontal: 16, borderRadius: 20 },
 });

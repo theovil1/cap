@@ -52,6 +52,15 @@ export default function EventLiveScreen() {
 
   const panel = (
     <>
+      {/* iPad mockup: the title and the walkers live head the panel. */}
+      {wide ? (
+        <View style={styles.panelHead}>
+          <Text style={[styles.panelTitle, { color: colors.text }]} numberOfLines={1}>
+            {event?.title ?? ''}
+          </Text>
+          <LivePill label={formatNumber(standings?.walking_now ?? 0)} />
+        </View>
+      ) : null}
       {me ? (
         <>
           <View style={styles.head}>
@@ -59,9 +68,9 @@ export default function EventLiveScreen() {
               <Text style={[styles.label, { color: colors.textSecondary }]}>
                 {t('events.yourPlace')}
               </Text>
-              <Text style={[styles.place, { color: colors.text }]}>
+              <Text style={[styles.place, wide && styles.placeWide, { color: colors.text }]}>
                 {formatNumber(me.rank)}
-                <Text style={[styles.of, { color: colors.textSecondary }]}>
+                <Text style={[styles.of, wide && styles.ofWide, { color: colors.textSecondary }]}>
                   {' '}
                   {t('race.of', { count: standings?.registered ?? 0 })}
                 </Text>
@@ -147,7 +156,7 @@ export default function EventLiveScreen() {
         />
       ) : null}
       <View
-        style={[styles.top, { top: insets.top + 8, right: wide ? 470 : 20 }]}
+        style={[styles.top, wide ? { top: 28, left: 28 } : { top: insets.top + 8, right: 20 }]}
         pointerEvents="box-none"
       >
         <GlassButton
@@ -155,24 +164,27 @@ export default function EventLiveScreen() {
           onPress={() => router.back()}
           label={t('common.close')}
         />
-        <Glass style={styles.titleBar}>
-          <Text style={[styles.titleText, { color: colors.text }]} numberOfLines={1}>
-            {event?.title ?? ''}
-          </Text>
-          <LivePill label={formatNumber(standings?.walking_now ?? 0)} large />
-        </Glass>
+        {wide ? null : (
+          <Glass style={styles.titleBar}>
+            <Text style={[styles.titleText, { color: colors.text }]} numberOfLines={1}>
+              {event?.title ?? ''}
+            </Text>
+            <LivePill label={formatNumber(standings?.walking_now ?? 0)} large />
+          </Glass>
+        )}
       </View>
       <View
         style={[
           wide ? styles.panelWide : styles.sheet,
           { backgroundColor: colors.surface },
-          wide
-            ? { top: insets.top + 20, bottom: insets.bottom + 20 }
-            : { paddingBottom: insets.bottom + 16 },
+          wide ? { top: 20, bottom: 20 } : { paddingBottom: insets.bottom + 16 },
           shadows.sheet,
         ]}
       >
-        <ScrollView contentContainerStyle={styles.panelContent} scrollEnabled={wide}>
+        <ScrollView
+          contentContainerStyle={[styles.panelContent, wide && styles.panelContentWide]}
+          scrollEnabled={wide}
+        >
           {!wide && <View style={[styles.grabber, { backgroundColor: colors.track }]} />}
           {panel}
         </ScrollView>
@@ -203,7 +215,17 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 34,
     borderTopRightRadius: 34,
   },
-  panelWide: { position: 'absolute', right: 20, width: 420, borderRadius: 30, overflow: 'hidden' },
+  panelWide: { position: 'absolute', right: 20, width: 412, borderRadius: 34, overflow: 'hidden' },
+  panelContentWide: { padding: 26, paddingTop: 26, gap: 14 },
+  panelHead: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    gap: 12,
+  },
+  panelTitle: { flex: 1, fontFamily: fonts.textSemiBold, fontSize: 15 },
+  placeWide: { fontSize: 60, letterSpacing: -2.1 },
+  ofWide: { fontSize: 19 },
   panelContent: { padding: 20, paddingTop: 10, gap: 14 },
   grabber: { alignSelf: 'center', width: 40, height: 5, borderRadius: 99, marginBottom: 4 },
   head: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end', gap: 12 },

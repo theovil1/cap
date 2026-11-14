@@ -698,7 +698,10 @@
       "path": "On the way"
     },
     "facts": "{{km}} km · {{stages}} · on foot, safe",
-    "submit": "Publish"
+    "submit": "Publish",
+    "factsShort": "{{km}} km · on foot, safe",
+    "pickRoute": "Route to publish",
+    "change": "Change"
   },
   "events": {
     "empty": "No scheduled journey",

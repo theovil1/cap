@@ -97,12 +97,15 @@ export function RoundButton({
   onPress,
   label,
   plain,
+  size,
 }: {
   icon: ReactNode;
   onPress: () => void;
   label: string;
   /** No background: the back arrow of the onboarding. */
   plain?: boolean;
+  /** 48 for the back button of iPad screen headers. */
+  size?: number;
 }) {
   const colors = useColors();
   return (
@@ -113,6 +116,7 @@ export function RoundButton({
       hitSlop={6}
       style={({ pressed }) => [
         styles.roundButton,
+        size ? { width: size, height: size } : null,
         !plain && { backgroundColor: colors.surface, borderColor: colors.border, borderWidth: 1 },
         { opacity: pressed ? 0.7 : 1 },
       ]}

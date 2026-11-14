@@ -698,7 +698,10 @@
       "path": "Parcours"
     },
     "facts": "{{km}} km · {{stages}} · à pied, sûr",
-    "submit": "Publier"
+    "submit": "Publier",
+    "factsShort": "{{km}} km · à pied, sûr",
+    "pickRoute": "Trajet à publier",
+    "change": "Modifier"
   },
   "events": {
     "empty": "Aucun trajet planifié",

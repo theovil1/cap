@@ -1,6 +1,6 @@
 import { Image } from 'expo-image';
 import { router, useLocalSearchParams } from 'expo-router';
-import { ChevronLeft, ImagePlus, Upload } from 'lucide-react-native';
+import { ChevronLeft, ImagePlus, Route as RouteIcon, Upload } from 'lucide-react-native';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
@@ -24,6 +24,9 @@ import { PlanFields, usePlan } from '@/community/plan-fields';
 import { formatKm } from '@/i18n/format';
 import { journeyTitle } from '@/journey/names';
 import { AerialView } from '@/map/aerial';
+import { RouteMap } from '@/map/route-map';
+import { ActionMenu } from '@/ui/action-menu';
+import { useWide } from '@/ui/layout';
 import { fonts, useColors } from '@/theme';
 import { Chip, Tabs, TextField } from '@/ui/controls';
 import { Button, Card, RoundButton } from '@/ui/primitives';
@@ -43,6 +46,7 @@ export default function PublishScreen() {
   const { t } = useTranslation();
   const colors = useColors();
   const insets = useSafeAreaInsets();
+  const wide = useWide();
   const { publicRouteId } = useLocalSearchParams<{ publicRouteId?: string }>();
   const { data: journeys = [] } = useJourneys();
   // Routes I computed and did not publish yet, the one under way first.
@@ -161,6 +165,148 @@ export default function PublishScreen() {
     </View>
   );
 
+  const fields = journey ? (
+    <>
+      <TextField
+        label={t('publish.titleLabel')}
+        value={shownTitle}
+        onChangeText={setTitle}
+        maxLength={80}
+      />
+      <TextField
+        label={t('publish.description')}
+        value={description}
+        onChangeText={setDescription}
+        placeholder={t('publish.descriptionPlaceholder')}
+        multiline
+        maxLength={600}
+      />
+      <View style={{ gap: 7 }}>
+        <Text style={[styles.label, { color: colors.textSecondary }]}>
+          {t('publish.visibleBy')}
+        </Text>
+        <Tabs
+          options={[
+            { value: 'everyone', label: t('publish.everyone') },
+            { value: 'friends', label: t('publish.friends') },
+          ]}
+          value={visibility}
+          onChange={setVisibility}
+        />
+      </View>
+      <PlanFields plan={plan} onChange={setPlan} />
+      <View style={{ gap: 7 }}>
+        <Text style={[styles.label, { color: colors.textSecondary }]}>{t('publish.themes')}</Text>
+        <View style={styles.tags}>
+          {TAGS.map((tag) => (
+            <Chip
+              key={tag}
+              small
+              label={t(`publish.tags.${tag}`)}
+              on={tags.includes(tag)}
+              onPress={() =>
+                setTags((list) =>
+                  list.includes(tag) ? list.filter((x) => x !== tag) : [...list, tag],
+                )
+              }
+            />
+          ))}
+        </View>
+      </View>
+      {photoSlots}
+    </>
+  ) : null;
+  const submitButton = (
+    <Button
+      tone="accent"
+      title={t('publish.submit')}
+      icon={<Upload size={19} color={colors.onAccent} />}
+      onPress={submit}
+      loading={busy}
+      disabled={shownTitle.trim().length < 3}
+      style={wide ? styles.submitWide : undefined}
+    />
+  );
+
+  // iPad mockup: the form in a card on the left, the route on its map in 460
+  // on the right with its name below.
+  if (wide && !editing && journey) {
+    return (
+      <KeyboardAvoidingView
+        behavior="padding"
+        style={[
+          styles.screen,
+          styles.wide,
+          {
+            backgroundColor: colors.background,
+            paddingTop: insets.top + 2,
+            paddingBottom: insets.bottom + 32,
+          },
+        ]}
+      >
+        <View style={styles.wideHeader}>
+          <RoundButton
+            icon={<ChevronLeft size={22} color={colors.text} />}
+            onPress={() => router.back()}
+            label={t('common.back')}
+            size={48}
+          />
+          <Text style={[styles.title, styles.titleWide, { color: colors.text }]}>
+            {t('publish.title')}
+          </Text>
+        </View>
+        <View style={styles.wideRow}>
+          <Card style={styles.formCard}>
+            <ScrollView
+              contentContainerStyle={styles.formContent}
+              keyboardShouldPersistTaps="handled"
+              showsVerticalScrollIndicator={false}
+            >
+              {fields}
+            </ScrollView>
+            {submitButton}
+          </Card>
+          <View style={styles.side}>
+            <Card style={styles.mapCard}>
+              <RouteOverview journey={journey} />
+            </Card>
+            <Card style={styles.routeCard}>
+              <View style={[styles.routeIcon, { backgroundColor: colors.accentSoft }]}>
+                <RouteIcon size={22} color={colors.accentText} />
+              </View>
+              <View style={styles.routeText}>
+                <Text style={[styles.routeTitle, { color: colors.text }]} numberOfLines={1}>
+                  {journeyTitle(journey)}
+                </Text>
+                <Text
+                  style={[styles.routeFacts, { color: colors.textSecondary }]}
+                  numberOfLines={1}
+                >
+                  {t('publish.factsShort', { km: formatKm(journey.route_distance_m, 0) })}
+                </Text>
+              </View>
+              {mine.length > 1 ? (
+                <ActionMenu
+                  title={t('publish.pickRoute')}
+                  label={t('publish.change')}
+                  items={mine.map((j) => ({
+                    label: journeyTitle(j),
+                    checked: j.id === journey.id,
+                    onPress: () => setChosen(j.id),
+                  }))}
+                >
+                  <Text style={[styles.change, { color: colors.blueText }]}>
+                    {t('publish.change')} ›
+                  </Text>
+                </ActionMenu>
+              ) : null}
+            </Card>
+          </View>
+        </View>
+      </KeyboardAvoidingView>
+    );
+  }
+
   return (
     <KeyboardAvoidingView
       behavior="padding"
@@ -216,55 +362,7 @@ export default function PublishScreen() {
               </ScrollView>
             )}
             <RouteSummary journey={journey} />
-            <TextField
-              label={t('publish.titleLabel')}
-              value={shownTitle}
-              onChangeText={setTitle}
-              maxLength={80}
-            />
-            <TextField
-              label={t('publish.description')}
-              value={description}
-              onChangeText={setDescription}
-              placeholder={t('publish.descriptionPlaceholder')}
-              multiline
-              maxLength={600}
-            />
-            <View style={{ gap: 6 }}>
-              <Text style={[styles.label, { color: colors.textSecondary }]}>
-                {t('publish.visibleBy')}
-              </Text>
-              <Tabs
-                options={[
-                  { value: 'everyone', label: t('publish.everyone') },
-                  { value: 'friends', label: t('publish.friends') },
-                ]}
-                value={visibility}
-                onChange={setVisibility}
-              />
-            </View>
-            <PlanFields plan={plan} onChange={setPlan} />
-            <View style={{ gap: 6 }}>
-              <Text style={[styles.label, { color: colors.textSecondary }]}>
-                {t('publish.themes')}
-              </Text>
-              <View style={styles.tags}>
-                {TAGS.map((tag) => (
-                  <Chip
-                    key={tag}
-                    small
-                    label={t(`publish.tags.${tag}`)}
-                    on={tags.includes(tag)}
-                    onPress={() =>
-                      setTags((list) =>
-                        list.includes(tag) ? list.filter((x) => x !== tag) : [...list, tag],
-                      )
-                    }
-                  />
-                ))}
-              </View>
-            </View>
-            {photoSlots}
+            {fields}
           </>
         )}
       </ScrollView>
@@ -275,17 +373,29 @@ export default function PublishScreen() {
             { paddingBottom: insets.bottom + 12, backgroundColor: colors.background },
           ]}
         >
-          <Button
-            tone="accent"
-            title={t('publish.submit')}
-            icon={<Upload size={19} color={colors.onAccent} />}
-            onPress={submit}
-            loading={busy}
-            disabled={shownTitle.trim().length < 3}
-          />
+          {submitButton}
         </View>
       ) : null}
     </KeyboardAvoidingView>
+  );
+}
+
+/** The whole route on the map, as the preview draws it. */
+function RouteOverview({ journey }: { journey: JourneySummary }) {
+  const { data: detail } = useJourney(journey.id);
+  if (!detail) return null;
+  return (
+    <View style={StyleSheet.absoluteFill} pointerEvents="none">
+      <RouteMap
+        path={detail.path}
+        walkedM={0}
+        stages={detail.stages}
+        mode="overview"
+        still
+        padding={{ top: 40, bottom: 40, left: 40, right: 40 }}
+        style={StyleSheet.absoluteFill}
+      />
+    </View>
   );
 }
 
@@ -347,6 +457,34 @@ const styles = StyleSheet.create({
     borderRadius: 99,
   },
   slotText: { fontFamily: fonts.textSemiBold, fontSize: 11.5 },
+  wide: { paddingHorizontal: 32, gap: 20 },
+  wideHeader: { height: 54, flexDirection: 'row', alignItems: 'center', gap: 14 },
+  titleWide: { fontSize: 30, letterSpacing: -0.9 },
+  wideRow: { flex: 1, flexDirection: 'row', gap: 20 },
+  formCard: { flex: 1, borderRadius: 30, paddingVertical: 26, paddingHorizontal: 28, gap: 18 },
+  formContent: { gap: 18 },
+  submitWide: { height: 56, borderRadius: 18 },
+  side: { width: 460, gap: 14 },
+  mapCard: { flex: 1, borderRadius: 30, overflow: 'hidden', padding: 0 },
+  routeCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
+    paddingVertical: 16,
+    paddingHorizontal: 18,
+    borderRadius: 24,
+  },
+  routeIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  routeText: { flex: 1, gap: 2 },
+  routeTitle: { fontFamily: fonts.textSemiBold, fontSize: 16 },
+  routeFacts: { fontFamily: fonts.text, fontSize: 13 },
+  change: { fontFamily: fonts.textSemiBold, fontSize: 14 },
   footer: {
     position: 'absolute',
     left: 0,
