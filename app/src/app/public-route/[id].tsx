@@ -256,17 +256,21 @@ function Body({ route, wide = false }: { route: PublicRouteDetail; wide?: boolea
         accessibilityRole="link"
       >
         <WalkerAvatar walker={route.author} size={22} />
-        <Text style={[styles.small, styles.shrink, { color: colors.textSecondary }]}>
+        {/* As in the mockup: the badge right after the name, then the stages. */}
+        <Text
+          style={[styles.small, styles.shrink, { color: colors.textSecondary }]}
+          numberOfLines={1}
+        >
           {isTeam(route.author.id)
-            ? t('publicRoute.byTeam', { stages: t('explore.stages', { count: route.stages }) })
-            : t('publicRoute.by', {
-                name: route.author.first_name,
-                stages: t('explore.stages', { count: route.stages }),
-              })}
+            ? t('publicRoute.byTeam')
+            : t('publicRoute.byName', { name: route.author.first_name })}
         </Text>
         {isTeam(route.author.id) ? (
           <Badge kind="certified" size={17} label={t('badges.names.certified')} />
         ) : null}
+        <Text style={[styles.small, { color: colors.textSecondary }]}>
+          {'· ' + t('explore.stages', { count: route.stages })}
+        </Text>
       </Pressable>
       {/* iPad (mockup): the numbers first, then the words. */}
       {wide ? tiles : null}

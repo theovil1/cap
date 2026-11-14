@@ -636,8 +636,7 @@
   "publicRoute": {
     "credit": "Photo: {{credit}}",
     "gone": "This route is no longer published.",
-    "by": "Published by {{name}} · {{stages}}",
-    "byTeam": "Published by the Cap team · {{stages}}",
+    "byTeam": "Published by the Cap team",
     "mapSlide": "Route · {{km}} km",
     "walkers": "Walkers",
     "finished": "Finished",
@@ -659,7 +658,8 @@
     "unpublishBody": "It leaves the Explorer. Walkers on it carry on.",
     "report": "Report this route",
     "reported": "Thanks, we will have a look.",
-    "shareText": "{{title}}, {{km}} km on foot, on Cap."
+    "shareText": "{{title}}, {{km}} km on foot, on Cap.",
+    "byName": "Published by {{name}}"
   },
   "publish": {
     "title": "Publish a route",

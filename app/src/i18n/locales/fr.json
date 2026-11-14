@@ -636,8 +636,7 @@
   "publicRoute": {
     "credit": "Photo : {{credit}}",
     "gone": "Ce trajet n'est plus publié.",
-    "by": "Publié par {{name}} · {{stages}}",
-    "byTeam": "Publié par l'équipe Cap · {{stages}}",
+    "byTeam": "Publié par l'équipe Cap",
     "mapSlide": "Itinéraire · {{km}} km",
     "walkers": "Marcheurs",
     "finished": "Terminé",
@@ -659,7 +658,8 @@
     "unpublishBody": "Il disparaît de l'Explorer. Ceux qui marchent dessus continuent.",
     "report": "Signaler ce trajet",
     "reported": "Merci, on va regarder.",
-    "shareText": "{{title}}, {{km}} km à pied, sur Cap."
+    "shareText": "{{title}}, {{km}} km à pied, sur Cap.",
+    "byName": "Publié par {{name}}"
   },
   "publish": {
     "title": "Publier un trajet",
