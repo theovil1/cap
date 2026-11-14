@@ -359,7 +359,9 @@ function RivalPawn({ path, rival }: { path: RoutePoint[]; rival: Rival }) {
         >
           <Glass style={styles.bubble}>
             <View style={[styles.bubbleDot, { backgroundColor: colors.blue }]}>
-              <Text style={styles.bubbleInitial}>{rival.initial.charAt(0).toUpperCase()}</Text>
+              <Text style={[styles.bubbleInitial, { color: colors.onBlue }]}>
+                {rival.initial.charAt(0).toUpperCase()}
+              </Text>
             </View>
             <Text style={[styles.bubbleText, { color: colors.text }]}>{rival.label}</Text>
           </Glass>
@@ -382,7 +384,7 @@ function Pawn({ initial, rival = false }: { initial: string; rival?: boolean }) 
           { backgroundColor: color, borderColor: colors.surface },
         ]}
       >
-        <Text style={[styles.initial, { color: rival ? '#FFFFFF' : colors.onAccent }]}>
+        <Text style={[styles.initial, { color: rival ? colors.onBlue : colors.onAccent }]}>
           {initial.charAt(0).toUpperCase()}
         </Text>
       </View>
@@ -419,6 +421,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  bubbleInitial: { fontFamily: fonts.display, fontSize: 9, color: '#FFFFFF' },
+  bubbleInitial: { fontFamily: fonts.display, fontSize: 9 },
   bubbleText: { fontFamily: fonts.textSemiBold, fontSize: 12.5, fontVariant: ['tabular-nums'] },
 });

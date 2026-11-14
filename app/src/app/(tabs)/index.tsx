@@ -234,18 +234,21 @@ function TreadmillBanner() {
     >
       <View style={styles.bannerIcon}>
         {connected ? (
-          <Footprints size={21} color="#FFFFFF" />
+          <Footprints size={21} color={colors.onBlue} />
         ) : (
           <Bluetooth size={21} color="#FFFFFF" />
         )}
       </View>
       <View style={{ flex: 1, gap: 1 }}>
-        <Text style={styles.bannerTitle} numberOfLines={1}>
+        <Text style={[styles.bannerTitle, connected && { color: colors.onBlue }]} numberOfLines={1}>
           {connected
             ? t('home.treadmillConnected', { name })
             : t(`treadmill.status.${connection.status}`, { name })}
         </Text>
-        <Text style={styles.bannerText} numberOfLines={1}>
+        <Text
+          style={[styles.bannerText, connected && { color: colors.onBlue, opacity: 0.85 }]}
+          numberOfLines={1}
+        >
           {live
             ? t('home.sessionRunning')
             : connected

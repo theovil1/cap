@@ -209,7 +209,7 @@ export function Button({
 }) {
   const colors = useColors();
   const [background, foreground, border] = {
-    blue: [colors.blue, '#FFFFFF', colors.blue],
+    blue: [colors.blue, colors.onBlue, colors.blue],
     accent: [colors.accent, colors.onAccent, colors.accent],
     dark: [colors.inverse, colors.onInverse, colors.inverse],
     light: [colors.surface, colors.text, colors.border],
@@ -325,7 +325,7 @@ export function Avatar({
   const walker = avatarTone(seed ?? name);
   const [background, foreground] = {
     accent: [colors.accent, colors.onAccent],
-    blue: [colors.blue, '#FFFFFF'],
+    blue: [colors.blue, colors.onBlue],
     plain: [colors.inset, colors.text],
     walker: [walker.background, walker.foreground],
   }[tone];

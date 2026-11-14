@@ -165,7 +165,7 @@ export default function PreviewScreen() {
                       { backgroundColor: colors.blue, borderColor: colors.surface },
                     ]}
                   >
-                    <Check size={11} color="#FFFFFF" strokeWidth={3} />
+                    <Check size={11} color={colors.onBlue} strokeWidth={3} />
                   </View>
                 )}
               </View>

@@ -187,7 +187,7 @@ export default function SummaryScreen() {
             {stage && (
               <View style={[styles.note, { backgroundColor: colors.blueSoft }]}>
                 <View style={[styles.noteIcon, { backgroundColor: colors.blue }]}>
-                  <Flag size={20} color="#FFFFFF" strokeWidth={2.2} />
+                  <Flag size={20} color={colors.onBlue} strokeWidth={2.2} />
                 </View>
                 <View style={{ flex: 1, gap: 3 }}>
                   <Text style={[styles.noteTitle, { color: colors.text }]}>

@@ -50,6 +50,22 @@ function softAccent(name: string, accent: string, dark: boolean): string {
   return dark ? mix(accent, palette.dark.background, 0.14) : mix(accent, '#FFFFFF', 0.11);
 }
 
+/**
+ * The second colour (the other walkers, links, stages) is blue, so that my
+ * accent and theirs differ. With the blue app colour they would look the
+ * same: it becomes Cap's orange instead.
+ */
+function second(name: string, dark: boolean) {
+  if (name !== 'blue') return {};
+  const orange = ACCENTS.orange[dark ? 'dark' : 'light'];
+  return {
+    blue: orange.accent,
+    onBlue: orange.onAccent,
+    blueText: orange.accentText,
+    blueSoft: dark ? palette.dark.accentSoft : palette.light.accentSoft,
+  };
+}
+
 const themes = Object.fromEntries(
   Object.entries(ACCENTS).map(([name, accent]) => [
     name,
@@ -58,11 +74,13 @@ const themes = Object.fromEntries(
         ...palette.light,
         ...accent.light,
         accentSoft: softAccent(name, accent.light.accent, false),
+        ...second(name, false),
       },
       dark: {
         ...palette.dark,
         ...accent.dark,
         accentSoft: softAccent(name, accent.dark.accent, true),
+        ...second(name, true),
       },
     },
   ]),

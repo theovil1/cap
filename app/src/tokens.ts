@@ -38,6 +38,8 @@ export const palette = {
     /** Soft accent fill: "Trajet de la semaine", Bravo given, my row in a ranking. */
     accentSoft: '#FFEDE4',
     blue: '#2952FF',
+    /** Words and icons on a `blue` fill. */
+    onBlue: '#FFFFFF',
     blueText: '#2547E8',
     blueSoft: '#E8ECFF',
     success: '#16894A',
@@ -75,6 +77,7 @@ export const palette = {
     accentText: '#FF9466',
     accentSoft: '#2E1A12',
     blue: '#4C68FF',
+    onBlue: '#FFFFFF',
     blueText: '#93A6FF',
     blueSoft: '#1A2048',
     success: '#3DCB7D',
