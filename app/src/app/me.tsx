@@ -65,13 +65,15 @@ export default function MyProfileScreen() {
   const finished = journeys.filter((j) => j.arrived_at);
   const medals = medalsFor({ journeys, totalM: walkedM, bestStreak: day.bestStreak });
   const won = medals.filter((m) => m.metal !== 'locked').length;
-  const place = [
+  // Two lines: a long country name ("Géorgie du Sud-et-les Îles Sandwich du Sud")
+  // gets its own, ending with "…" if needed.
+  const handle = [
     `@${user.username}`,
-    [user.home_city, countryName(user.country)].filter(Boolean).join(', '),
     t('me.since', {
       date: formatDate(new Date(user.created_at), { month: 'long', year: 'numeric' }),
     }),
   ].join(' · ');
+  const home = [user.home_city, countryName(user.country)].filter(Boolean).join(', ');
   const share = () =>
     Share.share({
       message: t('me.shareText', {
@@ -119,10 +121,16 @@ export default function MyProfileScreen() {
           <Text style={[styles.name, { color: colors.text }]}>{user.first_name}</Text>
           <NameBadge badges={badges} />
         </View>
+        <Text style={[styles.place, { color: colors.textSecondary }]} numberOfLines={1}>
+          {handle}
+        </Text>
         <View style={styles.placeRow}>
           <CountryFlag code={user.country} height={13} />
-          <Text style={[styles.place, styles.placeText, { color: colors.textSecondary }]}>
-            {place}
+          <Text
+            style={[styles.place, styles.placeText, { color: colors.textSecondary }]}
+            numberOfLines={1}
+          >
+            {home}
           </Text>
         </View>
         <BadgeRow badges={badges} />

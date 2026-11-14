@@ -75,6 +75,7 @@ export function Chip({
   onPress,
   small,
   disabled,
+  icon,
 }: {
   label: string;
   on?: boolean;
@@ -83,6 +84,8 @@ export function Chip({
   disabled?: boolean;
   /** 32 high, for a second row of filters. */
   small?: boolean;
+  /** Before the label, e.g. a flag. */
+  icon?: ReactNode;
 }) {
   const colors = useColors();
   return (
@@ -100,7 +103,14 @@ export function Chip({
           : { backgroundColor: colors.surface, borderColor: colors.track },
       ]}
     >
-      <Text style={[type.label, { color: on ? colors.onInverse : colors.text }]}>{label}</Text>
+      {icon}
+      {/* Long names (countries) end with "…" instead of leaving the screen. */}
+      <Text
+        style={[type.label, styles.chipLabel, { color: on ? colors.onInverse : colors.text }]}
+        numberOfLines={1}
+      >
+        {label}
+      </Text>
     </Pressable>
   );
 }
@@ -321,6 +331,7 @@ export function SectionHeader({
 }
 
 const styles = StyleSheet.create({
+  chipLabel: { flexShrink: 1 },
   tabs: { flexDirection: 'row', gap: 6 },
   tab: {
     flex: 1,
@@ -336,6 +347,9 @@ const styles = StyleSheet.create({
   tabText: { fontFamily: fonts.textSemiBold, fontSize: 14.5 },
   dot: { width: 13, height: 13, borderRadius: 99, borderWidth: 3 },
   chip: {
+    flexDirection: 'row',
+    gap: 7,
+    maxWidth: 260,
     paddingHorizontal: 14,
     borderRadius: radius.pill,
     borderWidth: 1,

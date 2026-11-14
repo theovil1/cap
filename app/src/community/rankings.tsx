@@ -84,6 +84,11 @@ export function Rankings() {
                 ? countryName(current.country)
                 : t(`rankings.${s}`)
             }
+            icon={
+              s === 'country' && current?.country ? (
+                <Flag code={current.country} height={12} />
+              ) : undefined
+            }
             on={s === scope}
             onPress={() => setScope(s)}
           />

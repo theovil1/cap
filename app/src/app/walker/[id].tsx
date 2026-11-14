@@ -72,13 +72,15 @@ function ProfileView({ profile }: { profile: PublicProfile }) {
     bestStreak: profile.best_streak,
   });
   const won = medals.filter((m) => m.metal !== 'locked');
-  const place = [
+  // Two lines: a long country name ("Géorgie du Sud-et-les Îles Sandwich du Sud")
+  // gets its own, ending with "…" if needed.
+  const handle = [
     `@${walker.username}`,
-    [profile.home_city, countryName(profile.country)].filter(Boolean).join(', '),
     t('me.since', {
       date: formatDate(new Date(profile.created_at), { month: 'long', year: 'numeric' }),
     }),
   ].join(' · ');
+  const home = [profile.home_city, countryName(profile.country)].filter(Boolean).join(', ');
 
   // A race needs friends: ask first, then the new journey picks them.
   const challenge = () => {
@@ -116,10 +118,16 @@ function ProfileView({ profile }: { profile: PublicProfile }) {
           <Text style={[styles.name, { color: colors.text }]}>{walker.first_name}</Text>
           <NameBadge badges={profile.badges} />
         </View>
+        <Text style={[styles.place, { color: colors.textSecondary }]} numberOfLines={1}>
+          {handle}
+        </Text>
         <View style={styles.placeRow}>
           <CountryFlag code={profile.country} height={13} />
-          <Text style={[styles.place, styles.placeText, { color: colors.textSecondary }]}>
-            {place}
+          <Text
+            style={[styles.place, styles.placeText, { color: colors.textSecondary }]}
+            numberOfLines={1}
+          >
+            {home}
           </Text>
         </View>
         <BadgeRow badges={profile.badges} />
