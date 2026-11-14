@@ -14,8 +14,11 @@ import {
 } from 'lucide-react-native';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useProfile } from '@/api/community';
+import { BadgeRow, NameBadge } from '@/community/profile-badges';
 import { useAuth } from '@/api/auth';
 import { useUpdateProfile, type ProfilePatch } from '@/api/profile';
 import { useJourneys, useSessions } from '@/api/queries';
@@ -29,12 +32,11 @@ import { useDayStats } from '@/session/stats';
 import { WeekCard } from '@/session/week-card';
 import type { AppColor, MapMood } from '@/settings/appearance';
 import { ACCENTS, fonts, useColors } from '@/theme';
-import { SectionHeader, Tabs } from '@/ui/controls';
-import { TabScreen, useWide } from '@/ui/layout';
+import { Tabs } from '@/ui/controls';
+import { ScreenHeader, TabScreen, useWide } from '@/ui/layout';
 import { StatusLabel } from '@/ui/pills';
-import { Avatar, Button, Card, RoundButton } from '@/ui/primitives';
+import { Avatar, Button, Card, Figure, RoundButton } from '@/ui/primitives';
 import { Segment } from '@/ui/segment';
-import { StatTile } from '@/ui/stats';
 
 const COLORS: AppColor[] = ['orange', 'blue', 'green', 'purple', 'pink'];
 const MOODS: MapMood[] = ['auto', 'day', 'night'];
@@ -47,6 +49,8 @@ export default function ProfileScreen() {
   const colors = useColors();
   const { user } = useAuth();
   const wide = useWide();
+  const { height } = useWindowDimensions();
+  const insets = useSafeAreaInsets();
   const { data: sessions = [] } = useSessions();
   const day = useDayStats();
   if (!user) return null;
@@ -58,21 +62,22 @@ export default function ProfileScreen() {
       icon={<Settings size={21} color={colors.text} />}
       onPress={() => router.push('/account')}
       label={t('account.title')}
+      size={wide ? 48 : undefined}
     />
   );
 
   if (wide) {
+    const rowHeight = height - (insets.top + 2) - 54 - 20 - (insets.bottom + 32);
     return (
-      <TabScreen style={styles.wideScreen}>
-        <View style={styles.wideHeader}>
-          <Text style={[styles.wideTitle, { color: colors.text }]}>{t('nav.profile')}</Text>
-          {settings}
-        </View>
-        <View style={styles.columns}>
+      <TabScreen>
+        <ScreenHeader title={t('nav.profile')}>{settings}</ScreenHeader>
+        {/* Mockup: 420 on the left, the settings cards on the right, 20 apart,
+            filling the screen under the title. */}
+        <View style={[styles.columns, { minHeight: rowHeight }]}>
           <View style={styles.left}>
             <Identity user={user} walkedM={walkedM} since={since} />
             <MedalsCard walkedM={walkedM} />
-            <WeekCard metres={day.weekM} />
+            <WeekCard metres={day.weekM} variant="profile" />
           </View>
           <View style={styles.right}>
             <GoalCard user={user} wide />
@@ -81,7 +86,7 @@ export default function ProfileScreen() {
               <PerWeekCard user={user} wide />
             </View>
             <ColorCard user={user} wide />
-            <View style={styles.pair}>
+            <View style={[styles.pair, styles.flex]}>
               <TreadmillCard />
               <HistoryCard count={sessions.length} />
             </View>
@@ -129,35 +134,42 @@ function Identity({ user, walkedM, since }: { user: UserProfile; walkedM: number
   const { data: journeys = [] } = useJourneys();
   const { bestStreak } = useDayStats();
   const finished = journeys.filter((j) => j.arrived_at).length;
+  const { data: profile } = useProfile(user.id);
+  const badges = profile?.badges ?? [];
   return (
-    <Card style={styles.identity}>
-      <View style={styles.identityTop}>
-        <Avatar name={user.first_name} size={76} photo={user.avatar_url} />
-        <View style={{ flex: 1, gap: 4 }}>
-          <Text style={[styles.name, { color: colors.text }]} numberOfLines={1}>
-            {user.first_name}
-          </Text>
-          <Text style={[styles.sub, { color: colors.textSecondary }]}>
-            {t('profile.walkedSince', { km: formatKm(walkedM, 0), since })}
-          </Text>
+    <Pressable onPress={() => router.push('/me')} accessibilityRole="button">
+      <Card style={styles.identity}>
+        <View style={styles.identityTop}>
+          <Avatar name={user.first_name} size={76} photo={user.avatar_url} />
+          <View style={{ flex: 1, gap: 4 }}>
+            <View style={styles.nameRow}>
+              <Text style={[styles.name, styles.shrink, { color: colors.text }]} numberOfLines={1}>
+                {user.first_name}
+              </Text>
+              <NameBadge badges={badges} />
+            </View>
+            <Text style={[styles.sub, { color: colors.textSecondary }]}>
+              {t('profile.walkedSince', { km: formatKm(walkedM, 0), since })}
+            </Text>
+          </View>
         </View>
-      </View>
-      <View style={styles.pair}>
-        <StatTile label={t('profile.total')} value={formatKm(walkedM, 0)} unit={t('units.km')} />
-        <StatTile label={t('profile.finished')} value={formatNumber(finished)} />
-        <StatTile
-          label={t('profile.bestStreak')}
-          value={formatNumber(bestStreak)}
-          unit={t('profile.daysShort')}
-        />
-      </View>
-      <Button
-        tone="light"
-        size="medium"
-        title={t('profile.seeMine')}
-        onPress={() => router.push('/me')}
-      />
-    </Card>
+        {badges.length > 0 ? <BadgeRow badges={badges} /> : null}
+        <View style={styles.tiles}>
+          {(
+            [
+              [t('profile.total'), formatKm(walkedM, 0), t('units.km')],
+              [t('profile.finished'), formatNumber(finished), undefined],
+              [t('profile.bestStreak'), formatNumber(bestStreak), t('profile.daysShort')],
+            ] as const
+          ).map(([label, value, unit]) => (
+            <View key={label} style={[styles.smallTile, { backgroundColor: colors.inset }]}>
+              <Text style={[styles.smallLabel, { color: colors.textSecondary }]}>{label}</Text>
+              <Figure value={value} unit={unit} size={20} unitSize={11} />
+            </View>
+          ))}
+        </View>
+      </Card>
+    </Pressable>
   );
 }
 
@@ -169,8 +181,13 @@ function MedalsCard({ walkedM }: { walkedM: number }) {
   const { bestStreak } = useDayStats();
   const medals = medalsFor({ journeys, totalM: walkedM, bestStreak });
   return (
-    <Card style={styles.card}>
-      <SectionHeader title={t('medals.title')} />
+    <Card style={styles.medalsCard}>
+      <View style={styles.medalsHead}>
+        <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('medals.mine')}</Text>
+        <Pressable onPress={() => router.push('/me')} accessibilityRole="link" hitSlop={8}>
+          <Text style={[styles.link, { color: colors.blueText }]}>{t('explore.seeAll')} ›</Text>
+        </Pressable>
+      </View>
       {medals.length > 1 || medals[0]?.metal !== 'locked' ? (
         <ScrollView
           horizontal
@@ -211,7 +228,9 @@ function GoalCard({ user, wide }: { user: UserProfile; wide?: boolean }) {
         <Minus size={20} color={colors.text} />
       </StepButton>
       <View style={{ alignItems: 'center' }}>
-        <Text style={[styles.goal, { color: colors.text }]}>{formatNumber(goal)}</Text>
+        <Text style={[styles.goal, wide && styles.goalNumberWide, { color: colors.text }]}>
+          {formatNumber(goal)}
+        </Text>
         <Text style={[styles.sub, { color: colors.textSecondary }]}>
           {wide ? t('profile.stepsAndKm', { km: formatKm(goalM) }) : t('profile.stepsPerDay')}
         </Text>
@@ -227,10 +246,12 @@ function GoalCard({ user, wide }: { user: UserProfile; wide?: boolean }) {
   );
   if (wide) {
     return (
-      <Card style={[styles.card, styles.goalWide]}>
+      <Card style={[styles.card, styles.cardWide, styles.goalWide]}>
         <View style={{ flex: 1, gap: 8 }}>
-          <Text style={[styles.cardTitle, { color: colors.text }]}>{t('profile.goalTitle')}</Text>
-          <Text style={[styles.noteText, { color: colors.textSecondary }]}>
+          <Text style={[styles.cardTitle, styles.cardTitleWide, { color: colors.text }]}>
+            {t('profile.goalTitle')}
+          </Text>
+          <Text style={[styles.noteText, styles.noteWide, { color: colors.textSecondary }]}>
             {t('profile.goalNote')}
           </Text>
         </View>
@@ -263,14 +284,16 @@ function StrideCard({ user, wide }: { user: UserProfile; wide?: boolean }) {
     ? t('profile.strideFromHeight', { cm: user.height_cm })
     : t('profile.strideDefault');
   const icon = (
-    <View style={[styles.icon, { backgroundColor: colors.blueSoft }]}>
+    <View style={[styles.icon, wide && styles.iconWide, { backgroundColor: colors.blueSoft }]}>
       <Footprints size={20} color={colors.blueText} />
     </View>
   );
   if (wide) {
     return (
-      <Card style={[styles.card, styles.flex]}>
-        <Text style={[styles.cardTitle, { color: colors.text }]}>{t('profile.strideTitle')}</Text>
+      <Card style={[styles.card, styles.cardWide, styles.strideWide, styles.flex]}>
+        <Text style={[styles.cardTitle, styles.cardTitleWide, { color: colors.text }]}>
+          {t('profile.strideTitle')}
+        </Text>
         <View style={styles.row}>
           {icon}
           <View style={{ flex: 1 }}>
@@ -336,7 +359,7 @@ function PerWeekCard({ user, wide }: { user: UserProfile; wide?: boolean }) {
     })
     .filter((a) => a !== null);
   return (
-    <Card style={[styles.card, wide && styles.flex]}>
+    <Card style={[styles.card, wide && styles.cardWide, wide && styles.flex]}>
       <Text style={[styles.cardTitle, { color: colors.text }]}>{t('profile.perWeekTitle')}</Text>
       <Segment
         options={[2, 3, 4, 5].map((n) => ({ value: n, label: String(n) }))}
@@ -405,7 +428,7 @@ function ColorCard({ user, wide }: { user: UserProfile; wide?: boolean }) {
     </View>
   );
   return (
-    <Card style={styles.card}>
+    <Card style={[styles.card, wide && styles.cardWide]}>
       <View style={styles.cardHead}>
         <Text style={[styles.cardTitle, { color: colors.text }]}>{t('profile.colorTitle')}</Text>
         <Text style={[styles.sub, { color: colors.textSecondary }]}>
@@ -445,7 +468,7 @@ function TreadmillCard() {
       accessibilityRole="button"
       style={styles.flex}
     >
-      <Card style={[styles.card, styles.row, styles.flex]}>
+      <Card style={[styles.card, styles.cardWide, styles.row, styles.flex]}>
         <View style={[styles.bigIcon, { backgroundColor: colors.bluetooth }]}>
           <Bluetooth size={24} color={colors.onBluetooth} />
         </View>
@@ -480,7 +503,7 @@ function HistoryCard({ count }: { count: number }) {
       accessibilityRole="button"
       style={wide && styles.flex}
     >
-      <Card style={[styles.linkRow, wide && styles.flex]}>
+      <Card style={[styles.linkRow, wide && styles.cardWide, wide && styles.flex]}>
         <History size={20} color={colors.textSecondary} />
         <Text style={[styles.label, { color: colors.text, flex: 1 }]}>{t('history.title')}</Text>
         <Text style={[styles.sub, { color: colors.textSecondary }]}>{formatNumber(count)}</Text>
@@ -569,7 +592,28 @@ const styles = StyleSheet.create({
   cardTitle: { fontFamily: fonts.textSemiBold, fontSize: 16 },
   row: { flexDirection: 'row', alignItems: 'center', gap: 14 },
   stepper: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  stepperWide: { gap: 26 },
+  stepperWide: { gap: 14 },
+  cardWide: { borderRadius: 28, paddingVertical: 20, paddingHorizontal: 22 },
+  cardTitleWide: { fontSize: 15 },
+  noteWide: { fontSize: 13, lineHeight: 19 },
+  goalNumberWide: { fontSize: 40, minWidth: 130, textAlign: 'center' },
+  strideWide: { gap: 12 },
+  iconWide: { width: 46, height: 46, borderRadius: 14 },
+  nameRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  shrink: { flexShrink: 1 },
+  tiles: { flexDirection: 'row', gap: 8 },
+  smallTile: {
+    flex: 1,
+    justifyContent: 'space-between',
+    gap: 6,
+    paddingVertical: 13,
+    paddingHorizontal: 14,
+    borderRadius: 18,
+  },
+  smallLabel: { fontFamily: fonts.textMedium, fontSize: 12 },
+  medalsCard: { borderRadius: 30, paddingVertical: 20, paddingHorizontal: 22, gap: 14 },
+  medalsHead: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline' },
+  sectionTitle: { fontFamily: fonts.display, fontSize: 20, letterSpacing: -0.4 },
   stepButton: {
     width: 44,
     height: 44,
@@ -636,14 +680,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     minHeight: 54,
   },
-  wideScreen: { maxWidth: 1180 },
-  wideHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  wideTitle: { fontFamily: fonts.display, fontSize: 31, letterSpacing: -0.9 },
-  columns: { flexDirection: 'row', gap: 20, alignItems: 'flex-start' },
-  left: { width: 420, gap: 18 },
-  right: { flex: 1, gap: 18 },
-  pair: { flexDirection: 'row', gap: 12 },
-  identity: { padding: 22, gap: 18 },
+  columns: { flexDirection: 'row', gap: 20, alignItems: 'stretch' },
+  left: { width: 420, gap: 16 },
+  right: { flex: 1, gap: 16 },
+  pair: { flexDirection: 'row', gap: 16 },
+  identity: { padding: 24, gap: 16, borderRadius: 30 },
   identityTop: { flexDirection: 'row', alignItems: 'center', gap: 16 },
   medals: { gap: 4, alignItems: 'flex-start', flexDirection: 'row' },
 });

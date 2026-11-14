@@ -557,7 +557,8 @@
     "placeUnit": "PLACE",
     "finished": "DONE",
     "title": "My medals",
-    "none": "Your first medal waits at 100 km."
+    "none": "Your first medal waits at 100 km.",
+    "mine": "My medals"
   },
   "settings": {
     "title": "Settings",

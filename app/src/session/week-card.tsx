@@ -6,7 +6,15 @@ import { fonts, useColors } from '@/theme';
 import { Card, Figure, Label } from '@/ui/primitives';
 
 /** iPad: kilometres of each day of the week as bars, Monday first. */
-export function WeekCard({ metres }: { metres: number[] }) {
+export function WeekCard({
+  metres,
+  variant = 'home',
+}: {
+  metres: number[];
+  /** The iPad profile's card: 30 round, 15 pt label, 22 pt figure. */
+  variant?: 'home' | 'profile';
+}) {
+  const profile = variant === 'profile';
   const { t } = useTranslation();
   const colors = useColors();
   const top = Math.max(...metres, 1);
@@ -15,13 +23,16 @@ export function WeekCard({ metres }: { metres: number[] }) {
     formatDate(new Date(2026, 11, 7 + i, 12), { weekday: 'narrow' }).toUpperCase(),
   );
   return (
-    <Card style={[styles.week, styles.grow]}>
+    <Card style={[styles.week, profile && styles.weekProfile, styles.grow]}>
       <View style={styles.weekHeader}>
-        <Label style={styles.weekLabel}>{t('home.thisWeek')}</Label>
+        <Label style={[styles.weekLabel, profile && styles.weekLabelProfile]}>
+          {t('home.thisWeek')}
+        </Label>
         <Figure
           value={formatKm(metres.reduce((a, b) => a + b, 0))}
           unit={t('units.km')}
-          size={26}
+          size={profile ? 22 : 26}
+          unitSize={profile ? 12 : undefined}
         />
       </View>
       <View style={styles.bars}>
@@ -48,6 +59,8 @@ const styles = StyleSheet.create({
   week: { padding: 18, gap: 12, minHeight: 200, borderRadius: 26 },
   weekHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline' },
   weekLabel: { fontSize: 14 },
+  weekProfile: { borderRadius: 30, paddingVertical: 18, paddingHorizontal: 22, gap: 10 },
+  weekLabelProfile: { fontSize: 15, fontFamily: fonts.textSemiBold, color: undefined },
   bars: { flex: 1, flexDirection: 'row', alignItems: 'flex-end', gap: 10 },
   barColumn: { flex: 1, height: '100%', alignItems: 'center', justifyContent: 'flex-end', gap: 6 },
   bar: { width: '100%', borderRadius: 8 },

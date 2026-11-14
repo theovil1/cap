@@ -557,7 +557,8 @@
     "placeUnit": "PLACE",
     "finished": "FINI",
     "title": "Mes médailles",
-    "none": "Ta première médaille t'attend à 100 km."
+    "none": "Ta première médaille t'attend à 100 km.",
+    "mine": "Mes médailles"
   },
   "settings": {
     "title": "Réglages",
