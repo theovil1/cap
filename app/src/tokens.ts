@@ -17,7 +17,8 @@ export const palette = {
     /** Idle segments of the onboarding progress. */
     trackIdle: '#CFC8BC',
     /** Floating glass: tab bar, buttons over the map. */
-    glass: 'rgba(255,255,255,0.72)',
+    // A little more opaque than the mockups (0.72) so words on it stay readable.
+    glass: 'rgba(255,255,255,0.8)',
     glassBorder: 'rgba(255,255,255,0.75)',
     /** Chips over a photo or the map (blur 14). */
     scrim: 'rgba(255,255,255,0.18)',
@@ -57,7 +58,8 @@ export const palette = {
     inset: '#1F2025',
     track: '#2A2C33',
     trackIdle: '#3A3C45',
-    glass: 'rgba(30,31,37,0.62)',
+    // A little more opaque than the mockups (0.62) so words on it stay readable.
+    glass: 'rgba(30,31,37,0.76)',
     glassBorder: 'rgba(255,255,255,0.10)',
     scrim: 'rgba(255,255,255,0.18)',
     scrimBorder: 'rgba(255,255,255,0.32)',

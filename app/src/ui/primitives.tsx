@@ -48,7 +48,14 @@ export function Glass({ children, style }: { children: ReactNode; style?: StyleP
   const colors = useColors();
   if (isLiquidGlassAvailable()) {
     return (
-      <GlassView style={[styles.glass, style]} glassEffectStyle="regular" isInteractive>
+      // Tinted with the glass colour: plain Liquid Glass lets busy photos and maps
+      // show through too much for the words on it (tab bar, chips).
+      <GlassView
+        style={[styles.glass, style]}
+        glassEffectStyle="regular"
+        tintColor={colors.glass}
+        isInteractive
+      >
         {children}
       </GlassView>
     );

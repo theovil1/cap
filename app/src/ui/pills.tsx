@@ -7,7 +7,6 @@ import { fonts, useColors, useShadows } from '@/theme';
 import { blur, radius } from '@/tokens';
 
 import { StatusDot } from './controls';
-import { Glass } from './primitives';
 
 type PillProps = { label: string; icon?: LucideIcon; style?: StyleProp<ViewStyle> };
 
@@ -16,26 +15,36 @@ export function Tag({ label, icon: Icon, style }: PillProps) {
   const colors = useColors();
   return (
     <View style={[styles.pill, styles.tag, { backgroundColor: colors.accentSoft }, style]}>
-      {/* A solid accent dot keeps the icon readable over any photo. */}
-      {Icon ? (
-        <View style={[styles.tagIcon, { backgroundColor: colors.accent }]}>
-          <Icon size={12} color={colors.onAccent} strokeWidth={2.6} />
-        </View>
-      ) : null}
+      {Icon ? <Icon size={13} color={colors.accentText} strokeWidth={2.4} /> : null}
       <Text style={[styles.bold12, { color: colors.accentText }]}>{label}</Text>
     </View>
   );
 }
 
-/** Glass tag on a photo card (28). */
+/**
+ * Tag on a photo card (28). Solid rather than see-through: clear glass over a
+ * bright photo made it unreadable. The icon sits on an accent dot.
+ */
 export function GlassTag({ label, icon: Icon, style }: PillProps) {
   const colors = useColors();
   const shadows = useShadows();
   return (
-    <Glass style={[styles.pill, styles.glassTag, shadows.floating, style]}>
-      {Icon ? <Icon size={13} color={colors.accentText} strokeWidth={2.4} /> : null}
+    <View
+      style={[
+        styles.pill,
+        styles.glassTag,
+        { backgroundColor: colors.surface },
+        shadows.floating,
+        style,
+      ]}
+    >
+      {Icon ? (
+        <View style={[styles.tagIcon, { backgroundColor: colors.accent }]}>
+          <Icon size={12} color={colors.onAccent} strokeWidth={2.6} />
+        </View>
+      ) : null}
       <Text style={[styles.bold12, { color: colors.text }]}>{label}</Text>
-    </Glass>
+    </View>
   );
 }
 
