@@ -10,7 +10,6 @@ import {
   Text,
   TextInput,
   View,
-  type GestureResponderEvent,
 } from 'react-native';
 
 import {
@@ -21,7 +20,7 @@ import {
   useFeed,
   useReport,
 } from '@/api/community';
-import { showActions } from '@/ui/action-sheet';
+import { ActionMenu, type MenuItem } from '@/ui/action-menu';
 import { useMe } from '@/api/queries';
 import type { FeedPost } from '@/api/types';
 import { formatAgo, formatKm, formatNumber } from '@/i18n/format';
@@ -210,27 +209,33 @@ export function PostCard({ post, now }: { post: FeedPost; now: number }) {
         edited: formatAgo(post.edited_at, now).toLowerCase(),
       })
     : formatAgo(post.created_at, now);
-  const more = (from?: GestureResponderEvent) => {
-    const options = post.mine
-      ? [post.text ? t('feed.editWord') : t('feed.addWord'), t('feed.delete'), t('journeys.cancel')]
-      : [t('feed.report'), t('journeys.cancel')];
-    showActions(
-      from,
-      { options, cancelButtonIndex: options.length - 1, destructiveButtonIndex: post.mine ? 1 : 0 },
-      (i) => {
-        if (post.mine && i === 0) {
-          word();
-        } else if (post.mine && i === 1) {
-          remove.mutate(post.id);
-        } else if (!post.mine && i === 0) {
-          report.mutate(
-            { target_type: 'post', target_id: post.id },
-            { onSuccess: () => Alert.alert(t('publicRoute.reported')) },
-          );
-        }
-      },
-    );
-  };
+  // Edit or delete mine, report someone else's.
+  const more: MenuItem[] = post.mine
+    ? [
+        {
+          label: post.text ? t('feed.editWord') : t('feed.addWord'),
+          icon: 'pencil',
+          onPress: word,
+        },
+        {
+          label: t('feed.delete'),
+          icon: 'trash',
+          destructive: true,
+          onPress: () => remove.mutate(post.id),
+        },
+      ]
+    : [
+        {
+          label: t('feed.report'),
+          icon: 'flag',
+          destructive: true,
+          onPress: () =>
+            report.mutate(
+              { target_type: 'post', target_id: post.id },
+              { onSuccess: () => Alert.alert(t('publicRoute.reported')) },
+            ),
+        },
+      ];
   return (
     <View>
       <FeedCard
@@ -274,15 +279,11 @@ export function PostCard({ post, now }: { post: FeedPost; now: number }) {
         comments={formatNumber(post.comments)}
         onComments={() => router.push({ pathname: '/post/[id]', params: { id: post.id } })}
       />
-      <Pressable
-        onPress={more}
-        accessibilityRole="button"
-        accessibilityLabel={t('publicRoute.more')}
-        hitSlop={10}
-        style={styles.more}
-      >
-        <Ellipsis size={18} color={colors.textMuted} />
-      </Pressable>
+      <ActionMenu items={more} label={t('publicRoute.more')} style={styles.more}>
+        <View style={styles.moreTarget}>
+          <Ellipsis size={18} color={colors.textMuted} />
+        </View>
+      </ActionMenu>
     </View>
   );
 }
@@ -377,7 +378,9 @@ export function FeedList() {
 const styles = StyleSheet.create({
   loading: { marginTop: 40 },
   tile: { width: 44, height: 44, borderRadius: 13, alignItems: 'center', justifyContent: 'center' },
-  more: { position: 'absolute', right: 16, top: 18 },
+  more: { position: 'absolute', right: 6, top: 8 },
+  // A finger-sized target around the small icon.
+  moreTarget: { padding: 10 },
   editor: { gap: 10 },
   editorInput: {
     minHeight: 64,

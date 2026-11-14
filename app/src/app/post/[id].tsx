@@ -11,11 +11,10 @@ import {
   Text,
   TextInput,
   View,
-  type GestureResponderEvent,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { showActions } from '@/ui/action-sheet';
+import { ActionMenu, type MenuItem } from '@/ui/action-menu';
 import { useAddComment, useComments, useDeleteComment, useFeed, useReport } from '@/api/community';
 import type { Comment } from '@/api/types';
 import { PostCard } from '@/community/feed-list';
@@ -43,23 +42,29 @@ export default function PostScreen() {
     if (!value || !id) return;
     add.mutate({ id, text: value }, { onSuccess: () => setText('') });
   };
-  const more = (comment: Comment, from?: GestureResponderEvent) => {
-    const options = [
-      comment.mine ? t('feed.delete') : t('feed.reportComment'),
-      t('journeys.cancel'),
-    ];
-    showActions(from, { options, cancelButtonIndex: 1, destructiveButtonIndex: 0 }, (i) => {
-      if (i !== 0 || !id) return;
-      if (comment.mine || post?.mine) {
-        remove.mutate({ commentId: comment.id, postId: id });
-      } else {
-        report.mutate(
-          { target_type: 'comment', target_id: comment.id },
-          { onSuccess: () => Alert.alert(t('publicRoute.reported')) },
-        );
-      }
-    });
-  };
+  // Delete my comment (or any, on my post), report someone else's.
+  const commentItems = (comment: Comment): MenuItem[] =>
+    comment.mine || post?.mine
+      ? [
+          {
+            label: t('feed.delete'),
+            icon: 'trash',
+            destructive: true,
+            onPress: () => id && remove.mutate({ commentId: comment.id, postId: id }),
+          },
+        ]
+      : [
+          {
+            label: t('feed.reportComment'),
+            icon: 'flag',
+            destructive: true,
+            onPress: () =>
+              report.mutate(
+                { target_type: 'comment', target_id: comment.id },
+                { onSuccess: () => Alert.alert(t('publicRoute.reported')) },
+              ),
+          },
+        ];
 
   return (
     <KeyboardAvoidingView
@@ -80,7 +85,7 @@ export default function PostScreen() {
         </View>
         {post ? <PostCard post={post} now={now} /> : null}
         {comments.map((c) => (
-          <Pressable key={c.id} onLongPress={(e) => more(c, e)} style={styles.comment}>
+          <View key={c.id} style={styles.comment}>
             <Pressable
               onPress={() => router.push({ pathname: '/walker/[id]', params: { id: c.author.id } })}
             >
@@ -92,22 +97,24 @@ export default function PostScreen() {
                 size={34}
               />
             </Pressable>
-            <View
-              style={[
-                styles.bubble,
-                { backgroundColor: colors.surface, borderColor: colors.border },
-              ]}
-            >
-              <Text style={[styles.author, { color: colors.text }]}>
-                {c.author.first_name}
-                <Text style={[styles.when, { color: colors.textMuted }]}>
-                  {'  '}
-                  {formatAgo(c.created_at, now)}
+            <ActionMenu longPress items={commentItems(c)} style={styles.bubbleMenu}>
+              <View
+                style={[
+                  styles.bubble,
+                  { backgroundColor: colors.surface, borderColor: colors.border },
+                ]}
+              >
+                <Text style={[styles.author, { color: colors.text }]}>
+                  {c.author.first_name}
+                  <Text style={[styles.when, { color: colors.textMuted }]}>
+                    {'  '}
+                    {formatAgo(c.created_at, now)}
+                  </Text>
                 </Text>
-              </Text>
-              <Text style={[styles.text, { color: colors.text }]}>{c.text}</Text>
-            </View>
-          </Pressable>
+                <Text style={[styles.text, { color: colors.text }]}>{c.text}</Text>
+              </View>
+            </ActionMenu>
+          </View>
         ))}
         {comments.length === 0 ? (
           <Text style={[styles.empty, { color: colors.textSecondary }]}>{t('feed.noComment')}</Text>
@@ -146,6 +153,7 @@ export default function PostScreen() {
 }
 
 const styles = StyleSheet.create({
+  bubbleMenu: { flex: 1 },
   screen: { flex: 1 },
   content: {
     paddingHorizontal: 20,

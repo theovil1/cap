@@ -1,9 +1,9 @@
 import { router } from 'expo-router';
 import { CalendarDays, ChevronRight, Ellipsis, Flag, Swords } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
-import { Alert, Pressable, StyleSheet, Text, View, type GestureResponderEvent } from 'react-native';
+import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { showActions } from '@/ui/action-sheet';
+import { ActionMenu, type MenuItem } from '@/ui/action-menu';
 import { useDeleteJourney, useJourneys, useResetJourney } from '@/api/queries';
 import type { JourneySummary } from '@/api/types';
 import { formatDate, formatKm, formatNumber } from '@/i18n/format';
@@ -67,36 +67,32 @@ function useJourneyMenu(journey: JourneySummary) {
       { text: t('journeys.cancel'), style: 'cancel' },
       { text: action, style: 'destructive', onPress: run },
     ]);
-  return (from?: GestureResponderEvent) =>
-    showActions(
-      from,
-      {
-        title: journeyTitle(journey),
-        options: [t('journeys.restart'), t('journeys.delete'), t('journeys.cancel')],
-        destructiveButtonIndex: 1,
-        cancelButtonIndex: 2,
-      },
-      (index) => {
-        if (index === 0) {
-          confirm(
-            t('journeys.restartTitle'),
-            t('journeys.restartBody'),
-            t('journeys.restart'),
-            () => reset.mutate(journey.id, { onError: failed }),
-          );
-        } else if (index === 1) {
-          confirm(t('journeys.deleteTitle'), t('journeys.deleteBody'), t('journeys.delete'), () =>
-            remove.mutate(journey.id, { onError: failed }),
-          );
-        }
-      },
-    );
+  const items: MenuItem[] = [
+    {
+      label: t('journeys.restart'),
+      icon: 'arrow.counterclockwise',
+      onPress: () =>
+        confirm(t('journeys.restartTitle'), t('journeys.restartBody'), t('journeys.restart'), () =>
+          reset.mutate(journey.id, { onError: failed }),
+        ),
+    },
+    {
+      label: t('journeys.delete'),
+      icon: 'trash',
+      destructive: true,
+      onPress: () =>
+        confirm(t('journeys.deleteTitle'), t('journeys.deleteBody'), t('journeys.delete'), () =>
+          remove.mutate(journey.id, { onError: failed }),
+        ),
+    },
+  ];
+  return { title: journeyTitle(journey), items };
 }
 
 function JourneyRow({ journey }: { journey: JourneySummary }) {
   const { t } = useTranslation();
   const colors = useColors();
-  const openMenu = useJourneyMenu(journey);
+  const menu = useJourneyMenu(journey);
   const ratio = journey.distance_m / journey.route_distance_m;
   const race = journey.kind === 'race';
   const event = journey.kind === 'event';
@@ -127,15 +123,11 @@ function JourneyRow({ journey }: { journey: JourneySummary }) {
           {race || event ? (
             <ChevronRight size={20} color={colors.textMuted} />
           ) : (
-            <Pressable
-              onPress={openMenu}
-              accessibilityRole="button"
-              accessibilityLabel={t('journeys.options')}
-              hitSlop={10}
-              style={[styles.more, { backgroundColor: colors.inset }]}
-            >
-              <Ellipsis size={18} color={colors.textSecondary} />
-            </Pressable>
+            <ActionMenu title={menu.title} items={menu.items} label={t('journeys.options')}>
+              <View style={[styles.more, { backgroundColor: colors.inset }]}>
+                <Ellipsis size={18} color={colors.textSecondary} />
+              </View>
+            </ActionMenu>
           )}
         </View>
         {event && (

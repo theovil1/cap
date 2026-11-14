@@ -12,11 +12,10 @@ import {
   Switch,
   Text,
   View,
-  type GestureResponderEvent,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { showActions } from '@/ui/action-sheet';
+import { ActionMenu, type MenuItem } from '@/ui/action-menu';
 import { countryName } from '@/i18n/countries';
 import { useAuth } from '@/api/auth';
 import { api, ApiError } from '@/api/client';
@@ -68,24 +67,20 @@ export default function AccountScreen() {
       keyboard ?? 'default',
     );
 
-  /** iOS menu to pick one value. */
+  /** Native menu on a row to pick one value; the current one is ticked. */
   const choose = <T extends string>(
-    from: GestureResponderEvent,
     title: string,
     options: { value: T; label: string }[],
+    current: T,
     pick: (value: T) => void,
-  ) =>
-    showActions(
-      from,
-      {
-        title,
-        options: [...options.map((o) => o.label), t('journeys.cancel')],
-        cancelButtonIndex: options.length,
-      },
-      (index) => {
-        if (index < options.length) pick(options[index].value);
-      },
-    );
+  ) => ({
+    title,
+    items: options.map((o) => ({
+      label: o.label,
+      checked: o.value === current,
+      onPress: () => pick(o.value),
+    })),
+  });
 
   const changePhoto = async () => {
     // The picker is a native module: older builds of the app do not have it yet.
@@ -169,28 +164,24 @@ export default function AccountScreen() {
     <Row
       label={t('account.language')}
       value={t(`account.languages.${user.language}`)}
-      onPress={(e) =>
-        choose(
-          e,
-          t('account.language'),
-          (['fr', 'en'] as const).map((l) => ({ value: l, label: t(`account.languages.${l}`) })),
-          (language) => save({ language }),
-        )
-      }
+      menu={choose(
+        t('account.language'),
+        (['fr', 'en'] as const).map((l) => ({ value: l, label: t(`account.languages.${l}`) })),
+        user.language,
+        (language) => save({ language }),
+      )}
     />
   );
   const unitsRow = (
     <Row
       label={t('account.units')}
       value={t(`account.unitNames.${user.units}`)}
-      onPress={(e) =>
-        choose(
-          e,
-          t('account.units'),
-          (['km', 'mi'] as const).map((u) => ({ value: u, label: t(`account.unitNames.${u}`) })),
-          (units) => save({ units }),
-        )
-      }
+      menu={choose(
+        t('account.units'),
+        (['km', 'mi'] as const).map((u) => ({ value: u, label: t(`account.unitNames.${u}`) })),
+        user.units,
+        (units) => save({ units }),
+      )}
     />
   );
   const notificationsRow = (
@@ -202,17 +193,15 @@ export default function AccountScreen() {
     <Row
       label={t('account.visibility')}
       value={t(`account.visibilities.${user.visibility}`)}
-      onPress={(e) =>
-        choose(
-          e,
-          t('account.visibilityHint'),
-          (['everyone', 'friends'] as const).map((v) => ({
-            value: v,
-            label: t(`account.visibilities.${v}`),
-          })),
-          (visibility) => save({ visibility }),
-        )
-      }
+      menu={choose(
+        t('account.visibilityHint'),
+        (['everyone', 'friends'] as const).map((v) => ({
+          value: v,
+          label: t(`account.visibilities.${v}`),
+        })),
+        user.visibility,
+        (visibility) => save({ visibility }),
+      )}
     />
   );
 
@@ -386,17 +375,35 @@ function Row({
   label,
   value,
   onPress,
+  menu,
   tone,
   children,
 }: {
   label: string;
   value?: string;
-  onPress?: (e: GestureResponderEvent) => void;
+  onPress?: () => void;
+  /** A native menu opening from the row, to pick a value. */
+  menu?: { title?: string; items: MenuItem[] };
   tone?: 'link' | 'danger';
   children?: ReactNode;
 }) {
   const colors = useColors();
   const color = tone === 'link' ? colors.blueText : tone === 'danger' ? colors.danger : colors.text;
+  if (menu) {
+    return (
+      <ActionMenu title={menu.title} items={menu.items} label={label}>
+        <View style={[styles.row, { borderColor: colors.border }]}>
+          <Text style={[styles.label, { color }]}>{label}</Text>
+          {value !== undefined && (
+            <Text style={[styles.value, { color: colors.textSecondary }]} numberOfLines={1}>
+              {value}
+            </Text>
+          )}
+          <ChevronRight size={18} color={colors.textMuted} />
+        </View>
+      </ActionMenu>
+    );
+  }
   return (
     <Pressable
       onPress={onPress}

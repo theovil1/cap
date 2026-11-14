@@ -9,18 +9,10 @@ import {
   Route as RouteIcon,
 } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
-import {
-  ActivityIndicator,
-  Alert,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-  type GestureResponderEvent,
-} from 'react-native';
+import { ActivityIndicator, Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { showActions } from '@/ui/action-sheet';
+import { ActionMenu } from '@/ui/action-menu';
 import { countryName } from '@/i18n/countries';
 import { Flag as CountryFlag } from '@/ui/flag';
 import { useFollow, useProfile, useReport } from '@/api/community';
@@ -96,21 +88,18 @@ function ProfileView({ profile }: { profile: PublicProfile }) {
       Alert.alert(t('walker.pending', { name: walker.first_name }));
     }
   };
-  const more = (from?: GestureResponderEvent) =>
-    showActions(
-      from,
-      {
-        options: [t('walker.report'), t('journeys.cancel')],
-        destructiveButtonIndex: 0,
-        cancelButtonIndex: 1,
-      },
-      (i) =>
-        i === 0 &&
+  const more = [
+    {
+      label: t('walker.report'),
+      icon: 'flag' as const,
+      destructive: true,
+      onPress: () =>
         report.mutate(
           { target_type: 'user', target_id: walker.id },
           { onSuccess: () => Alert.alert(t('publicRoute.reported')) },
         ),
-    );
+    },
+  ];
 
   const identity = (
     <>
@@ -248,11 +237,13 @@ function ProfileView({ profile }: { profile: PublicProfile }) {
         onPress={() => router.back()}
         label={t('common.back')}
       />
-      <RoundButton
-        icon={<Ellipsis size={20} color={colors.text} />}
-        onPress={more}
-        label={t('publicRoute.more')}
-      />
+      <ActionMenu items={more} label={t('publicRoute.more')}>
+        <RoundButton
+          icon={<Ellipsis size={20} color={colors.text} />}
+          onPress={() => {}}
+          label={t('publicRoute.more')}
+        />
+      </ActionMenu>
     </View>
   );
 

@@ -2,9 +2,9 @@ import { router } from 'expo-router';
 import { Plus } from 'lucide-react-native';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { StyleSheet, Text, View, type GestureResponderEvent } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
-import { showActions } from '@/ui/action-sheet';
+import { ActionMenu } from '@/ui/action-menu';
 import { useEvents, type EventFilter } from '@/api/community';
 import { EVENT_FILTERS, EventsExplorer } from '@/community/events-explorer';
 import { ROUTE_FILTERS, RoutesExplorer, type RouteFilter } from '@/community/routes-explorer';
@@ -29,28 +29,27 @@ export default function ExploreScreen() {
   const live = events.some((e) => e.state === 'live');
   const [search, setSearch] = useState('');
 
-  // New journey, or publish one of mine for the community.
-  const add = (from?: GestureResponderEvent) =>
-    showActions(
-      from,
-      {
-        options: [t('journeys.new'), t('publish.title'), t('journeys.cancel')],
-        cancelButtonIndex: 2,
-      },
-      (index) => {
-        if (index === 0) router.push('/new-journey');
-        if (index === 1) router.push('/publish');
-      },
-    );
-
   return (
     <TabScreen>
       <ScreenHeader title={t('nav.explore')}>
-        <RoundButton
-          icon={<Plus size={20} color={colors.text} strokeWidth={2} />}
-          onPress={add}
+        {/* New journey, or publish one of mine for the community. */}
+        <ActionMenu
           label={t('explore.add')}
-        />
+          items={[
+            { label: t('journeys.new'), icon: 'map', onPress: () => router.push('/new-journey') },
+            {
+              label: t('publish.title'),
+              icon: 'square.and.arrow.up',
+              onPress: () => router.push('/publish'),
+            },
+          ]}
+        >
+          <RoundButton
+            icon={<Plus size={20} color={colors.text} strokeWidth={2} />}
+            onPress={() => {}}
+            label={t('explore.add')}
+          />
+        </ActionMenu>
       </ScreenHeader>
       {/* iPad: the two parts and the search side by side, as in the mockup. */}
       <View style={wide ? styles.bar : styles.stack}>

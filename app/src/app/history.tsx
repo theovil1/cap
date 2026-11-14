@@ -1,18 +1,10 @@
 import { router } from 'expo-router';
 import { ChevronLeft, CloudOff, Hand, Plus } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
-import {
-  Alert,
-  FlatList,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-  type GestureResponderEvent,
-} from 'react-native';
+import { Alert, FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { showActions } from '@/ui/action-sheet';
+import { ActionMenu } from '@/ui/action-menu';
 import { useDeleteSessions, useSessions } from '@/api/queries';
 import { formatDate, formatDuration, formatKm, formatSpeed } from '@/i18n/format';
 import { pendingSessions } from '@/session/store';
@@ -41,21 +33,9 @@ export default function HistoryScreen() {
       { text: t('journeys.cancel'), style: 'cancel' },
       { text: t('history.delete'), style: 'destructive', onPress: run },
     ]);
-  const openMenu = (localId: string, from?: GestureResponderEvent) =>
-    showActions(
-      from,
-      {
-        options: [t('history.deleteOne'), t('journeys.cancel')],
-        destructiveButtonIndex: 0,
-        cancelButtonIndex: 1,
-      },
-      (index) => {
-        if (index === 0) {
-          confirm(t('history.deleteOneTitle'), t('history.deleteOneBody'), () =>
-            remove.mutate(localId, { onError: failed }),
-          );
-        }
-      },
+  const deleteOne = (localId: string) =>
+    confirm(t('history.deleteOneTitle'), t('history.deleteOneBody'), () =>
+      remove.mutate(localId, { onError: failed }),
     );
   const clearAll = () =>
     confirm(t('history.deleteAllTitle'), t('history.deleteAllBody'), () =>
@@ -120,34 +100,43 @@ export default function HistoryScreen() {
         ) : undefined
       }
       renderItem={({ item }) => (
-        <Pressable
-          onPress={(e) => openMenu(item.id, e)}
-          accessibilityRole="button"
-          accessibilityHint={t('history.deleteOne')}
-          style={[styles.row, { backgroundColor: colors.surface, borderColor: colors.border }]}
+        <ActionMenu
+          label={t('history.deleteOne')}
+          items={[
+            {
+              label: t('history.deleteOne'),
+              icon: 'trash',
+              destructive: true,
+              onPress: () => deleteOne(item.id),
+            },
+          ]}
         >
-          <View style={{ flex: 1, gap: 2 }}>
-            <Text style={[styles.date, { color: colors.text }]}>
-              {formatDate(new Date(item.startedAt), {
-                weekday: 'long',
-                day: 'numeric',
-                month: 'long',
-              })}
-            </Text>
-            <View style={styles.inline}>
-              <Text style={[styles.detail, { color: colors.textSecondary }]}>
-                {formatDuration(item.durationS)} ·{' '}
-                {formatSpeed((item.distanceM / item.durationS) * 3.6)} {t('units.kmh')}
+          <View
+            style={[styles.row, { backgroundColor: colors.surface, borderColor: colors.border }]}
+          >
+            <View style={{ flex: 1, gap: 2 }}>
+              <Text style={[styles.date, { color: colors.text }]}>
+                {formatDate(new Date(item.startedAt), {
+                  weekday: 'long',
+                  day: 'numeric',
+                  month: 'long',
+                })}
               </Text>
-              {item.manual && <Hand size={13} color={colors.textMuted} />}
-              {item.pending && <CloudOff size={13} color={colors.textMuted} />}
+              <View style={styles.inline}>
+                <Text style={[styles.detail, { color: colors.textSecondary }]}>
+                  {formatDuration(item.durationS)} ·{' '}
+                  {formatSpeed((item.distanceM / item.durationS) * 3.6)} {t('units.kmh')}
+                </Text>
+                {item.manual && <Hand size={13} color={colors.textMuted} />}
+                {item.pending && <CloudOff size={13} color={colors.textMuted} />}
+              </View>
             </View>
+            <Text style={[styles.km, { color: colors.text }]}>
+              {formatKm(item.distanceM, 2)}
+              <Text style={[styles.unit, { color: colors.textSecondary }]}> {t('units.km')}</Text>
+            </Text>
           </View>
-          <Text style={[styles.km, { color: colors.text }]}>
-            {formatKm(item.distanceM, 2)}
-            <Text style={[styles.unit, { color: colors.textSecondary }]}> {t('units.km')}</Text>
-          </Text>
-        </Pressable>
+        </ActionMenu>
       )}
     />
   );

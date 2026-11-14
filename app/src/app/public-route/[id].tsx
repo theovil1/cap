@@ -20,11 +20,10 @@ import {
   Text,
   useWindowDimensions,
   View,
-  type GestureResponderEvent,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { showActions } from '@/ui/action-sheet';
+import { ActionMenu, type MenuItem } from '@/ui/action-menu';
 import { ApiError } from '@/api/client';
 import { useReport, useStartPublicRoute, useUnpublish, usePublicRoute } from '@/api/community';
 import type { PublicRouteDetail, RoutePhoto } from '@/api/types';
@@ -100,48 +99,49 @@ function useActions(route: PublicRouteDetail) {
         ),
     });
   };
-  const more = (from?: GestureResponderEvent) => {
-    const options = route.mine
+  // Schedule a journey on it; edit or unpublish mine, report someone else's.
+  const more: MenuItem[] = [
+    {
+      label: t('plan.schedule'),
+      icon: 'calendar.badge.plus',
+      onPress: () => router.push({ pathname: '/plan', params: { publicRouteId: route.id } }),
+    },
+    ...(route.mine
       ? [
-          t('plan.schedule'),
-          t('publicRoute.photos'),
-          t('publicRoute.unpublish'),
-          t('journeys.cancel'),
+          {
+            label: t('publicRoute.photos'),
+            icon: 'photo' as const,
+            onPress: () =>
+              router.push({ pathname: '/publish', params: { publicRouteId: route.id } }),
+          },
+          {
+            label: t('publicRoute.unpublish'),
+            icon: 'trash' as const,
+            destructive: true,
+            onPress: () =>
+              Alert.alert(t('publicRoute.unpublishTitle'), t('publicRoute.unpublishBody'), [
+                { text: t('journeys.cancel'), style: 'cancel' },
+                {
+                  text: t('publicRoute.unpublish'),
+                  style: 'destructive',
+                  onPress: () => unpublish.mutate(route.id, { onSuccess: () => router.back() }),
+                },
+              ]),
+          },
         ]
-      : [t('plan.schedule'), t('publicRoute.report'), t('journeys.cancel')];
-    showActions(
-      from,
-      {
-        options,
-        cancelButtonIndex: options.length - 1,
-        destructiveButtonIndex: route.mine ? 2 : 1,
-      },
-      (choice) => {
-        if (choice === 0) {
-          router.push({ pathname: '/plan', params: { publicRouteId: route.id } });
-          return;
-        }
-        const index = choice - 1;
-        if (route.mine && index === 0) {
-          router.push({ pathname: '/publish', params: { publicRouteId: route.id } });
-        } else if (route.mine && index === 1) {
-          Alert.alert(t('publicRoute.unpublishTitle'), t('publicRoute.unpublishBody'), [
-            { text: t('journeys.cancel'), style: 'cancel' },
-            {
-              text: t('publicRoute.unpublish'),
-              style: 'destructive',
-              onPress: () => unpublish.mutate(route.id, { onSuccess: () => router.back() }),
-            },
-          ]);
-        } else if (!route.mine && index === 0) {
-          report.mutate(
-            { target_type: 'route', target_id: route.id },
-            { onSuccess: () => Alert.alert(t('publicRoute.reported')) },
-          );
-        }
-      },
-    );
-  };
+      : [
+          {
+            label: t('publicRoute.report'),
+            icon: 'flag' as const,
+            destructive: true,
+            onPress: () =>
+              report.mutate(
+                { target_type: 'route', target_id: route.id },
+                { onSuccess: () => Alert.alert(t('publicRoute.reported')) },
+              ),
+          },
+        ]),
+  ];
   return { share, begin, more, starting: start.isPending };
 }
 
@@ -363,11 +363,13 @@ function TopButtons({ route, top }: { route: PublicRouteDetail; top: number }) {
         onPress={() => router.back()}
         label={t('common.back')}
       />
-      <GlassButton
-        icon={<Ellipsis size={22} color={colors.text} />}
-        onPress={more}
-        label={t('publicRoute.more')}
-      />
+      <ActionMenu items={more} label={t('publicRoute.more')}>
+        <GlassButton
+          icon={<Ellipsis size={22} color={colors.text} />}
+          onPress={() => {}}
+          label={t('publicRoute.more')}
+        />
+      </ActionMenu>
     </View>
   );
 }
