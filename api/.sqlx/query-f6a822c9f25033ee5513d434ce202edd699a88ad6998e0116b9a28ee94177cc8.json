@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "WITH members AS (\n             SELECT u.id FROM users u\n             WHERE u.id = $1\n                OR ($2 = 'friends' AND EXISTS (SELECT 1 FROM friendships f WHERE f.status = 'accepted'\n                     AND ((f.user_id = $1 AND f.friend_id = u.id) OR (f.friend_id = $1 AND f.user_id = u.id))))\n                OR ($2 = 'world' AND u.visibility = 'everyone')\n                OR ($2 = 'country' AND u.visibility = 'everyone'\n                    AND u.country = (SELECT country FROM users WHERE id = $1))\n         )\n         SELECT u.id, u.first_name, u.username, u.avatar_url, u.country,\n                COALESCE(array_agg(DISTINCT (s.started_at AT TIME ZONE 'Europe/Paris')::date)\n                         FILTER (WHERE s.id IS NOT NULL), '{}') AS \"days!: Vec<Date>\"\n         FROM members m\n         JOIN users u ON u.id = m.id\n         LEFT JOIN sessions s ON s.user_id = u.id AND s.source = 'treadmill'\n         GROUP BY u.id",
+  "query": "WITH members AS (\n             SELECT u.id FROM users u\n             WHERE u.id = $1\n                OR (EXISTS (SELECT 1 FROM friendships f WHERE f.status = 'accepted'\n                     AND ((f.user_id = $1 AND f.friend_id = u.id) OR (f.friend_id = $1 AND f.user_id = u.id)))\n                    AND ($2 <> 'country' OR u.country = (SELECT country FROM users WHERE id = $1)))\n                OR ($2 = 'world' AND u.visibility = 'everyone')\n                OR ($2 = 'country' AND u.visibility = 'everyone'\n                    AND u.country = (SELECT country FROM users WHERE id = $1))\n         )\n         SELECT u.id, u.first_name, u.username, u.avatar_url, u.country,\n                (EXISTS (SELECT 1 FROM friendships f WHERE f.status = 'accepted'\n                     AND ((f.user_id = $1 AND f.friend_id = u.id) OR (f.friend_id = $1 AND f.user_id = u.id)))) AS \"friend!\",\n                COALESCE(array_agg(DISTINCT (s.started_at AT TIME ZONE 'Europe/Paris')::date)\n                         FILTER (WHERE s.id IS NOT NULL), '{}') AS \"days!: Vec<Date>\"\n         FROM members m\n         JOIN users u ON u.id = m.id\n         LEFT JOIN sessions s ON s.user_id = u.id AND s.source = 'treadmill'\n         GROUP BY u.id",
   "describe": {
     "columns": [
       {
@@ -60,6 +60,12 @@
       },
       {
         "ordinal": 5,
+        "name": "friend!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 6,
         "name": "days!: Vec<Date>",
         "type_info": "DateArray",
         "origin": "Expression"
@@ -77,8 +83,9 @@
       false,
       true,
       false,
+      null,
       null
     ]
   },
-  "hash": "8546c529dad96d24e9426a2bed751767afff1727bd29dfb70526e3e0e1ce286e"
+  "hash": "f6a822c9f25033ee5513d434ce202edd699a88ad6998e0116b9a28ee94177cc8"
 }

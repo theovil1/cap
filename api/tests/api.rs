@@ -1325,6 +1325,24 @@ async fn world_and_country_rankings(db: PgPool) {
     assert_eq!(country["total"], 1);
     assert_eq!(country["me"]["rank"], 1);
 
+    // Friends show in every ranking, even with a private profile or nothing walked.
+    let lazy = register(&server, "lazy").await;
+    befriend(&server, &theo, &shy).await;
+    befriend(&server, &theo, &lazy).await;
+    let world: Value = server
+        .get("/leaderboards?period=week&scope=world")
+        .add_header("authorization", bearer(&theo))
+        .await
+        .json();
+    assert_eq!(world["total"], 4);
+    assert_eq!(world["entries"][0]["username"], "shy");
+    let country: Value = server
+        .get("/leaderboards?period=week&scope=country")
+        .add_header("authorization", bearer(&theo))
+        .await
+        .json();
+    assert_eq!(country["total"], 3);
+
     server
         .get("/leaderboards?period=week&scope=galaxy")
         .add_header("authorization", bearer(&theo))

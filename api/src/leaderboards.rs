@@ -157,8 +157,9 @@ async fn distances(
         "WITH members AS (
              SELECT u.id FROM users u
              WHERE u.id = $1
-                OR ($2 = 'friends' AND EXISTS (SELECT 1 FROM friendships f WHERE f.status = 'accepted'
-                     AND ((f.user_id = $1 AND f.friend_id = u.id) OR (f.friend_id = $1 AND f.user_id = u.id))))
+                OR (EXISTS (SELECT 1 FROM friendships f WHERE f.status = 'accepted'
+                     AND ((f.user_id = $1 AND f.friend_id = u.id) OR (f.friend_id = $1 AND f.user_id = u.id)))
+                    AND ($2 <> 'country' OR u.country = (SELECT country FROM users WHERE id = $1)))
                 OR ($2 = 'world' AND u.visibility = 'everyone')
                 OR ($2 = 'country' AND u.visibility = 'everyone'
                     AND u.country = (SELECT country FROM users WHERE id = $1))
@@ -172,7 +173,9 @@ async fn distances(
               AND ($3::date IS NULL OR s.started_at >= ($3::date::timestamp AT TIME ZONE 'Europe/Paris'))
               AND ($4::date IS NULL OR s.started_at < ($4::date::timestamp AT TIME ZONE 'Europe/Paris'))
          GROUP BY u.id
-         HAVING u.id = $1 OR $2 = 'friends' OR COALESCE(SUM(s.distance_m), 0) > 0",
+         HAVING u.id = $1 OR $2 = 'friends' OR COALESCE(SUM(s.distance_m), 0) > 0
+             OR EXISTS (SELECT 1 FROM friendships f WHERE f.status = 'accepted'
+                  AND ((f.user_id = $1 AND f.friend_id = u.id) OR (f.friend_id = $1 AND f.user_id = u.id)))",
         user_id,
         scope,
         since,
@@ -207,13 +210,16 @@ async fn streak_entries(
         "WITH members AS (
              SELECT u.id FROM users u
              WHERE u.id = $1
-                OR ($2 = 'friends' AND EXISTS (SELECT 1 FROM friendships f WHERE f.status = 'accepted'
-                     AND ((f.user_id = $1 AND f.friend_id = u.id) OR (f.friend_id = $1 AND f.user_id = u.id))))
+                OR (EXISTS (SELECT 1 FROM friendships f WHERE f.status = 'accepted'
+                     AND ((f.user_id = $1 AND f.friend_id = u.id) OR (f.friend_id = $1 AND f.user_id = u.id)))
+                    AND ($2 <> 'country' OR u.country = (SELECT country FROM users WHERE id = $1)))
                 OR ($2 = 'world' AND u.visibility = 'everyone')
                 OR ($2 = 'country' AND u.visibility = 'everyone'
                     AND u.country = (SELECT country FROM users WHERE id = $1))
          )
          SELECT u.id, u.first_name, u.username, u.avatar_url, u.country,
+                (EXISTS (SELECT 1 FROM friendships f WHERE f.status = 'accepted'
+                     AND ((f.user_id = $1 AND f.friend_id = u.id) OR (f.friend_id = $1 AND f.user_id = u.id)))) AS \"friend!\",
                 COALESCE(array_agg(DISTINCT (s.started_at AT TIME ZONE 'Europe/Paris')::date)
                          FILTER (WHERE s.id IS NOT NULL), '{}') AS \"days!: Vec<Date>\"
          FROM members m
@@ -230,7 +236,7 @@ async fn streak_entries(
         .filter_map(|r| {
             let (current, best) = streaks(r.days, today);
             // Out of the friends, only walkers on a streak are ranked (and me).
-            (current > 0 || scope == "friends" || r.id == user_id).then(|| LeaderboardEntry {
+            (current > 0 || scope == "friends" || r.id == user_id || r.friend).then(|| LeaderboardEntry {
                 rank: 0,
                 me: r.id == user_id,
                 user_id: r.id,
