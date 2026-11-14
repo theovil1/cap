@@ -1,14 +1,14 @@
 import { router } from 'expo-router';
 import { Compass, Flag, Sparkles } from 'lucide-react-native';
-import { useDeferredValue } from 'react';
+import { useDeferredValue, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { useFeaturedRoute, usePublicRoutes, type PublicRouteFilters } from '@/api/community';
 import { useJourneys } from '@/api/queries';
 import type { PublicRouteCard } from '@/api/types';
 import { formatKm, formatNumber } from '@/i18n/format';
-import { useColors } from '@/theme';
+import { fonts, useColors } from '@/theme';
 import { RouteCard, RouteRow, RouteTile } from '@/ui/cards';
 import { SectionHeader } from '@/ui/controls';
 import { EmptyState, useWide } from '@/ui/layout';
@@ -41,7 +41,16 @@ function openRoute(route: PublicRouteCard) {
 }
 
 /** The Trajets part of the Explorer: the route of the week, then the list. */
-export function RoutesExplorer({ search, filter }: { search: string; filter: RouteFilter }) {
+export function RoutesExplorer({
+  search,
+  filter,
+  height,
+}: {
+  search: string;
+  filter: RouteFilter;
+  /** iPad: the height left under the filters, which the hero and the grid fill. */
+  height?: number;
+}) {
   const { t } = useTranslation();
   const colors = useColors();
   const wide = useWide();
@@ -59,6 +68,7 @@ export function RoutesExplorer({ search, filter }: { search: string; filter: Rou
   };
   const list = usePublicRoutes(filters, filter !== 'near' || !!home);
   const featured = useFeaturedRoute();
+  const [all, setAll] = useState(false);
   const showFeatured = filter === 'popular' && !q && featured.data;
   const routes = (list.data ?? []).filter((r) => !showFeatured || r.id !== featured.data?.id);
 
@@ -84,7 +94,7 @@ export function RoutesExplorer({ search, filter }: { search: string; filter: Rou
       subtitle={subtitle(featured.data)}
       {...facts(featured.data)}
       onPress={() => featured.data && openRoute(featured.data)}
-      coverHeight={wide ? 470 : undefined}
+      fill={wide}
       action={
         wide ? (
           <Button
@@ -93,6 +103,7 @@ export function RoutesExplorer({ search, filter }: { search: string; filter: Rou
             title={t('explore.start')}
             icon={<Flag size={17} color={colors.onAccent} />}
             onPress={() => featured.data && openRoute(featured.data)}
+            style={styles.start}
           />
         ) : undefined
       }
@@ -119,37 +130,56 @@ export function RoutesExplorer({ search, filter }: { search: string; filter: Rou
     );
   }
 
-  const rows = routes.map((route) =>
-    wide ? (
-      <View key={route.id} style={styles.cell}>
-        <RouteTile
-          cover={<RouteCover photos={route.photos} place={route.end} zoom={13} small />}
-          title={route.title}
-          subtitle={subtitle(route)}
-          {...facts(route)}
-          onPress={() => openRoute(route)}
-        />
-      </View>
-    ) : (
-      <View key={route.id}>
-        <RouteRow
-          cover={<RouteCover photos={route.photos} place={route.end} zoom={13} small />}
-          title={route.title}
-          subtitle={subtitle(route)}
-          {...facts(route)}
-          onPress={() => openRoute(route)}
-        />
-      </View>
-    ),
-  );
+  const rows = routes.map((route) => (
+    <RouteRow
+      key={route.id}
+      cover={<RouteCover photos={route.photos} place={route.end} zoom={13} small />}
+      title={route.title}
+      subtitle={subtitle(route)}
+      {...facts(route)}
+      onPress={() => openRoute(route)}
+    />
+  ));
 
   if (wide) {
+    // The mockup: the route of the week on the left, two by two tiles on the
+    // right filling the screen; "Tout voir" shows the others below.
+    const shown = all ? routes : routes.slice(0, 4);
+    const pairs = Array.from({ length: Math.ceil(shown.length / 2) }, (_, i) =>
+      shown.slice(2 * i, 2 * i + 2),
+    );
     return (
-      <View style={styles.wide}>
+      <View style={[styles.wide, { minHeight: height }]}>
         {hero ? <View style={styles.heroWide}>{hero}</View> : null}
         <View style={[styles.listWide, !hero && styles.full]}>
-          <SectionHeader title={t(`explore.lists.${filter}`)} />
-          <View style={styles.grid}>{rows}</View>
+          <View style={styles.listHead}>
+            <Text style={[styles.listTitle, { color: colors.text }]}>
+              {t(`explore.lists.${filter}`)}
+            </Text>
+            {routes.length > 4 ? (
+              <Pressable onPress={() => setAll(!all)} accessibilityRole="button" hitSlop={8}>
+                <Text style={[styles.seeAll, { color: colors.blueText }]}>
+                  {all ? t('explore.seeLess') : t('explore.seeAll')} ›
+                </Text>
+              </Pressable>
+            ) : null}
+          </View>
+          {pairs.map((pair, i) => (
+            <View key={i} style={[styles.pair, !all && styles.pairFill]}>
+              {pair.map((route) => (
+                <RouteTile
+                  key={route.id}
+                  fill
+                  cover={<RouteCover photos={route.photos} place={route.end} zoom={13} small />}
+                  title={route.title}
+                  subtitle={subtitle(route)}
+                  {...facts(route)}
+                  onPress={() => openRoute(route)}
+                />
+              ))}
+              {pair.length === 1 ? <View style={styles.flex} /> : null}
+            </View>
+          ))}
         </View>
       </View>
     );
@@ -165,12 +195,16 @@ export function RoutesExplorer({ search, filter }: { search: string; filter: Rou
 
 const styles = StyleSheet.create({
   loading: { marginTop: 40 },
-  wide: { flexDirection: 'row', gap: 20, alignItems: 'flex-start' },
-  // As in the iPad mockup: the route of the week on the left half, tiles on the right.
-  heroWide: { flex: 1 },
+  // As in the iPad mockup: the route of the week (1.15) beside the tiles (1).
+  wide: { flexDirection: 'row', gap: 20, alignItems: 'stretch' },
+  heroWide: { flex: 1.15 },
   listWide: { flex: 1, gap: 12 },
   full: { flex: 1 },
-  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 14 },
-  // Two tiles a row, three when the list has the whole width.
-  cell: { flexBasis: 240, flexGrow: 1, maxWidth: '50%' },
+  listHead: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline' },
+  listTitle: { fontFamily: fonts.display, fontSize: 20, letterSpacing: -0.4 },
+  seeAll: { fontFamily: fonts.textSemiBold, fontSize: 14 },
+  pair: { flexDirection: 'row', gap: 14, minHeight: 230 },
+  pairFill: { flex: 1 },
+  flex: { flex: 1 },
+  start: { height: 46, borderRadius: 999, paddingHorizontal: 18 },
 });

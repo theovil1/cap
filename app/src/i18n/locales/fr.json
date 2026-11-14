@@ -520,7 +520,9 @@
       "sea": "Bord de mer",
       "castles": "Châteaux"
     },
-    "start": "Démarrer"
+    "start": "Démarrer",
+    "seeAll": "Tout voir",
+    "seeLess": "Voir moins"
   },
   "arrival": {
     "done": "Trajet terminé",

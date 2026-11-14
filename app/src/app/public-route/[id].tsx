@@ -36,7 +36,7 @@ import { fonts, useColors, useShadows } from '@/theme';
 import { HOME } from '@/ui/routes';
 import { useWide } from '@/ui/layout';
 import { PhotoChip, Tag } from '@/ui/pills';
-import { Avatar, Button, GlassButton } from '@/ui/primitives';
+import { Avatar, Button, Figure, GlassButton } from '@/ui/primitives';
 import { RankRow, StatTile } from '@/ui/stats';
 
 const KINDS: RoutePhoto['kind'][] = ['start', 'end', 'path'];
@@ -233,7 +233,27 @@ function Gallery({
 function Body({ route, wide = false }: { route: PublicRouteDetail; wide?: boolean }) {
   const { t } = useTranslation();
   const colors = useColors();
-  const tiles = (
+  // iPad mockup: three small tiles (12 pt label, 20 pt figure).
+  const tiles = wide ? (
+    <View style={styles.tiles}>
+      {(
+        [
+          [t('preview.distance'), formatKm(route.distance_m, 0), t('units.km')],
+          [t('publicRoute.walkers'), formatNumber(route.walkers), undefined],
+          [
+            t('publicRoute.finished'),
+            formatNumber(route.finished),
+            t('publicRoute.times', { count: route.finished }),
+          ],
+        ] as const
+      ).map(([label, value, unit]) => (
+        <View key={label} style={[styles.smallTile, { backgroundColor: colors.inset }]}>
+          <Text style={[styles.smallLabel, { color: colors.textSecondary }]}>{label}</Text>
+          <Figure value={value} unit={unit} size={20} unitSize={11} />
+        </View>
+      ))}
+    </View>
+  ) : (
     <View style={styles.tiles}>
       <StatTile
         label={t('preview.distance')}
@@ -251,7 +271,9 @@ function Body({ route, wide = false }: { route: PublicRouteDetail; wide?: boolea
   return (
     <>
       {route.featured ? <Tag label={t('explore.ofTheWeek')} icon={Sparkles} /> : null}
-      <Text style={[styles.title, { color: colors.text }]}>{route.title}</Text>
+      <Text style={[styles.title, wide && styles.titleWide, { color: colors.text }]}>
+        {route.title}
+      </Text>
       <Pressable
         style={styles.author}
         onPress={() => router.push({ pathname: '/walker/[id]', params: { id: route.author.id } })}
@@ -277,7 +299,13 @@ function Body({ route, wide = false }: { route: PublicRouteDetail; wide?: boolea
       {/* iPad (mockup): the numbers first, then the words. */}
       {wide ? tiles : null}
       {route.description ? (
-        <Text style={[styles.description, { color: colors.textSecondary }]}>
+        <Text
+          style={[
+            styles.description,
+            wide && styles.descriptionWide,
+            { color: colors.textSecondary },
+          ]}
+        >
           {route.description}
         </Text>
       ) : null}
@@ -409,17 +437,17 @@ function Phone({ route }: { route: PublicRouteDetail }) {
 function Wide({ route }: { route: PublicRouteDetail }) {
   const colors = useColors();
   const shadows = useShadows();
-  const insets = useSafeAreaInsets();
   const { width, height } = useWindowDimensions();
-  const panel = 440;
+  // Mockup: the pictures take the width the 412 panel leaves, the panel lies
+  // over their edge, 20 from the screen's.
+  const panel = 412;
   return (
     <View style={[styles.screen, { backgroundColor: colors.background }]}>
       <Gallery route={route} width={width - panel} height={height} />
       <View
         style={[
           styles.panel,
-          { backgroundColor: colors.surface, width: panel - 20, top: insets.top + 20 },
-          { bottom: insets.bottom + 20 },
+          { backgroundColor: colors.surface, width: panel, top: 20, bottom: 20 },
           shadows.floating,
         ]}
       >
@@ -431,7 +459,7 @@ function Wide({ route }: { route: PublicRouteDetail }) {
         </View>
       </View>
       <View style={[styles.wideTop, { width: width - panel }]} pointerEvents="box-none">
-        <TopButtons route={route} top={insets.top + 20} />
+        <TopButtons route={route} top={28} />
       </View>
     </View>
   );
@@ -484,6 +512,8 @@ const styles = StyleSheet.create({
   author: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   small: { fontFamily: fonts.text, fontSize: 13.5, fontVariant: ['tabular-nums'] },
   description: { fontFamily: fonts.text, fontSize: 15, lineHeight: 22 },
+  descriptionWide: { fontSize: 14, lineHeight: 21 },
+  titleWide: { lineHeight: 30, letterSpacing: -0.84 },
   tiles: { flexDirection: 'row', gap: 8, marginTop: 4 },
   fastestHead: {
     flexDirection: 'row',
@@ -509,7 +539,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  panel: { position: 'absolute', right: 20, borderRadius: 30, overflow: 'hidden' },
-  panelContent: { padding: 26, gap: 12 },
-  panelFooter: { padding: 22, paddingTop: 10 },
+  panel: { position: 'absolute', right: 20, borderRadius: 34, overflow: 'hidden' },
+  panelContent: { padding: 26, paddingBottom: 12, gap: 16 },
+  panelFooter: { paddingHorizontal: 26, paddingBottom: 26, paddingTop: 10 },
+  smallTile: {
+    flex: 1,
+    justifyContent: 'space-between',
+    gap: 6,
+    paddingVertical: 13,
+    paddingHorizontal: 14,
+    borderRadius: 18,
+  },
+  smallLabel: { fontFamily: fonts.textMedium, fontSize: 12 },
 });

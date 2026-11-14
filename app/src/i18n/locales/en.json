@@ -520,7 +520,9 @@
       "sea": "Seaside",
       "castles": "Castles"
     },
-    "start": "Start"
+    "start": "Start",
+    "seeAll": "See all",
+    "seeLess": "See less"
   },
   "arrival": {
     "done": "Journey done",

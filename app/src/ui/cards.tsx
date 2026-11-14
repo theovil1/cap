@@ -55,7 +55,7 @@ export function RouteCard({
   distance,
   walkers,
   onPress,
-  coverHeight,
+  fill,
   action,
 }: {
   /** The picture, filling the 184 high top. */
@@ -70,8 +70,8 @@ export function RouteCard({
   distance: string;
   walkers?: string;
   onPress: () => void;
-  /** iPad: a taller picture, given in points. */
-  coverHeight?: number;
+  /** iPad: the card fills its place and the picture takes what the words leave. */
+  fill?: boolean;
   /** iPad: a button next to the title ("Démarrer"). */
   action?: ReactNode;
 }) {
@@ -83,21 +83,28 @@ export function RouteCard({
       accessibilityRole="button"
       style={[
         styles.hero,
+        fill && styles.heroFill,
         { backgroundColor: colors.surface, borderColor: colors.border },
         shadows.card,
       ]}
     >
-      <View style={[styles.heroCover, coverHeight ? { height: coverHeight } : null]}>
+      <View style={[styles.heroCover, fill && styles.coverFill]}>
         {cover}
         <Grain on="picture" />
         <Shade />
         {caption ? (
-          <View style={styles.caption}>
+          <View style={[styles.caption, fill && styles.captionFill]}>
             {CaptionIcon ? <CaptionIcon size={14} color="#FFFFFF" strokeWidth={2.2} /> : null}
             <Text style={styles.captionText}>{caption}</Text>
           </View>
         ) : null}
-        {tag ? <GlassTag label={tag} icon={tagIcon} style={styles.heroTag} /> : null}
+        {tag ? (
+          <GlassTag
+            label={tag}
+            icon={tagIcon}
+            style={[styles.heroTag, fill && styles.heroTagFill]}
+          />
+        ) : null}
       </View>
       <View style={[styles.heroBody, action ? styles.heroBodyAction : null]}>
         <View style={styles.rowBody}>
@@ -125,6 +132,7 @@ export function RouteTile({
   distance,
   walkers,
   onPress,
+  fill,
 }: {
   cover: ReactNode;
   title: string;
@@ -132,6 +140,8 @@ export function RouteTile({
   distance: string;
   walkers?: string;
   onPress: () => void;
+  /** Fills its cell, the picture taking what the words leave (120 at least). */
+  fill?: boolean;
 }) {
   const colors = useColors();
   const shadows = useShadows();
@@ -141,16 +151,18 @@ export function RouteTile({
       accessibilityRole="button"
       style={[
         styles.hero,
+        styles.tile,
+        fill && styles.flex,
         { backgroundColor: colors.surface, borderColor: colors.border },
         shadows.card,
       ]}
     >
-      <View style={styles.tileCover}>
+      <View style={[styles.tileCover, fill && styles.tileCoverFill]}>
         {cover}
         <Grain on="picture" />
       </View>
       <View style={styles.tileBody}>
-        <Text style={[styles.rowTitle, { color: colors.text }]} numberOfLines={1}>
+        <Text style={[styles.rowTitle, styles.tileTitle, { color: colors.text }]} numberOfLines={1}>
           {title}
         </Text>
         <Text style={[type.footnote, { color: colors.textSecondary }]} numberOfLines={1}>
@@ -327,16 +339,25 @@ export function LiveEventCard({
 const styles = StyleSheet.create({
   hero: { borderRadius: 26, borderWidth: 1, overflow: 'hidden', borderCurve: 'continuous' },
   heroCover: { height: 184, overflow: 'hidden' },
+  // iPad mockup: hero 30 round, tag 16 from the corner, tiles 24 round.
+  heroFill: { flex: 1, borderRadius: 30 },
+  coverFill: { flex: 1, height: undefined },
+  captionFill: { left: 18, bottom: 14 },
+  heroTagFill: { left: 16, top: 16, height: 32, paddingHorizontal: 13 },
+  tile: { borderRadius: 24 },
+  flex: { flex: 1 },
+  tileCoverFill: { flex: 1, height: undefined, minHeight: 120 },
   heroBodyAction: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 16,
     paddingHorizontal: 22,
-    paddingVertical: 18,
+    paddingTop: 18,
+    paddingBottom: 20,
   },
-  heroTitleWide: { fontSize: 24, lineHeight: 28 },
+  heroTitleWide: { fontSize: 25, lineHeight: 29, letterSpacing: -0.5 },
   tileCover: { height: 150, overflow: 'hidden' },
-  tileBody: { gap: 3, paddingTop: 12, paddingHorizontal: 14, paddingBottom: 14 },
+  tileBody: { gap: 4, paddingTop: 12, paddingHorizontal: 16, paddingBottom: 14 },
   liveCover: { height: 150 },
   heroTag: { position: 'absolute', left: 12, top: 12 },
   caption: {
@@ -372,6 +393,7 @@ const styles = StyleSheet.create({
   thumb: { width: 92, height: 92, borderRadius: radius.field, overflow: 'hidden' },
   rowBody: { flex: 1, minWidth: 0, gap: 4 },
   rowTitle: { fontFamily: fonts.display, fontSize: 16, lineHeight: 18, letterSpacing: -0.32 },
+  tileTitle: { fontSize: 17, lineHeight: 20, letterSpacing: -0.34 },
   event: {
     flexDirection: 'row',
     alignItems: 'center',

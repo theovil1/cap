@@ -2,7 +2,8 @@ import { router } from 'expo-router';
 import { Plus } from 'lucide-react-native';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { MeAvatar } from '@/ui/me-avatar';
 import { ActionMenu } from '@/ui/action-menu';
@@ -22,6 +23,10 @@ export default function ExploreScreen() {
   const { t } = useTranslation();
   const colors = useColors();
   const wide = useWide();
+  const { height } = useWindowDimensions();
+  const insets = useSafeAreaInsets();
+  // iPad mockup: under the title (54), the tabs and search (50) and the chips (36), 20 apart.
+  const listHeight = height - (insets.top + 2) - 54 - 20 - 50 - 20 - 36 - 20 - (insets.bottom + 32);
   const [part, setPart] = useState<Part>('routes');
   const [routeFilter, setRouteFilter] = useState<RouteFilter>('popular');
   const [plannedFilter, setPlannedFilter] = useState<EventFilter>('all');
@@ -93,7 +98,11 @@ export default function ExploreScreen() {
             ))}
       </ChipRow>
       {part === 'routes' ? (
-        <RoutesExplorer search={search} filter={routeFilter} />
+        <RoutesExplorer
+          search={search}
+          filter={routeFilter}
+          height={wide ? listHeight : undefined}
+        />
       ) : (
         <>
           <Text style={[type.subhead, { color: colors.textSecondary }]}>
