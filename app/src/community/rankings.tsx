@@ -79,11 +79,9 @@ export function Rankings() {
           <Chip
             key={s}
             small
-            label={
-              s === 'country' && current?.country
-                ? countryName(current.country)
-                : t(`rankings.${s}`)
-            }
+            // "Pays" and its flag: a long country name pushed the Amis chip off
+            // screen. The full name is in the line under the chips.
+            label={t(`rankings.${s}`)}
             icon={
               s === 'country' && current?.country ? (
                 <Flag code={current.country} height={12} />
