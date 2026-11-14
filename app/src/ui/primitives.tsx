@@ -1,6 +1,6 @@
 import { GlassView, isLiquidGlassAvailable } from 'expo-glass-effect';
 import { Image } from 'expo-image';
-import type { ReactNode } from 'react';
+import { cloneElement, isValidElement, type ReactNode } from 'react';
 import {
   ActivityIndicator,
   Pressable,
@@ -232,7 +232,14 @@ export function Button({
         style,
       ]}
     >
-      {loading ? <ActivityIndicator color={foreground} /> : icon}
+      {loading ? (
+        <ActivityIndicator color={foreground} />
+      ) : isValidElement<{ color?: string }>(icon) ? (
+        // The icon always takes the colour of the words, whatever the caller gave.
+        cloneElement(icon, { color: foreground })
+      ) : (
+        icon
+      )}
       <Text
         style={[
           styles.buttonText,

@@ -295,7 +295,7 @@ function Standings({ race, list, me }: { race: JourneyDetail; list: Racer[]; me?
               <Avatar
                 name={r.firstName}
                 size={44}
-                tone={r.me ? 'accent' : r.distanceM > (me?.distanceM ?? 0) ? 'blue' : 'plain'}
+                tone={r.me ? 'accent' : r.distanceM > (me?.distanceM ?? 0) ? 'other' : 'plain'}
               />
               {r.arrivedAt && r.place === 1 && (
                 <View style={[styles.medal, { borderColor: colors.surface }]}>
