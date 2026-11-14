@@ -22,7 +22,10 @@ use crate::{
 };
 
 pub fn router() -> OpenApiRouter<AppState> {
-    OpenApiRouter::new().routes(routes!(get_profile)).routes(routes!(follow, unfollow))
+    OpenApiRouter::new()
+        .routes(routes!(get_profile))
+        .routes(routes!(follow, unfollow))
+        .routes(routes!(suggestions))
 }
 
 /// A journey a walker finished: a medal on their profile.
@@ -261,4 +264,54 @@ async fn unfollow(
         .execute(&state.db)
         .await?;
     Ok(StatusCode::NO_CONTENT)
+}
+
+/// A walker to follow: friends of my friends, with how many we share.
+#[derive(Serialize, ToSchema)]
+pub struct Suggestion {
+    walker: Walker,
+    mutual_friends: i64,
+}
+
+/// Walkers to follow ("À suivre"): friends of my friends I neither have as
+/// friends nor follow yet, the most shared friends first.
+#[utoipa::path(get, path = "/users/suggestions", tag = "profiles", security(("bearer" = [])),
+    responses((status = 200, body = Vec<Suggestion>)))]
+async fn suggestions(
+    State(state): State<AppState>,
+    AuthUser(me): AuthUser,
+) -> AppResult<Json<Vec<Suggestion>>> {
+    let rows = sqlx::query!(
+        "WITH mine AS (
+             SELECT CASE WHEN user_id = $1 THEN friend_id ELSE user_id END AS id FROM friendships
+             WHERE status = 'accepted' AND (user_id = $1 OR friend_id = $1)),
+         theirs AS (
+             SELECT CASE WHEN f.user_id = m.id THEN f.friend_id ELSE f.user_id END AS id, m.id AS via
+             FROM friendships f JOIN mine m ON f.user_id = m.id OR f.friend_id = m.id
+             WHERE f.status = 'accepted')
+         SELECT u.id, u.first_name, u.username, u.avatar_url, count(DISTINCT t.via) AS \"mutual!\"
+         FROM theirs t JOIN users u ON u.id = t.id
+         WHERE u.id <> $1 AND NOT u.is_system
+           AND u.id NOT IN (SELECT id FROM mine)
+           AND NOT EXISTS (SELECT 1 FROM follows WHERE follower_id = $1 AND followee_id = u.id)
+         GROUP BY u.id
+         ORDER BY count(DISTINCT t.via) DESC, lower(u.first_name)
+         LIMIT 5",
+        me
+    )
+    .fetch_all(&state.db)
+    .await?;
+    Ok(Json(
+        rows.into_iter()
+            .map(|r| Suggestion {
+                walker: Walker {
+                    id: r.id,
+                    first_name: r.first_name,
+                    username: r.username,
+                    avatar_url: r.avatar_url,
+                },
+                mutual_friends: r.mutual,
+            })
+            .collect(),
+    ))
 }

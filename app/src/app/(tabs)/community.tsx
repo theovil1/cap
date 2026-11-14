@@ -2,9 +2,11 @@ import { router } from 'expo-router';
 import { UsersRound } from 'lucide-react-native';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useFriends } from '@/api/queries';
+import { FeedSide } from '@/community/feed-side';
 import { FeedList } from '@/community/feed-list';
 import { Rankings } from '@/community/rankings';
 import { fonts, useColors } from '@/theme';
@@ -23,6 +25,10 @@ export default function CommunityScreen() {
   const [part, setPart] = useState<Part>('feed');
   const { data: friends } = useFriends();
   const waiting = friends?.incoming.length ?? 0;
+  const { height } = useWindowDimensions();
+  const insets = useSafeAreaInsets();
+  // Under the title (54) and the tabs (40), 20 apart.
+  const listHeight = height - (insets.top + 2) - 54 - 20 - 40 - 20 - (insets.bottom + 32);
 
   return (
     <TabScreen>
@@ -52,7 +58,22 @@ export default function CommunityScreen() {
           onChange={setPart}
         />
       </View>
-      {part === 'feed' ? <FeedList /> : <Rankings />}
+      {/* iPad mockups: the feed beside "Cette semaine" and "À suivre"; the
+          rankings fill the screen under the tabs. */}
+      {part === 'feed' ? (
+        wide ? (
+          <View style={styles.feedRow}>
+            <View style={styles.feedColumn}>
+              <FeedList />
+            </View>
+            <FeedSide onRankings={() => setPart('rankings')} />
+          </View>
+        ) : (
+          <FeedList />
+        )
+      ) : (
+        <Rankings height={wide ? listHeight : undefined} />
+      )}
     </TabScreen>
   );
 }
@@ -60,6 +81,8 @@ export default function CommunityScreen() {
 const styles = StyleSheet.create({
   // iPad mockups: the two parts take 360 on the left.
   partsWide: { width: 360 },
+  feedRow: { flexDirection: 'row', gap: 20, alignItems: 'flex-start' },
+  feedColumn: { flex: 1, gap: 14 },
   count: {
     position: 'absolute',
     top: -3,

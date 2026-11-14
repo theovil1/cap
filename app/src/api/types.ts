@@ -397,3 +397,6 @@ export type ProfileBadge = {
   /** Supporter level: 1 Soutien, 2 Grand soutien, 3 Mécène. */
   tier: number | null;
 };
+
+/** A walker to follow: a friend of my friends. */
+export type Suggestion = { walker: Walker; mutual_friends: number };

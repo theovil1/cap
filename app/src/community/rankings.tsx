@@ -1,8 +1,9 @@
 import { router } from 'expo-router';
+import { TrendingUp } from 'lucide-react-native';
 import type { TFunction } from 'i18next';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { countryName } from '@/i18n/countries';
 import { Flag } from '@/ui/flag';
@@ -14,10 +15,11 @@ import type {
   LeaderboardScope,
 } from '@/api/types';
 import { formatDate, formatKm, formatNumber, formatRank } from '@/i18n/format';
-import { useColors } from '@/theme';
+import { fonts, useColors } from '@/theme';
 import { type } from '@/tokens';
 import { MenuPill } from '@/ui/action-menu';
-import { Avatar, Card } from '@/ui/primitives';
+import { useWide } from '@/ui/layout';
+import { Avatar, Card, Figure } from '@/ui/primitives';
 import { RankCard, RankRow } from '@/ui/stats';
 
 const PERIODS: LeaderboardPeriod[] = ['week', 'month', 'all', 'streak'];
@@ -25,9 +27,10 @@ const SCOPES: LeaderboardScope[] = ['world', 'country', 'friends'];
 const SCOPE_ICONS = { world: 'globe.europe.africa', country: 'flag', friends: 'person.2' } as const;
 
 /** Rankings part of the Community tab: period and scope, my place, the list. */
-export function Rankings() {
+export function Rankings({ height }: { height?: number } = {}) {
   const { t } = useTranslation();
   const colors = useColors();
+  const wide = useWide();
   const [period, setPeriod] = useState<LeaderboardPeriod>('week');
   const [scope, setScope] = useState<LeaderboardScope>('world');
   const { data: board } = useLeaderboard(period, scope);
@@ -67,36 +70,156 @@ export function Rankings() {
     />
   );
   const delta = me && current?.previous_rank ? current.previous_rank - me.rank : 0;
+  const filters = (
+    <View style={styles.filters}>
+      <MenuPill
+        label={t(`rankings.${period}`)}
+        title={t('rankings.periodTitle')}
+        items={PERIODS.map((p) => ({
+          label: t(`rankings.${p}`),
+          checked: p === period,
+          onPress: () => setPeriod(p),
+        }))}
+      />
+      <MenuPill
+        label={t(`rankings.${scope}`)}
+        icon={
+          scope === 'country' && current?.country ? (
+            <Flag code={current.country} height={12} />
+          ) : undefined
+        }
+        title={t('rankings.scopeTitle')}
+        items={SCOPES.map((s) => ({
+          label: t(`rankings.${s}`),
+          icon: SCOPE_ICONS[s],
+          checked: s === scope,
+          onPress: () => setScope(s),
+        }))}
+      />
+    </View>
+  );
+  const myLine =
+    me && current
+      ? scope === 'friends'
+        ? hint(entries, period, t)
+        : t('rankings.top', {
+            percent: formatNumber(Math.max(1, Math.ceil((100 * me.rank) / current.total))),
+            value: `${value(me)} ${unit(me)}`,
+            period: t(`rankings.during.${period}`),
+          })
+      : '';
+
+  // iPad mockup: the podium of the first three in a card, the others and
+  // what it takes to move up on the right.
+  if (wide) {
+    const top = entries.slice(0, 3);
+    const rest = entries.slice(3);
+    const podium = [top[1], top[0], top[2]];
+    const bars = [250, 340, 180];
+    return (
+      <View style={[styles.wideRow, { minHeight: height }]}>
+        <Card style={styles.podiumCard}>
+          <View style={styles.podiumHead}>
+            <Text style={[styles.podiumSub, { color: colors.textSecondary }]} numberOfLines={1}>
+              {current ? subtitle(current, t) : ''}
+            </Text>
+            {filters}
+          </View>
+          <View style={styles.podium}>
+            {podium.map((entry, i) =>
+              entry ? (
+                <Pressable
+                  key={entry.user_id}
+                  style={styles.step}
+                  onPress={
+                    entry.me
+                      ? undefined
+                      : () =>
+                          router.push({ pathname: '/walker/[id]', params: { id: entry.user_id } })
+                  }
+                >
+                  <Avatar
+                    name={entry.first_name}
+                    seed={entry.user_id}
+                    photo={entry.avatar_url}
+                    tone={entry.me ? 'accent' : 'walker'}
+                    size={i === 1 ? 72 : 60}
+                  />
+                  <Text style={[styles.stepName, { color: colors.text }]} numberOfLines={1}>
+                    {entry.me ? t('rankings.you') : entry.first_name}
+                  </Text>
+                  <Figure value={value(entry)} unit={unit(entry)} size={24} unitSize={13} />
+                  <View
+                    style={[
+                      styles.bar,
+                      { height: bars[i], backgroundColor: i === 1 ? colors.accent : colors.inset },
+                    ]}
+                  >
+                    <Text
+                      style={[
+                        styles.barRank,
+                        { color: i === 1 ? colors.onAccent : colors.textSecondary },
+                      ]}
+                    >
+                      {entry.rank}
+                    </Text>
+                  </View>
+                </Pressable>
+              ) : (
+                <View key={i} style={styles.step} />
+              ),
+            )}
+          </View>
+        </Card>
+        <View style={styles.wideSide}>
+          {rest.length > 0 || (me && !top.some((e) => e.me)) ? (
+            <Card style={styles.restCard}>
+              {[...rest, ...(me && !entries.some((e) => e.me) ? [me] : [])].map((entry) => (
+                <Pressable
+                  key={entry.user_id}
+                  style={[styles.restRow, entry.me && { backgroundColor: colors.accentSoft }]}
+                  onPress={
+                    entry.me
+                      ? undefined
+                      : () =>
+                          router.push({ pathname: '/walker/[id]', params: { id: entry.user_id } })
+                  }
+                >
+                  <Text style={[styles.restRank, { color: colors.textSecondary }]}>
+                    {entry.rank}
+                  </Text>
+                  <Avatar
+                    name={entry.first_name}
+                    seed={entry.user_id}
+                    photo={entry.avatar_url}
+                    tone={entry.me ? 'accent' : 'walker'}
+                    size={42}
+                  />
+                  <Text style={[styles.restName, { color: colors.text }]} numberOfLines={1}>
+                    {entry.me ? t('rankings.you') : entry.first_name}
+                  </Text>
+                  <Figure value={value(entry)} unit={unit(entry)} size={20} unitSize={12} />
+                </Pressable>
+              ))}
+            </Card>
+          ) : null}
+          {myLine ? (
+            <View style={[styles.tip, { backgroundColor: colors.blueSoft }]}>
+              <View style={[styles.tipIcon, { backgroundColor: colors.blue }]}>
+                <TrendingUp size={22} color={colors.onBlue} />
+              </View>
+              <Text style={[styles.tipText, { color: colors.text }]}>{myLine}</Text>
+            </View>
+          ) : null}
+        </View>
+      </View>
+    );
+  }
 
   return (
     <>
       {/* Two menus on one line: the period and who I am ranked with. */}
-      <View style={styles.filters}>
-        <MenuPill
-          label={t(`rankings.${period}`)}
-          title={t('rankings.periodTitle')}
-          items={PERIODS.map((p) => ({
-            label: t(`rankings.${p}`),
-            checked: p === period,
-            onPress: () => setPeriod(p),
-          }))}
-        />
-        <MenuPill
-          label={t(`rankings.${scope}`)}
-          icon={
-            scope === 'country' && current?.country ? (
-              <Flag code={current.country} height={12} />
-            ) : undefined
-          }
-          title={t('rankings.scopeTitle')}
-          items={SCOPES.map((s) => ({
-            label: t(`rankings.${s}`),
-            icon: SCOPE_ICONS[s],
-            checked: s === scope,
-            onPress: () => setScope(s),
-          }))}
-        />
-      </View>
+      {filters}
       {current && (
         <Text style={[type.footnote, { color: colors.textSecondary }]}>{subtitle(current, t)}</Text>
       )}
@@ -105,15 +228,7 @@ export function Rankings() {
         <RankCard
           label={t(`rankings.myPlace.${scope}`, { country: countryName(current.country) })}
           place={formatRank(me.rank)}
-          detail={
-            scope === 'friends'
-              ? hint(entries, period, t)
-              : t('rankings.top', {
-                  percent: formatNumber(Math.max(1, Math.ceil((100 * me.rank) / current.total))),
-                  value: `${value(me)} ${unit(me)}`,
-                  period: t(`rankings.during.${period}`),
-                })
-          }
+          detail={myLine}
           delta={
             delta !== 0 ? `${delta > 0 ? '▲' : '▼'} ${formatNumber(Math.abs(delta))}` : undefined
           }
@@ -189,6 +304,62 @@ function hint(entries: LeaderboardEntry[], period: LeaderboardPeriod, t: T): str
 }
 
 const styles = StyleSheet.create({
+  wideRow: { flexDirection: 'row', gap: 20, alignItems: 'stretch' },
+  podiumCard: {
+    flex: 1.2,
+    borderRadius: 32,
+    paddingTop: 28,
+    paddingHorizontal: 32,
+    paddingBottom: 0,
+    gap: 10,
+  },
+  podiumHead: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    gap: 12,
+  },
+  podiumSub: { flexShrink: 1, fontFamily: fonts.text, fontSize: 14 },
+  podium: { flex: 1, flexDirection: 'row', alignItems: 'flex-end', gap: 18 },
+  step: { flex: 1, alignItems: 'center', gap: 10 },
+  stepName: { fontFamily: fonts.textSemiBold, fontSize: 16 },
+  bar: {
+    width: '100%',
+    borderTopLeftRadius: 22,
+    borderTopRightRadius: 22,
+    borderBottomLeftRadius: 10,
+    borderBottomRightRadius: 10,
+    alignItems: 'center',
+    paddingTop: 14,
+  },
+  barRank: { fontFamily: fonts.display, fontSize: 30 },
+  wideSide: { flex: 1, gap: 16 },
+  restCard: { borderRadius: 26, paddingVertical: 6, paddingHorizontal: 0 },
+  restRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+  },
+  restRank: { width: 20, fontFamily: fonts.display, fontSize: 18 },
+  restName: { flex: 1, fontFamily: fonts.textSemiBold, fontSize: 16 },
+  tip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
+    paddingVertical: 18,
+    paddingHorizontal: 20,
+    borderRadius: 24,
+  },
+  tipIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  tipText: { flex: 1, fontFamily: fonts.text, fontSize: 15, lineHeight: 21 },
   filters: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   list: { paddingVertical: 2 },
 });

@@ -30,7 +30,7 @@ import { fonts, useColors } from '@/theme';
 import { useBadgeName } from './profile-badges';
 import { WalkerAvatar } from './team';
 import { BravoButton, FeedAttachment, FeedCard } from '@/ui/feed';
-import { EmptyState } from '@/ui/layout';
+import { EmptyState, useWide } from '@/ui/layout';
 import { Badge } from '@/ui/badge';
 import { Medal } from '@/ui/medal';
 import { Avatar, Button, Card } from '@/ui/primitives';
@@ -154,6 +154,7 @@ function Attachment({ post }: { post: FeedPost }) {
 export function PostCard({ post, now }: { post: FeedPost; now: number }) {
   const { t } = useTranslation();
   const colors = useColors();
+  const wide = useWide();
   const bravo = useBravo();
   const edit = useEditPost();
   const remove = useDeletePost();
@@ -241,7 +242,11 @@ export function PostCard({ post, now }: { post: FeedPost; now: number }) {
       <FeedCard
         avatar={
           <Pressable onPress={() => walker(post.author.id)} accessibilityRole="link">
-            <WalkerAvatar walker={post.author} tone={post.mine ? 'accent' : 'walker'} size={40} />
+            <WalkerAvatar
+              walker={post.author}
+              tone={post.mine ? 'accent' : 'walker'}
+              size={wide ? 44 : 40}
+            />
           </Pressable>
         }
         name={post.author.first_name}

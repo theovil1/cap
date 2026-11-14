@@ -960,5 +960,12 @@
       "treadmill": "Treadmill",
       "start": "Start"
     }
+  },
+  "feedSide": {
+    "week": "This week",
+    "weekOf": "Friends · {{start}} to {{end}}",
+    "toFollow": "To follow",
+    "mutual_one": "{{n}} friend in common",
+    "mutual_other": "{{n}} friends in common"
   }
 }

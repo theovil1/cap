@@ -16,6 +16,7 @@ import Animated, {
 import { fonts, useColors } from '@/theme';
 import { radius, type } from '@/tokens';
 
+import { useWide } from './layout';
 import { Card } from './primitives';
 
 /** A few hearts that fly off when a Bravo is given. */
@@ -135,13 +136,17 @@ export function FeedCard({
   onComments?: () => void;
 }) {
   const colors = useColors();
+  const wide = useWide();
   return (
-    <Card style={styles.card}>
+    <Card style={[styles.card, wide && styles.cardWide]}>
       <View style={styles.header}>
         {avatar}
         <View style={styles.who}>
           <View style={styles.name}>
-            <Text style={[styles.nameText, { color: colors.text }]} numberOfLines={1}>
+            <Text
+              style={[styles.nameText, wide && styles.nameWide, { color: colors.text }]}
+              numberOfLines={1}
+            >
               {name}
             </Text>
             {badge}
@@ -151,7 +156,11 @@ export function FeedCard({
           </Text>
         </View>
       </View>
-      {text ? <Text style={[styles.text, { color: colors.text }]}>{text}</Text> : addText}
+      {text ? (
+        <Text style={[styles.text, wide && styles.textWide, { color: colors.text }]}>{text}</Text>
+      ) : (
+        addText
+      )}
       {attachment}
       <View style={styles.actions}>
         {bravo}
@@ -204,6 +213,10 @@ export function FeedAttachment({
 
 const styles = StyleSheet.create({
   card: { paddingVertical: 14, paddingHorizontal: 16, gap: 12 },
+  // iPad mockup: 26 round, 18 by 20 inside, 15.5 pt name, 15 pt words.
+  cardWide: { borderRadius: 26, paddingVertical: 18, paddingHorizontal: 20, gap: 14 },
+  nameWide: { fontSize: 15.5 },
+  textWide: { fontSize: 15, lineHeight: 22.5 },
   header: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   who: { flex: 1, minWidth: 0, gap: 1 },
   name: { flexDirection: 'row', alignItems: 'center', gap: 6 },

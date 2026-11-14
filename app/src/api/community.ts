@@ -10,6 +10,7 @@ import { api } from './client';
 import { keys as journeyKeys } from './queries';
 import type {
   Comment,
+  Suggestion,
   EventCard,
   FeedPost,
   JourneyDetail,
@@ -224,13 +225,24 @@ export function useProfile(id: string | undefined) {
   });
 }
 
+/** Friends of my friends to follow, the most shared friends first. */
+export function useSuggestions() {
+  return useQuery({
+    queryKey: ['suggestions'],
+    queryFn: () => api<Suggestion[]>('/users/suggestions'),
+  });
+}
+
 /** Follow (`true`) or stop following (`false`) a walker. */
 export function useFollow() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ id, on }: { id: string; on: boolean }) =>
       api<void>(`/users/${id}/follow`, { method: on ? 'POST' : 'DELETE' }),
-    onSuccess: (_, { id }) => queryClient.invalidateQueries({ queryKey: profileKeys.profile(id) }),
+    onSuccess: (_, { id }) => {
+      queryClient.invalidateQueries({ queryKey: profileKeys.profile(id) });
+      queryClient.invalidateQueries({ queryKey: ['suggestions'] });
+    },
   });
 }
 

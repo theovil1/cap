@@ -960,5 +960,12 @@
       "treadmill": "Tapis",
       "start": "Commencer"
     }
+  },
+  "feedSide": {
+    "week": "Cette semaine",
+    "weekOf": "Entre amis · du {{start}} au {{end}}",
+    "toFollow": "À suivre",
+    "mutual_one": "{{n}} ami en commun",
+    "mutual_other": "{{n}} amis en commun"
   }
 }

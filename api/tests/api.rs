@@ -1473,3 +1473,30 @@ async fn the_team_account_is_out_of_reach(db: PgPool) {
     assert_eq!(profile["walker"]["first_name"], "Équipe Cap");
     assert_eq!(profile["badges"][0]["kind"], "team");
 }
+
+#[sqlx::test(migrator = "cap_api::MIGRATOR")]
+async fn suggestions_are_friends_of_friends(db: PgPool) {
+    let server = server(db).await;
+    let theo = register(&server, "theo").await;
+    let lilou = register(&server, "lilou").await;
+    let marc = register(&server, "marc").await;
+    befriend(&server, &theo, &lilou).await;
+    befriend(&server, &lilou, &marc).await;
+
+    let list: Value =
+        server.get("/users/suggestions").add_header("authorization", bearer(&theo)).await.json();
+    assert_eq!(list[0]["walker"]["username"], "marc");
+    assert_eq!(list[0]["mutual_friends"], 1);
+    assert_eq!(list.as_array().unwrap().len(), 1);
+
+    // Followed walkers leave the list.
+    let marc_id = marc["user"]["id"].as_str().unwrap();
+    server
+        .post(&format!("/users/{marc_id}/follow"))
+        .add_header("authorization", bearer(&theo))
+        .await
+        .assert_status(StatusCode::NO_CONTENT);
+    let list: Value =
+        server.get("/users/suggestions").add_header("authorization", bearer(&theo)).await.json();
+    assert_eq!(list.as_array().unwrap().len(), 0);
+}
