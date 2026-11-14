@@ -80,7 +80,7 @@ export default function ExploreScreen() {
       </View>
       {/* iPad (Planifiés): the chips and the one-line intro share a row. */}
       <View style={wide && part === 'planned' ? styles.chipsWide : null}>
-        <ChipRow>
+        <ChipRow gutter={wide && part === 'planned' ? 0 : 19}>
           {part === 'routes'
             ? ROUTE_FILTERS.map((key) => (
                 <Chip
