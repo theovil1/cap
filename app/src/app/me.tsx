@@ -73,7 +73,8 @@ export default function MyProfileScreen() {
       date: formatDate(new Date(user.created_at), { month: 'long', year: 'numeric' }),
     }),
   ].join(' · ');
-  const home = [user.home_city, countryName(user.country)].filter(Boolean).join(', ');
+  // Only the country: the city stays private.
+  const home = countryName(user.country);
   const share = () =>
     Share.share({
       message: t('me.shareText', {

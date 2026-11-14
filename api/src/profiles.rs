@@ -64,7 +64,6 @@ pub struct PublicProfile {
     walker: Walker,
     /// Rarest first; only `certified` goes next to the name.
     badges: Vec<Badge>,
-    home_city: Option<String>,
     country: String,
     #[serde(with = "time::serde::rfc3339")]
     created_at: OffsetDateTime,
@@ -97,7 +96,7 @@ async fn get_profile(
 ) -> AppResult<Json<PublicProfile>> {
     let db = &state.db;
     let user = sqlx::query!(
-        "SELECT u.id, u.first_name, u.username, u.avatar_url, u.home_city, u.country, u.visibility, u.created_at,
+        "SELECT u.id, u.first_name, u.username, u.avatar_url, u.country, u.visibility, u.created_at,
                 COALESCE((SELECT sum(distance_m) FROM sessions WHERE user_id = u.id), 0) AS \"total_m!\",
                 (SELECT count(*) FROM follows WHERE followee_id = u.id) AS \"followers!\",
                 (SELECT count(*) FROM follows WHERE follower_id = u.id) AS \"following!\",
@@ -149,7 +148,6 @@ async fn get_profile(
             username: user.username,
             avatar_url: user.avatar_url,
         },
-        home_city: user.home_city,
         country: user.country,
         created_at: user.created_at,
         total_m: user.total_m,

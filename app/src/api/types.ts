@@ -308,7 +308,6 @@ export type PublicProfile = {
   walker: Walker;
   /** Rarest first; only `certified` goes next to the name. */
   badges: ProfileBadge[];
-  home_city: string | null;
   country: string;
   created_at: string;
   total_m: number;

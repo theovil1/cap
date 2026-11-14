@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT u.id, u.first_name, u.username, u.avatar_url, u.home_city, u.country, u.visibility, u.created_at,\n                COALESCE((SELECT sum(distance_m) FROM sessions WHERE user_id = u.id), 0) AS \"total_m!\",\n                (SELECT count(*) FROM follows WHERE followee_id = u.id) AS \"followers!\",\n                (SELECT count(*) FROM follows WHERE follower_id = u.id) AS \"following!\",\n                EXISTS (SELECT 1 FROM follows WHERE follower_id = $2 AND followee_id = u.id) AS \"i_follow!\",\n                EXISTS (SELECT 1 FROM follows WHERE follower_id = u.id AND followee_id = $2) AS \"follows_me!\",\n                (SELECT CASE WHEN f.status = 'accepted' THEN 'friend'\n                             WHEN f.user_id = $2 THEN 'outgoing' ELSE 'incoming' END\n                 FROM friendships f\n                 WHERE (f.user_id = $2 AND f.friend_id = u.id) OR (f.friend_id = $2 AND f.user_id = u.id)) AS relation,\n                (SELECT COALESCE(array_agg(DISTINCT (s.started_at AT TIME ZONE 'Europe/Paris')::date), '{}')\n                 FROM sessions s WHERE s.user_id = u.id AND s.source = 'treadmill') AS \"days!: Vec<Date>\",\n                (now() AT TIME ZONE 'Europe/Paris')::date AS \"today!\"\n         FROM users u WHERE u.id = $1",
+  "query": "SELECT u.id, u.first_name, u.username, u.avatar_url, u.country, u.visibility, u.created_at,\n                COALESCE((SELECT sum(distance_m) FROM sessions WHERE user_id = u.id), 0) AS \"total_m!\",\n                (SELECT count(*) FROM follows WHERE followee_id = u.id) AS \"followers!\",\n                (SELECT count(*) FROM follows WHERE follower_id = u.id) AS \"following!\",\n                EXISTS (SELECT 1 FROM follows WHERE follower_id = $2 AND followee_id = u.id) AS \"i_follow!\",\n                EXISTS (SELECT 1 FROM follows WHERE follower_id = u.id AND followee_id = $2) AS \"follows_me!\",\n                (SELECT CASE WHEN f.status = 'accepted' THEN 'friend'\n                             WHEN f.user_id = $2 THEN 'outgoing' ELSE 'incoming' END\n                 FROM friendships f\n                 WHERE (f.user_id = $2 AND f.friend_id = u.id) OR (f.friend_id = $2 AND f.user_id = u.id)) AS relation,\n                (SELECT COALESCE(array_agg(DISTINCT (s.started_at AT TIME ZONE 'Europe/Paris')::date), '{}')\n                 FROM sessions s WHERE s.user_id = u.id AND s.source = 'treadmill') AS \"days!: Vec<Date>\",\n                (now() AT TIME ZONE 'Europe/Paris')::date AS \"today!\"\n         FROM users u WHERE u.id = $1",
   "describe": {
     "columns": [
       {
@@ -49,17 +49,6 @@
       },
       {
         "ordinal": 4,
-        "name": "home_city",
-        "type_info": "Text",
-        "origin": {
-          "Table": {
-            "table": "users",
-            "name": "home_city"
-          }
-        }
-      },
-      {
-        "ordinal": 5,
         "name": "country",
         "type_info": "Text",
         "origin": {
@@ -70,7 +59,7 @@
         }
       },
       {
-        "ordinal": 6,
+        "ordinal": 5,
         "name": "visibility",
         "type_info": "Text",
         "origin": {
@@ -81,7 +70,7 @@
         }
       },
       {
-        "ordinal": 7,
+        "ordinal": 6,
         "name": "created_at",
         "type_info": "Timestamptz",
         "origin": {
@@ -92,49 +81,49 @@
         }
       },
       {
-        "ordinal": 8,
+        "ordinal": 7,
         "name": "total_m!",
         "type_info": "Float8",
         "origin": "Expression"
       },
       {
-        "ordinal": 9,
+        "ordinal": 8,
         "name": "followers!",
         "type_info": "Int8",
         "origin": "Expression"
       },
       {
-        "ordinal": 10,
+        "ordinal": 9,
         "name": "following!",
         "type_info": "Int8",
         "origin": "Expression"
       },
       {
-        "ordinal": 11,
+        "ordinal": 10,
         "name": "i_follow!",
         "type_info": "Bool",
         "origin": "Expression"
       },
       {
-        "ordinal": 12,
+        "ordinal": 11,
         "name": "follows_me!",
         "type_info": "Bool",
         "origin": "Expression"
       },
       {
-        "ordinal": 13,
+        "ordinal": 12,
         "name": "relation",
         "type_info": "Text",
         "origin": "Expression"
       },
       {
-        "ordinal": 14,
+        "ordinal": 13,
         "name": "days!: Vec<Date>",
         "type_info": "DateArray",
         "origin": "Expression"
       },
       {
-        "ordinal": 15,
+        "ordinal": 14,
         "name": "today!",
         "type_info": "Date",
         "origin": "Expression"
@@ -151,7 +140,6 @@
       false,
       false,
       true,
-      true,
       false,
       false,
       false,
@@ -165,5 +153,5 @@
       null
     ]
   },
-  "hash": "09b873358d06d8e7b364d4d0715a4f81ed69b8d466ca8ff78bab98d32070d2de"
+  "hash": "8fa6949299c1b82688fbc550e1b1c48fc0a38b4717cc9118ad7d5bccf7c64694"
 }

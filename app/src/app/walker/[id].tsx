@@ -73,7 +73,8 @@ function ProfileView({ profile }: { profile: PublicProfile }) {
       date: formatDate(new Date(profile.created_at), { month: 'long', year: 'numeric' }),
     }),
   ].join(' · ');
-  const home = [profile.home_city, countryName(profile.country)].filter(Boolean).join(', ');
+  // Only the country: the city stays private.
+  const home = countryName(profile.country);
 
   // A race needs friends: ask first, then the new journey picks them.
   const challenge = () => {
