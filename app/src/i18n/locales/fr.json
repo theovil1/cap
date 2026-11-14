@@ -513,7 +513,8 @@
       "mountain": "Montagne",
       "sea": "Bord de mer",
       "castles": "Châteaux"
-    }
+    },
+    "start": "Démarrer"
   },
   "arrival": {
     "done": "Trajet terminé",

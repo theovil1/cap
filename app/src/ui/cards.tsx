@@ -55,6 +55,8 @@ export function RouteCard({
   distance,
   walkers,
   onPress,
+  coverHeight,
+  action,
 }: {
   /** The picture, filling the 184 high top. */
   cover: ReactNode;
@@ -63,6 +65,68 @@ export function RouteCard({
   /** White words at the bottom of the picture: "Arrivée · Tours". */
   caption?: string;
   captionIcon?: LucideIcon;
+  title: string;
+  subtitle: string;
+  distance: string;
+  walkers?: string;
+  onPress: () => void;
+  /** iPad: a taller picture, given in points. */
+  coverHeight?: number;
+  /** iPad: a button next to the title ("Démarrer"). */
+  action?: ReactNode;
+}) {
+  const colors = useColors();
+  const shadows = useShadows();
+  return (
+    <Pressable
+      onPress={onPress}
+      accessibilityRole="button"
+      style={[
+        styles.hero,
+        { backgroundColor: colors.surface, borderColor: colors.border },
+        shadows.card,
+      ]}
+    >
+      <View style={[styles.heroCover, coverHeight ? { height: coverHeight } : null]}>
+        {cover}
+        <Grain on="picture" />
+        <Shade />
+        {caption ? (
+          <View style={styles.caption}>
+            {CaptionIcon ? <CaptionIcon size={14} color="#FFFFFF" strokeWidth={2.2} /> : null}
+            <Text style={styles.captionText}>{caption}</Text>
+          </View>
+        ) : null}
+        {tag ? <GlassTag label={tag} icon={tagIcon} style={styles.heroTag} /> : null}
+      </View>
+      <View style={[styles.heroBody, action ? styles.heroBodyAction : null]}>
+        <View style={styles.rowBody}>
+          <Text
+            style={[styles.heroTitle, action ? styles.heroTitleWide : null, { color: colors.text }]}
+          >
+            {title}
+          </Text>
+          <Text style={[type.footnote, { color: colors.textSecondary }]} numberOfLines={1}>
+            {subtitle}
+          </Text>
+          <RouteFacts distance={distance} walkers={walkers} />
+        </View>
+        {action}
+      </View>
+    </Pressable>
+  );
+}
+
+/** Route tile with its picture on top: the grid of "Les plus suivis" on iPad. */
+export function RouteTile({
+  cover,
+  title,
+  subtitle,
+  distance,
+  walkers,
+  onPress,
+}: {
+  cover: ReactNode;
   title: string;
   subtitle: string;
   distance: string;
@@ -81,20 +145,14 @@ export function RouteCard({
         shadows.card,
       ]}
     >
-      <View style={styles.heroCover}>
+      <View style={styles.tileCover}>
         {cover}
         <Grain on="picture" />
-        <Shade />
-        {caption ? (
-          <View style={styles.caption}>
-            {CaptionIcon ? <CaptionIcon size={14} color="#FFFFFF" strokeWidth={2.2} /> : null}
-            <Text style={styles.captionText}>{caption}</Text>
-          </View>
-        ) : null}
-        {tag ? <GlassTag label={tag} icon={tagIcon} style={styles.heroTag} /> : null}
       </View>
-      <View style={styles.heroBody}>
-        <Text style={[styles.heroTitle, { color: colors.text }]}>{title}</Text>
+      <View style={styles.tileBody}>
+        <Text style={[styles.rowTitle, { color: colors.text }]} numberOfLines={1}>
+          {title}
+        </Text>
         <Text style={[type.footnote, { color: colors.textSecondary }]} numberOfLines={1}>
           {subtitle}
         </Text>
@@ -269,6 +327,16 @@ export function LiveEventCard({
 const styles = StyleSheet.create({
   hero: { borderRadius: 26, borderWidth: 1, overflow: 'hidden', borderCurve: 'continuous' },
   heroCover: { height: 184, overflow: 'hidden' },
+  heroBodyAction: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+    paddingHorizontal: 22,
+    paddingVertical: 18,
+  },
+  heroTitleWide: { fontSize: 24, lineHeight: 28 },
+  tileCover: { height: 150, overflow: 'hidden' },
+  tileBody: { gap: 3, paddingTop: 12, paddingHorizontal: 14, paddingBottom: 14 },
   liveCover: { height: 150 },
   heroTag: { position: 'absolute', left: 12, top: 12 },
   caption: {

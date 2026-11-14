@@ -513,7 +513,8 @@
       "mountain": "Mountains",
       "sea": "Seaside",
       "castles": "Castles"
-    }
+    },
+    "start": "Start"
   },
   "arrival": {
     "done": "Journey done",

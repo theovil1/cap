@@ -228,9 +228,24 @@ function Gallery({
   );
 }
 
-function Body({ route }: { route: PublicRouteDetail }) {
+function Body({ route, wide = false }: { route: PublicRouteDetail; wide?: boolean }) {
   const { t } = useTranslation();
   const colors = useColors();
+  const tiles = (
+    <View style={styles.tiles}>
+      <StatTile
+        label={t('preview.distance')}
+        value={formatKm(route.distance_m, 0)}
+        unit={t('units.km')}
+      />
+      <StatTile label={t('publicRoute.walkers')} value={formatNumber(route.walkers)} />
+      <StatTile
+        label={t('publicRoute.finished')}
+        value={formatNumber(route.finished)}
+        unit={t('publicRoute.times', { count: route.finished })}
+      />
+    </View>
+  );
   return (
     <>
       {route.featured ? <Tag label={t('explore.ofTheWeek')} icon={Sparkles} /> : null}
@@ -253,24 +268,14 @@ function Body({ route }: { route: PublicRouteDetail }) {
           <Badge kind="certified" size={17} label={t('badges.names.certified')} />
         ) : null}
       </Pressable>
+      {/* iPad (mockup): the numbers first, then the words. */}
+      {wide ? tiles : null}
       {route.description ? (
         <Text style={[styles.description, { color: colors.textSecondary }]}>
           {route.description}
         </Text>
       ) : null}
-      <View style={styles.tiles}>
-        <StatTile
-          label={t('preview.distance')}
-          value={formatKm(route.distance_m, 0)}
-          unit={t('units.km')}
-        />
-        <StatTile label={t('publicRoute.walkers')} value={formatNumber(route.walkers)} />
-        <StatTile
-          label={t('publicRoute.finished')}
-          value={formatNumber(route.finished)}
-          unit={t('publicRoute.times', { count: route.finished })}
-        />
-      </View>
+      {wide ? null : tiles}
       <View style={styles.fastestHead}>
         <Text style={[styles.section, { color: colors.text }]}>{t('publicRoute.fastest')}</Text>
         <Text style={[styles.small, { color: colors.textSecondary }]}>
@@ -411,7 +416,7 @@ function Wide({ route }: { route: PublicRouteDetail }) {
         ]}
       >
         <ScrollView contentContainerStyle={styles.panelContent}>
-          <Body route={route} />
+          <Body route={route} wide />
         </ScrollView>
         <View style={styles.panelFooter}>
           <ActionBar route={route} />

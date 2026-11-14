@@ -9,9 +9,10 @@ import { useJourneys } from '@/api/queries';
 import type { PublicRouteCard } from '@/api/types';
 import { formatKm, formatNumber } from '@/i18n/format';
 import { useColors } from '@/theme';
-import { RouteCard, RouteRow } from '@/ui/cards';
+import { RouteCard, RouteRow, RouteTile } from '@/ui/cards';
 import { SectionHeader } from '@/ui/controls';
 import { EmptyState, useWide } from '@/ui/layout';
+import { Button } from '@/ui/primitives';
 
 import { RouteCover } from './route-cover';
 
@@ -83,6 +84,18 @@ export function RoutesExplorer({ search, filter }: { search: string; filter: Rou
       subtitle={subtitle(featured.data)}
       {...facts(featured.data)}
       onPress={() => featured.data && openRoute(featured.data)}
+      coverHeight={wide ? 470 : undefined}
+      action={
+        wide ? (
+          <Button
+            tone="accent"
+            size="medium"
+            title={t('explore.start')}
+            icon={<Flag size={17} color={colors.onAccent} />}
+            onPress={() => featured.data && openRoute(featured.data)}
+          />
+        ) : undefined
+      }
     />
   );
 
@@ -106,23 +119,35 @@ export function RoutesExplorer({ search, filter }: { search: string; filter: Rou
     );
   }
 
-  const rows = routes.map((route) => (
-    <View key={route.id} style={wide && styles.cell}>
-      <RouteRow
-        cover={<RouteCover photos={route.photos} place={route.end} zoom={13} small />}
-        title={route.title}
-        subtitle={subtitle(route)}
-        {...facts(route)}
-        onPress={() => openRoute(route)}
-      />
-    </View>
-  ));
+  const rows = routes.map((route) =>
+    wide ? (
+      <View key={route.id} style={styles.cell}>
+        <RouteTile
+          cover={<RouteCover photos={route.photos} place={route.end} zoom={13} small />}
+          title={route.title}
+          subtitle={subtitle(route)}
+          {...facts(route)}
+          onPress={() => openRoute(route)}
+        />
+      </View>
+    ) : (
+      <View key={route.id}>
+        <RouteRow
+          cover={<RouteCover photos={route.photos} place={route.end} zoom={13} small />}
+          title={route.title}
+          subtitle={subtitle(route)}
+          {...facts(route)}
+          onPress={() => openRoute(route)}
+        />
+      </View>
+    ),
+  );
 
   if (wide) {
     return (
       <View style={styles.wide}>
         {hero ? <View style={styles.heroWide}>{hero}</View> : null}
-        <View style={styles.listWide}>
+        <View style={[styles.listWide, !hero && styles.full]}>
           <SectionHeader title={t(`explore.lists.${filter}`)} />
           <View style={styles.grid}>{rows}</View>
         </View>
@@ -141,8 +166,11 @@ export function RoutesExplorer({ search, filter }: { search: string; filter: Rou
 const styles = StyleSheet.create({
   loading: { marginTop: 40 },
   wide: { flexDirection: 'row', gap: 20, alignItems: 'flex-start' },
+  // As in the iPad mockup: the route of the week on the left half, tiles on the right.
   heroWide: { flex: 1 },
   listWide: { flex: 1, gap: 12 },
-  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
-  cell: { width: '48%', flexGrow: 1 },
+  full: { flex: 1 },
+  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 14 },
+  // Two tiles a row, three when the list has the whole width.
+  cell: { flexBasis: 240, flexGrow: 1, maxWidth: '50%' },
 });

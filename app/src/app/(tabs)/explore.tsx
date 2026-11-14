@@ -2,7 +2,7 @@ import { router } from 'expo-router';
 import { Plus } from 'lucide-react-native';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActionSheetIOS, Text } from 'react-native';
+import { ActionSheetIOS, StyleSheet, Text, View } from 'react-native';
 
 import { useEvents, type EventFilter } from '@/api/community';
 import { EVENT_FILTERS, EventsExplorer } from '@/community/events-explorer';
@@ -10,7 +10,7 @@ import { ROUTE_FILTERS, RoutesExplorer, type RouteFilter } from '@/community/rou
 import { useColors } from '@/theme';
 import { type } from '@/tokens';
 import { Chip, ChipRow, SearchBar, Tabs } from '@/ui/controls';
-import { ScreenHeader, TabScreen } from '@/ui/layout';
+import { ScreenHeader, TabScreen, useWide } from '@/ui/layout';
 import { RoundButton } from '@/ui/primitives';
 
 type Part = 'routes' | 'planned';
@@ -19,6 +19,7 @@ type Part = 'routes' | 'planned';
 export default function ExploreScreen() {
   const { t } = useTranslation();
   const colors = useColors();
+  const wide = useWide();
   const [part, setPart] = useState<Part>('routes');
   const [routeFilter, setRouteFilter] = useState<RouteFilter>('popular');
   const [plannedFilter, setPlannedFilter] = useState<EventFilter>('all');
@@ -49,19 +50,26 @@ export default function ExploreScreen() {
           label={t('explore.add')}
         />
       </ScreenHeader>
-      <Tabs
-        options={[
-          { value: 'routes', label: t('explore.routes') },
-          { value: 'planned', label: t('explore.planned'), dot: live },
-        ]}
-        value={part}
-        onChange={setPart}
-      />
-      <SearchBar
-        value={search}
-        onChangeText={setSearch}
-        placeholder={t(part === 'routes' ? 'explore.searchRoutes' : 'explore.searchPlanned')}
-      />
+      {/* iPad: the two parts and the search side by side, as in the mockup. */}
+      <View style={wide ? styles.bar : styles.stack}>
+        <View style={wide ? styles.parts : null}>
+          <Tabs
+            options={[
+              { value: 'routes', label: t('explore.routes') },
+              { value: 'planned', label: t('explore.planned'), dot: live },
+            ]}
+            value={part}
+            onChange={setPart}
+          />
+        </View>
+        <View style={wide ? styles.flex : null}>
+          <SearchBar
+            value={search}
+            onChangeText={setSearch}
+            placeholder={t(part === 'routes' ? 'explore.searchRoutes' : 'explore.searchPlanned')}
+          />
+        </View>
+      </View>
       <ChipRow>
         {part === 'routes'
           ? ROUTE_FILTERS.map((key) => (
@@ -94,3 +102,10 @@ export default function ExploreScreen() {
     </TabScreen>
   );
 }
+
+const styles = StyleSheet.create({
+  stack: { gap: 12 },
+  bar: { flexDirection: 'row', alignItems: 'center', gap: 14 },
+  parts: { width: 300 },
+  flex: { flex: 1 },
+});
