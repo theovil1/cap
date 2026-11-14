@@ -37,10 +37,10 @@ pub struct CreateRoute {
 
 #[derive(Serialize, ToSchema)]
 pub struct RouteDetail {
-    id: Uuid,
+    pub(crate) id: Uuid,
     start: Place,
     end: Place,
-    distance_m: f64,
+    pub(crate) distance_m: f64,
     /// Route geometry: `[lon, lat, cumulative_m]` points.
     #[schema(value_type = Vec<[f64; 3]>)]
     path: serde_json::Value,
@@ -142,14 +142,25 @@ async fn create_route(
     AuthUser(user_id): AuthUser,
     Json(body): Json<CreateRoute>,
 ) -> AppResult<(StatusCode, Json<RouteDetail>)> {
+    Ok((StatusCode::CREATED, Json(compute_route(&state, user_id, body.start, body.end).await?)))
+}
+
+/// Compute a walking route and its stages, saved in the name of `user_id`.
+pub async fn compute_route(
+    state: &AppState,
+    user_id: Uuid,
+    start: Place,
+    end: Place,
+) -> AppResult<RouteDetail> {
+    let body = CreateRoute { start, end };
     for place in [&body.start, &body.end] {
         let valid = (-90.0..=90.0).contains(&place.lat) && (-180.0..=180.0).contains(&place.lon);
         if !valid || place.label.trim().is_empty() || place.label.len() > 300 {
             return Err(AppError::bad_request("invalid_place", "invalid start or destination"));
         }
     }
-    let route = geo::walking_route(&state, &body.start, &body.end).await?;
-    let stages = stages::find_stages(&state, &route.path).await?;
+    let route = geo::walking_route(state, &body.start, &body.end).await?;
+    let stages = stages::find_stages(state, &route.path).await?;
     let path = serde_json::to_value(&route.path).map_err(AppError::internal)?;
 
     let route_id = Uuid::now_v7();
@@ -192,10 +203,7 @@ async fn create_route(
 
     let start = Place { label: body.start.label.trim().to_owned(), ..body.start };
     let end = Place { label: body.end.label.trim().to_owned(), ..body.end };
-    Ok((
-        StatusCode::CREATED,
-        Json(RouteDetail { id: route_id, start, end, distance_m: route.distance_m, path, stages }),
-    ))
+    Ok(RouteDetail { id: route_id, start, end, distance_m: route.distance_m, path, stages })
 }
 
 /// Start a solo journey on a route computed by the current user.

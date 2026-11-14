@@ -1439,3 +1439,23 @@ async fn notes_in_the_feed(db: PgPool) {
         .await
         .assert_status(StatusCode::BAD_REQUEST);
 }
+
+#[sqlx::test(migrator = "cap_api::MIGRATOR")]
+async fn the_team_account_is_out_of_reach(db: PgPool) {
+    let server = server(db).await;
+    let theo = register(&server, "theo").await;
+    // Nobody can befriend it, and it has no way to sign in.
+    server
+        .post("/friends")
+        .add_header("authorization", bearer(&theo))
+        .json(&json!({ "username": "cap" }))
+        .await
+        .assert_status(StatusCode::NOT_FOUND);
+    let profile: Value = server
+        .get("/users/00000000-0000-0000-0000-000000000ca9/profile")
+        .add_header("authorization", bearer(&theo))
+        .await
+        .json();
+    assert_eq!(profile["walker"]["first_name"], "Équipe Cap");
+    assert_eq!(profile["badges"][0]["kind"], "team");
+}

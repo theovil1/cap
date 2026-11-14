@@ -135,7 +135,7 @@ async fn add_friend(
     let by_invite = body.invite_code.is_some();
     let target = match (body.username, body.invite_code) {
         (Some(username), None) => sqlx::query!(
-            "SELECT id, first_name, username, avatar_url FROM users WHERE username = $1",
+            "SELECT id, first_name, username, avatar_url FROM users WHERE username = $1 AND NOT is_system",
             username.trim().to_lowercase()
         )
         .fetch_optional(&state.db)
