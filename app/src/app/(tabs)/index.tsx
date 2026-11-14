@@ -1,7 +1,8 @@
 import { router } from 'expo-router';
 import { Bluetooth, Flame, Footprints, Plus, Route as RouteIcon } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useAuth } from '@/api/auth';
 import { useActiveJourney } from '@/api/queries';
@@ -32,6 +33,10 @@ export default function HomeScreen() {
   const strideM = (user?.stride_cm ?? 70) / 100;
   const leftSteps = Math.max(0, goal - stats.todaySteps);
   const { detail } = useActiveJourney();
+  const { height } = useWindowDimensions();
+  const insets = useSafeAreaInsets();
+  // iPad: the journey and the cards fill the screen under the title, as in the mockup.
+  const rowHeight = height - (insets.top + 2) - 54 - 20 - (insets.bottom + 32);
 
   return (
     <TabScreen>
@@ -61,43 +66,64 @@ export default function HomeScreen() {
         </View>
       )}
 
-      <View style={[styles.columns, wide && styles.columnsWide]}>
+      <View style={[styles.columns, wide && styles.columnsWide, wide && { minHeight: rowHeight }]}>
         <View style={[styles.column, wide && styles.mapColumn]}>
           <JourneyCard walkingM={live?.distanceM ?? 0} />
         </View>
-        <View style={[styles.column, wide && { flex: 1 }]}>
-          <View style={styles.row}>
-            <Card style={[styles.small, { flex: 1.15 }]}>
-              <Label>{t('home.dailyGoal')}</Label>
-              <View style={styles.goal}>
-                <Ring
-                  ratio={stats.todaySteps / goal}
-                  label={`${formatNumber(Math.min(999, (100 * stats.todaySteps) / goal))} %`}
-                />
-                <View style={styles.goalFigure}>
-                  <Figure value={formatNumber(stats.todaySteps)} size={21} />
-                  <Text style={[styles.caption, { color: colors.textSecondary }]}>
-                    {t('home.ofSteps', { goal: formatNumber(goal) })}
+        <View style={[styles.column, wide && styles.sideColumn]}>
+          <View style={[styles.row, wide && styles.rowWide]}>
+            <Card style={[styles.small, wide ? styles.smallWide : { flex: 1.15 }]}>
+              <Label style={wide && styles.labelWide}>{t('home.dailyGoal')}</Label>
+              {wide ? (
+                <>
+                  <Ring
+                    ratio={stats.todaySteps / goal}
+                    label={`${formatNumber(Math.min(999, (100 * stats.todaySteps) / goal))} %`}
+                    size={104}
+                    labelSize={20}
+                  />
+                  <Text style={[styles.goalLine, { color: colors.textSecondary }]}>
+                    <Text style={[styles.strong, { color: colors.text }]}>
+                      {formatNumber(stats.todaySteps)}
+                    </Text>{' '}
+                    {t('home.ofStepsShort', { goal: formatNumber(goal) })}
                   </Text>
+                </>
+              ) : (
+                <View style={styles.goal}>
+                  <Ring
+                    ratio={stats.todaySteps / goal}
+                    label={`${formatNumber(Math.min(999, (100 * stats.todaySteps) / goal))} %`}
+                  />
+                  <View style={styles.goalFigure}>
+                    <Figure value={formatNumber(stats.todaySteps)} size={21} />
+                    <Text style={[styles.caption, { color: colors.textSecondary }]}>
+                      {t('home.ofSteps', { goal: formatNumber(goal) })}
+                    </Text>
+                  </View>
                 </View>
-              </View>
+              )}
               {/* Under the ring, on the whole width of the card, so nothing gets cut. */}
-              <Text style={[styles.caption, styles.strong, { color: colors.accentText }]}>
-                {leftSteps > 0
-                  ? t('home.stillKm', { km: formatKm(leftSteps * strideM) })
-                  : t('home.goalReached')}
-              </Text>
+              {wide ? null : (
+                <Text style={[styles.caption, styles.strong, { color: colors.accentText }]}>
+                  {leftSteps > 0
+                    ? t('home.stillKm', { km: formatKm(leftSteps * strideM) })
+                    : t('home.goalReached')}
+                </Text>
+              )}
             </Card>
-            <Card style={[styles.small, { flex: 1 }]}>
+            <Card style={[styles.small, wide ? styles.smallWide : { flex: 1 }]}>
               <View style={styles.inline}>
                 <Flame size={15} color={colors.accentText} strokeWidth={2.2} />
-                <Label>{t('home.streak')}</Label>
+                <Label style={wide && styles.labelWide}>{t('home.streak')}</Label>
               </View>
               <Figure
                 value={String(stats.streak)}
                 unit={t('home.days', { count: stats.streak })}
-                size={34}
+                size={wide ? 52 : 34}
+                unitSize={wide ? 16 : undefined}
               />
+              {wide ? <View style={styles.grow} /> : null}
               {/* This week, Monday first: today is dashed until walked, days to come are faint. */}
               <View style={styles.dots}>
                 {stats.weekM.map((metres, i) => {
@@ -107,6 +133,7 @@ export default function HomeScreen() {
                       <View
                         style={[
                           styles.dot,
+                          wide && styles.dotWide,
                           metres > 0
                             ? { backgroundColor: colors.accent }
                             : today
@@ -132,7 +159,7 @@ export default function HomeScreen() {
                   );
                 })}
               </View>
-              <Text style={[styles.record, { color: colors.textMuted }]}>
+              <Text style={[styles.record, wide && styles.recordWide, { color: colors.textMuted }]}>
                 {t('home.record', { count: stats.bestStreak })}
               </Text>
             </Card>
@@ -184,7 +211,7 @@ function JourneyCard({ walkingM }: { walkingM: number }) {
 
   return (
     <Pressable onPress={() => router.push('/session')} style={wide && styles.grow}>
-      <Card style={[styles.journey, wide && styles.grow]}>
+      <Card style={[styles.journey, wide && styles.journeyWide, wide && styles.grow]}>
         <View style={[styles.mapBox, wide && styles.grow]}>
           {detail && (
             <RouteMap
@@ -196,22 +223,35 @@ function JourneyCard({ walkingM }: { walkingM: number }) {
               style={StyleSheet.absoluteFill}
             />
           )}
-          <Glass style={styles.chip}>
-            <RouteIcon size={15} color={colors.accent} strokeWidth={2.2} />
-            <Text style={[styles.chipText, { color: colors.text }]}>{t('home.activeJourney')}</Text>
+          <Glass style={[styles.chip, wide && styles.chipWide]}>
+            <RouteIcon size={wide ? 16 : 15} color={colors.accent} strokeWidth={2.2} />
+            <Text style={[styles.chipText, wide && styles.chipTextWide, { color: colors.text }]}>
+              {t('home.activeJourney')}
+            </Text>
           </Glass>
         </View>
-        <View style={styles.cardBody}>
-          <View style={styles.titleRow}>
+        <View style={[styles.cardBody, wide && styles.cardBodyWide]}>
+          <View style={[styles.titleRow, wide && styles.titleRowWide]}>
             <View style={{ flex: 1, gap: 4 }}>
               <Text
-                style={[styles.journeyTitle, { color: colors.text }]}
+                style={[
+                  styles.journeyTitle,
+                  wide && styles.journeyTitleWide,
+                  { color: colors.text },
+                ]}
                 numberOfLines={1}
                 adjustsFontSizeToFit
               >
                 {journeyTitle(summary)}
               </Text>
-              <Text style={[styles.caption, { color: colors.textSecondary }]} numberOfLines={1}>
+              <Text
+                style={[
+                  styles.caption,
+                  wide && styles.captionWide,
+                  { color: colors.textSecondary },
+                ]}
+                numberOfLines={1}
+              >
                 <Text style={[styles.strong, { color: colors.text }]}>{formatKm(walked)}</Text>{' '}
                 {t('home.ofKm', { total: formatKm(total, 0) })}
                 {stage ? ` · ${t('home.stageIn', { km: formatKm(stage.at_m - walked) })}` : ''}
@@ -220,11 +260,12 @@ function JourneyCard({ walkingM }: { walkingM: number }) {
             <Figure
               value={formatNumber(Math.floor((100 * walked) / total))}
               unit="%"
-              size={32}
+              size={wide ? 52 : 32}
+              unitSize={wide ? 24 : undefined}
               color={colors.accentText}
             />
           </View>
-          <ProgressBar ratio={walked / total} marks={marks} height={9} />
+          <ProgressBar ratio={walked / total} marks={marks} height={wide ? 12 : 9} />
         </View>
       </Card>
     </Pressable>
@@ -237,15 +278,17 @@ function TreadmillBanner() {
   const { connection, live } = useSession();
   const connected = connection.status === 'connected';
   const name = connection.deviceName ?? t('treadmill.unknownName');
+  const wide = useWide();
   return (
     <Pressable
       onPress={() => router.push('/session')}
       style={[
         styles.banner,
+        wide && styles.bannerWide,
         { backgroundColor: connected ? colors.bluetooth : colors.textSecondary },
       ]}
     >
-      <View style={styles.bannerIcon}>
+      <View style={[styles.bannerIcon, wide && styles.bannerIconWide]}>
         {connected ? (
           <Footprints size={21} color={colors.onBluetooth} />
         ) : (
@@ -254,7 +297,11 @@ function TreadmillBanner() {
       </View>
       <View style={{ flex: 1, gap: 1 }}>
         <Text
-          style={[styles.bannerTitle, connected && { color: colors.onBluetooth }]}
+          style={[
+            styles.bannerTitle,
+            wide && styles.bannerTitleWide,
+            connected && { color: colors.onBluetooth },
+          ]}
           numberOfLines={1}
         >
           {connected
@@ -262,7 +309,11 @@ function TreadmillBanner() {
             : t(`treadmill.status.${connection.status}`, { name })}
         </Text>
         <Text
-          style={[styles.bannerText, connected && { color: colors.onBluetooth, opacity: 0.85 }]}
+          style={[
+            styles.bannerText,
+            wide && styles.bannerTextWide,
+            connected && { color: colors.onBluetooth, opacity: 0.85 },
+          ]}
           numberOfLines={1}
         >
           {live
@@ -287,10 +338,29 @@ const styles = StyleSheet.create({
   date: { fontFamily: fonts.textMedium, fontSize: 14, textTransform: 'capitalize' },
   hello: { fontFamily: fonts.display, fontSize: 31, lineHeight: 33, letterSpacing: -0.9 },
   columns: { gap: 12 },
-  columnsWide: { flexDirection: 'row', alignItems: 'stretch' },
-  mapColumn: { flex: 1.3 },
+  // iPad mockup: 680 for the journey, the rest for the cards, 20 apart.
+  columnsWide: { flexDirection: 'row', alignItems: 'stretch', gap: 20 },
+  mapColumn: { flex: 680 },
+  sideColumn: { flex: 430, gap: 16 },
+  rowWide: { gap: 16 },
+  smallWide: { flex: 1, padding: 18, gap: 12, borderRadius: 26 },
+  labelWide: { fontSize: 14 },
+  goalLine: { fontFamily: fonts.text, fontSize: 13, fontVariant: ['tabular-nums'] },
+  dotWide: { width: 16, height: 16 },
+  recordWide: { fontSize: 12.5 },
+  cardBodyWide: { gap: 16, paddingHorizontal: 26, paddingVertical: 22 },
+  titleRowWide: { alignItems: 'flex-end' },
+  journeyTitleWide: { fontSize: 30, letterSpacing: -0.6 },
+  captionWide: { fontSize: 15 },
+  chipWide: { left: 18, top: 18, height: 34, paddingHorizontal: 14, gap: 7 },
+  chipTextWide: { fontSize: 14 },
+  bannerWide: { paddingVertical: 16, paddingHorizontal: 18, borderRadius: 24, gap: 14 },
+  bannerIconWide: { width: 44, height: 44, borderRadius: 14 },
+  bannerTitleWide: { fontSize: 16 },
+  bannerTextWide: { fontSize: 13.5 },
   grow: { flex: 1 },
   journey: { overflow: 'hidden', borderRadius: 28 },
+  journeyWide: { borderRadius: 32 },
   column: { gap: 12 },
   row: { flexDirection: 'row', gap: 12 },
   small: { padding: 14, gap: 10 },

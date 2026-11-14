@@ -4,9 +4,20 @@ import Svg, { Circle, Defs, LinearGradient, Path, Stop } from 'react-native-svg'
 import { fonts, useColors } from '@/theme';
 
 /** Daily goal ring (home screen). */
-export function Ring({ ratio, size = 66, label }: { ratio: number; size?: number; label: string }) {
+export function Ring({
+  ratio,
+  size = 66,
+  label,
+  labelSize = 15,
+}: {
+  ratio: number;
+  size?: number;
+  label: string;
+  labelSize?: number;
+}) {
   const colors = useColors();
-  const stroke = 9;
+  // 9 at the phone's 66, 14 at the iPad's 104.
+  const stroke = Math.round(size * 0.136);
   const r = (size - stroke) / 2;
   const length = 2 * Math.PI * r;
   const shown = Math.max(0, Math.min(1, ratio));
@@ -39,7 +50,7 @@ export function Ring({ ratio, size = 66, label }: { ratio: number; size?: number
         <Text
           style={{
             fontFamily: fonts.display,
-            fontSize: 15,
+            fontSize: labelSize,
             color: colors.text,
             fontVariant: ['tabular-nums'],
           }}

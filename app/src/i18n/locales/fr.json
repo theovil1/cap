@@ -82,7 +82,8 @@
     "walking": "{{name}} marche",
     "raceToLead": "{{km}} {{unit}} pour prendre la tête",
     "raceAhead": "{{km}} {{unit}} d'avance",
-    "thisWeek": "Cette semaine"
+    "thisWeek": "Cette semaine",
+    "ofStepsShort": "/ {{goal}} pas"
   },
   "journeys": {
     "title": "Mes trajets",
@@ -384,7 +385,8 @@
     "notStarted": "Pas encore parti",
     "leader": "Leader",
     "rule": "Le premier arrivé à {{place}} gagne. Les positions bougent en direct.",
-    "shareText": "Je suis {{place}} sur {{count}} dans la course {{title}} sur Cap."
+    "shareText": "Je suis {{place}} sur {{count}} dans la course {{title}} sur Cap.",
+    "fromLeader": "−{{km}} km du leader"
   },
   "ago": {
     "now": "À l'instant",

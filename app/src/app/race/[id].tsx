@@ -62,17 +62,17 @@ export default function RaceScreen() {
       style={[
         styles.panel,
         { backgroundColor: colors.surface },
-        wide && [
-          styles.panelWide,
-          shadows.floating,
-          { top: insets.top + 20, bottom: insets.bottom + 20 },
-        ],
+        wide && [styles.panelWide, shadows.floating, { top: 20, bottom: 20 }],
       ]}
-      contentContainerStyle={{ gap: 16, paddingBottom: wide ? 26 : insets.bottom + 24 }}
+      contentContainerStyle={
+        wide
+          ? { flexGrow: 1, gap: 18, paddingBottom: 26 }
+          : { gap: 16, paddingBottom: insets.bottom + 24 }
+      }
     >
       {wide && (
-        <View style={{ gap: 4 }}>
-          <Text style={[styles.kicker, { color: colors.textSecondary, fontSize: 13 }]}>
+        <View style={{ gap: 4, paddingHorizontal: 8 }}>
+          <Text style={[styles.kicker, styles.kickerWide, { color: colors.textSecondary }]}>
             {kicker}
           </Text>
           <Text style={[styles.wideTitle, { color: colors.text }]} numberOfLines={2}>
@@ -101,7 +101,7 @@ export default function RaceScreen() {
           padding={{ top: insets.top + 90, bottom: 60, left: 40, right: wide ? 470 : 40 }}
           style={StyleSheet.absoluteFill}
         />
-        <View style={[styles.top, { top: insets.top + 12 }]}>
+        <View style={[styles.top, wide ? { top: 28, left: 28 } : { top: insets.top + 12 }]}>
           <GlassButton
             icon={<ChevronLeft size={22} color={colors.text} />}
             onPress={() => router.back()}
@@ -233,10 +233,31 @@ function Standings({ race, list, me }: { race: JourneyDetail; list: Racer[]; me?
   const total = race.route_distance_m;
   const marks = list.filter((r) => !r.me).map((r) => r.distanceM / total);
   const destination = race.end_town ?? race.end.label;
+  const wide = useWide();
 
   return (
     <>
-      {me && (
+      {/* iPad mockup: "2 sur 3 · −2,4 km du leader" on one line, then the bar. */}
+      {me && wide ? (
+        <View style={styles.positionWide}>
+          <Text style={[styles.place, styles.placeWide, { color: colors.text }]}>
+            {formatNumber(me.place)}
+          </Text>
+          <Text style={[styles.placeOf, { color: colors.textSecondary }]}>
+            {t('race.of', { count: list.length })}
+          </Text>
+          <Text style={[styles.gap, styles.gapWide, { color: colors.text }]} numberOfLines={1}>
+            {me.arrivedAt
+              ? t('race.arrived', { place: formatRank(me.place) })
+              : me.place > 1
+                ? t('race.fromLeader', { km: formatKm(leader.distanceM - me.distanceM) })
+                : list.length > 1
+                  ? t('race.ahead', { km: formatKm(me.distanceM - (list[1]?.distanceM ?? 0)) })
+                  : ''}
+          </Text>
+        </View>
+      ) : null}
+      {me && !wide && (
         <View style={styles.position}>
           <View>
             <Text style={[styles.caption, { color: colors.textSecondary }]}>
@@ -282,19 +303,35 @@ function Standings({ race, list, me }: { race: JourneyDetail; list: Racer[]; me?
           </View>
         </View>
       )}
-      {me && <ProgressBar ratio={me.distanceM / total} marks={marks} />}
+      {me && (
+        <View style={wide && styles.inset}>
+          <ProgressBar ratio={me.distanceM / total} marks={marks} height={wide ? 10 : 8} />
+        </View>
+      )}
 
-      <View style={{ gap: 6 }}>
+      <View style={{ gap: wide ? 4 : 6 }}>
         {list.map((r) => (
           <View
             key={r.userId}
-            style={[styles.racer, r.me && { backgroundColor: colors.accentSoft }]}
+            style={[
+              styles.racer,
+              wide && styles.racerWide,
+              r.me && { backgroundColor: colors.accentSoft },
+            ]}
           >
-            <Text style={[styles.racerPlace, { color: colors.textSecondary }]}>{r.place}</Text>
+            <Text
+              style={[
+                styles.racerPlace,
+                wide && styles.racerPlaceWide,
+                { color: colors.textSecondary },
+              ]}
+            >
+              {r.place}
+            </Text>
             <View>
               <Avatar
                 name={r.firstName}
-                size={44}
+                size={wide ? 46 : 44}
                 tone={r.me ? 'accent' : r.distanceM > (me?.distanceM ?? 0) ? 'other' : 'plain'}
               />
               {r.arrivedAt && r.place === 1 && (
@@ -303,19 +340,27 @@ function Standings({ race, list, me }: { race: JourneyDetail; list: Racer[]; me?
                 </View>
               )}
             </View>
-            <View style={{ flex: 1, gap: 2 }}>
+            <View style={{ flex: 1, gap: wide ? 3 : 2 }}>
               <Text style={[styles.name, { color: colors.text }]} numberOfLines={1}>
                 {r.me ? t('rankings.you') : r.firstName}
               </Text>
               {r.speedKmh !== null ? (
                 <View style={styles.inline}>
                   <View style={[styles.liveDot, { backgroundColor: colors.success }]} />
-                  <Text style={[styles.status, { color: colors.success }]}>
+                  <Text
+                    style={[styles.status, wide && styles.statusWide, { color: colors.success }]}
+                  >
                     {t('race.live', { speed: formatSpeed(r.speedKmh) })}
                   </Text>
                 </View>
               ) : (
-                <Text style={[styles.status, { color: colors.textSecondary }]}>
+                <Text
+                  style={[
+                    styles.status,
+                    wide && styles.statusWide,
+                    { color: colors.textSecondary },
+                  ]}
+                >
                   {r.arrivedAt
                     ? t('race.arrivedOn', { when: formatAgo(r.arrivedAt, now) })
                     : r.lastSessionAt
@@ -324,12 +369,23 @@ function Standings({ race, list, me }: { race: JourneyDetail; list: Racer[]; me?
                 </Text>
               )}
             </View>
-            <View style={{ alignItems: 'flex-end' }}>
-              <Text style={[styles.km, { color: colors.text }]}>
+            <View style={{ alignItems: 'flex-end', gap: wide ? 2 : 0 }}>
+              <Text style={[styles.km, wide && styles.kmWide, { color: colors.text }]}>
                 {formatKm(r.distanceM)}
-                <Text style={[styles.unit, { color: colors.textSecondary }]}> {t('units.km')}</Text>
+                <Text
+                  style={[styles.unit, wide && styles.unitWide, { color: colors.textSecondary }]}
+                >
+                  {' '}
+                  {t('units.km')}
+                </Text>
               </Text>
-              <Text style={[styles.status, { color: colors.textSecondary }]}>
+              <Text
+                style={[
+                  styles.status,
+                  wide && styles.unitWide,
+                  { color: wide ? colors.textMuted : colors.textSecondary },
+                ]}
+              >
                 {r.place === 1
                   ? t('race.leader')
                   : `−${formatKm(leader.distanceM - r.distanceM)} ${t('units.km')}`}
@@ -338,7 +394,8 @@ function Standings({ race, list, me }: { race: JourneyDetail; list: Racer[]; me?
           </View>
         ))}
       </View>
-      <Text style={[styles.footer, { color: colors.textMuted }]}>
+      {wide ? <View style={{ flex: 1 }} /> : null}
+      <Text style={[styles.footer, wide && styles.footerWide, { color: colors.textMuted }]}>
         {t('race.rule', { place: destination })}
       </Text>
     </>
@@ -395,11 +452,27 @@ const styles = StyleSheet.create({
     flex: 0,
     marginTop: 0,
     paddingTop: 26,
-    paddingHorizontal: 24,
-    borderRadius: 30,
+    paddingHorizontal: 18,
+    borderRadius: 34,
     borderCurve: 'continuous',
   },
-  wideTitle: { fontFamily: fonts.display, fontSize: 26, letterSpacing: -0.6 },
+  wideTitle: { fontFamily: fonts.display, fontSize: 26, letterSpacing: -0.52 },
+  kickerWide: { fontSize: 14, fontFamily: fonts.textSemiBold },
+  inset: { paddingHorizontal: 8 },
+  positionWide: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    gap: 10,
+    paddingHorizontal: 8,
+  },
+  placeWide: { fontSize: 72, letterSpacing: -2.5, lineHeight: 70 },
+  gapWide: { flexShrink: 1, textAlign: 'left' },
+  racerWide: { gap: 14, paddingHorizontal: 16, paddingVertical: 14, borderRadius: 22 },
+  racerPlaceWide: { width: 20, fontSize: 19 },
+  statusWide: { fontSize: 13 },
+  kmWide: { fontSize: 22 },
+  unitWide: { fontSize: 12 },
+  footerWide: { fontSize: 13, textAlign: 'left', marginTop: 0, paddingHorizontal: 8 },
   heading: { fontFamily: fonts.display, fontSize: 24 },
   caption: { fontFamily: fonts.text, fontSize: 13, lineHeight: 18 },
   position: {

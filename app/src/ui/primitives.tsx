@@ -127,12 +127,15 @@ export function Figure({
   value,
   unit,
   size,
+  unitSize,
   color,
   style,
 }: {
   value: string;
   unit?: string;
   size: number;
+  /** The unit's size when the mockup gives one (a third of the figure otherwise). */
+  unitSize?: number;
   color?: string;
   style?: StyleProp<TextStyle>;
 }) {
@@ -157,7 +160,7 @@ export function Figure({
         <Text
           style={{
             fontFamily: fonts.textSemiBold,
-            fontSize: Math.max(11, Math.round(size * 0.32)),
+            fontSize: unitSize ?? Math.max(11, Math.round(size * 0.32)),
             color: color ?? colors.textSecondary,
             letterSpacing: 0,
           }}

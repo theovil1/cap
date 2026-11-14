@@ -156,15 +156,20 @@ export default function SessionScreen() {
       </View>
 
       <View
-        style={wide ? { gap: 14 } : styles.bigRow}
+        style={wide ? { gap: 18 } : styles.bigRow}
         onLayout={(e) => {
           const compactH = bottomOf(e);
           setStops((old) => ({ ...old, compact: compactH }));
         }}
       >
         <View style={{ gap: 8, flexShrink: 1 }}>
-          <Label>{t('session.today')}</Label>
-          <Figure value={formatKm(sessionM, 2)} unit={t('units.km')} size={wide ? 100 : 82} />
+          <Label style={wide && styles.labelWide}>{t('session.today')}</Label>
+          <Figure
+            value={formatKm(sessionM, 2)}
+            unit={t('units.km')}
+            size={wide ? 140 : 82}
+            unitSize={wide ? 34 : undefined}
+          />
         </View>
         <SpeedBlock
           wide={wide}
@@ -178,7 +183,7 @@ export default function SessionScreen() {
         <Text style={[styles.hint, { color: colors.textSecondary }]}>{t('session.waiting')}</Text>
       )}
 
-      <View style={styles.tiles}>
+      <View style={[styles.tiles, wide && styles.tilesWide]}>
         {tiles.map(([icon, label, value, unit]) => (
           <View
             key={label}
@@ -186,9 +191,22 @@ export default function SessionScreen() {
           >
             <View style={styles.inline}>
               {icon}
-              <Text style={[styles.tileLabel, { color: colors.textSecondary }]}>{label}</Text>
+              <Text
+                style={[
+                  styles.tileLabel,
+                  wide && styles.tileLabelWide,
+                  { color: colors.textSecondary },
+                ]}
+              >
+                {label}
+              </Text>
             </View>
-            <Figure value={value} unit={unit} size={24} />
+            <Figure
+              value={value}
+              unit={unit}
+              size={wide ? 30 : 24}
+              unitSize={wide ? 16 : undefined}
+            />
           </View>
         ))}
       </View>
@@ -212,17 +230,25 @@ export default function SessionScreen() {
       ) : null}
       {wide && <View style={{ flex: 1 }} />}
       {summary && (
-        <View style={{ gap: 9 }}>
-          <ProgressBar ratio={walked / total} marks={marks} />
+        <View style={{ gap: wide ? 10 : 9 }}>
+          <ProgressBar ratio={walked / total} marks={marks} height={wide ? 10 : 8} />
           <View style={styles.progressRow}>
-            <Text style={[styles.caption, { color: colors.textSecondary }]} numberOfLines={1}>
+            <Text
+              style={[styles.caption, wide && styles.captionWide, { color: colors.textSecondary }]}
+              numberOfLines={1}
+            >
               <Text style={{ color: colors.text, fontFamily: fonts.textSemiBold }}>
                 {formatKm(walked)} {t('units.km')}
               </Text>{' '}
               {t('session.fromStart', { place: summary.start_town ?? '' })}
             </Text>
             <Text
-              style={[styles.caption, styles.right, { color: colors.textSecondary }]}
+              style={[
+                styles.caption,
+                wide && styles.captionWide,
+                styles.right,
+                { color: colors.textSecondary },
+              ]}
               numberOfLines={1}
             >
               {t('session.toEnd', { place: summary.end_town ?? '', km: formatKm(total - walked) })}
@@ -276,7 +302,14 @@ export default function SessionScreen() {
         </View>
       )}
 
-      <View style={[styles.top, { top: insets.top + 8, right: wide && !panelHidden ? 460 : 20 }]}>
+      <View
+        style={[
+          styles.top,
+          wide
+            ? { top: 28, left: 28, right: panelHidden ? 28 : 448, gap: 14 }
+            : { top: insets.top + 8, right: 20 },
+        ]}
+      >
         <GlassButton
           icon={<ChevronDown size={22} color={colors.text} />}
           onPress={() => router.back()}
@@ -284,7 +317,10 @@ export default function SessionScreen() {
         />
         {summary && (
           <Glass style={[styles.titleChip, !wide && styles.grow]}>
-            <Text style={[styles.titleText, { color: colors.text }]} numberOfLines={1}>
+            <Text
+              style={[styles.titleText, wide && styles.titleTextWide, { color: colors.text }]}
+              numberOfLines={1}
+            >
               {journeyTitle(summary)}
             </Text>
             {me && racers.length > 1 ? (
@@ -297,7 +333,7 @@ export default function SessionScreen() {
           </Glass>
         )}
         {wide && stage ? (
-          <Glass style={[styles.stageChip, styles.stageWide]}>
+          <Glass style={[styles.stageChip, styles.stageWide, styles.stageChipWide]}>
             <Flag size={16} color={colors.blueText} strokeWidth={2.2} />
             <Text style={[styles.stageText, { color: colors.text }]} numberOfLines={1}>
               {t('session.stageIn', { name: stage.name, km: formatKm(stage.at_m - walked) })}
@@ -343,15 +379,15 @@ export default function SessionScreen() {
                 {
                   backgroundColor: colors.surface,
                   shadowColor: colors.shadow,
-                  top: insets.top + 16,
-                  bottom: insets.bottom + 16,
+                  top: 20,
+                  bottom: 20,
                 },
               ]}
             >
               {/* Scrolls when the tiles, the rival and the progress do not all fit. */}
               <ScrollView
-                style={styles.panelScroll}
-                contentContainerStyle={styles.panelContent}
+                style={[styles.panelScroll, styles.panelScrollWide]}
+                contentContainerStyle={[styles.panelContent, styles.panelContentWide]}
                 showsVerticalScrollIndicator={false}
               >
                 {content}
@@ -399,7 +435,13 @@ function SpeedBlock({
     return (
       <View style={[styles.speedWide, { backgroundColor: colors.accentSoft }]}>
         <Text style={[styles.tileLabel, { color: colors.text, fontSize: 15 }]}>{label}</Text>
-        <Figure value={formatSpeed(speed)} unit={unit} size={44} color={colors.accentText} />
+        <Figure
+          value={formatSpeed(speed)}
+          unit={unit}
+          size={48}
+          unitSize={18}
+          color={colors.accentText}
+        />
       </View>
     );
   }
@@ -486,6 +528,14 @@ const styles = StyleSheet.create({
     shadowRadius: 40,
   },
   panelScroll: { flex: 1, marginHorizontal: -20 },
+  panelScrollWide: { marginHorizontal: -20 },
+  panelContentWide: { paddingHorizontal: 26, paddingBottom: 26 },
+  labelWide: { fontSize: 15, fontFamily: fonts.textSemiBold },
+  tilesWide: { gap: 10 },
+  tileLabelWide: { fontSize: 14 },
+  captionWide: { fontSize: 14 },
+  titleTextWide: { fontSize: 16 },
+  stageChipWide: { height: 40, paddingHorizontal: 14 },
   panelContent: { flexGrow: 1, gap: 18, paddingHorizontal: 20, paddingBottom: 22 },
   right: { textAlign: 'right' },
   panelWide: {
@@ -493,8 +543,8 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: 20,
     width: 404,
-    paddingTop: 22,
-    borderRadius: 30,
+    paddingTop: 26,
+    borderRadius: 34,
     borderCurve: 'continuous',
   },
   statusRow: {
@@ -515,14 +565,15 @@ const styles = StyleSheet.create({
   hint: { fontFamily: fonts.textMedium, fontSize: 14.5, textAlign: 'center' },
   speedWide: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'baseline',
     justifyContent: 'space-between',
-    padding: 18,
+    paddingVertical: 16,
+    paddingHorizontal: 18,
     borderRadius: 22,
   },
   tiles: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   tile: { flex: 1, minWidth: 96, gap: 8, padding: 14, paddingBottom: 13, borderRadius: 20 },
-  tileWide: { flexBasis: '45%' },
+  tileWide: { flexBasis: '45%', padding: 18, paddingBottom: 18, gap: 10, borderRadius: 22 },
   tileLabel: { fontFamily: fonts.textMedium, fontSize: 12.5 },
   progressRow: { flexDirection: 'row', justifyContent: 'space-between', gap: 8 },
   caption: { fontFamily: fonts.text, fontSize: 12.5, fontVariant: ['tabular-nums'], flexShrink: 1 },

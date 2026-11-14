@@ -215,7 +215,11 @@ function WideArrival({ journey, facts, onShare, onNext }: Props) {
           })}
         </Text>
         <View style={styles.wideButtons}>
-          <Pressable onPress={onShare} accessibilityRole="button" style={styles.ghost}>
+          <Pressable
+            onPress={onShare}
+            accessibilityRole="button"
+            style={[styles.ghost, styles.grow]}
+          >
             <ShareIcon size={18} color="#FFFFFF" />
             <Text style={styles.ghostText}>{t('summary.share')}</Text>
           </Pressable>
@@ -286,9 +290,9 @@ const styles = StyleSheet.create({
     left: 64,
     top: 0,
     bottom: 0,
-    width: 520,
+    width: 560,
     justifyContent: 'center',
-    gap: 22,
+    gap: 18,
   },
   widePill: {
     alignSelf: 'flex-start',
@@ -303,18 +307,18 @@ const styles = StyleSheet.create({
   widePillText: { fontFamily: fonts.textBold, fontSize: 13, letterSpacing: 0.8, color: '#FFFFFF' },
   wideTitle: {
     fontFamily: fonts.display,
-    fontSize: 72,
-    lineHeight: 72,
-    letterSpacing: -2.5,
+    fontSize: 78,
+    lineHeight: 74,
+    letterSpacing: -3.5,
     color: '#FFFFFF',
   },
   wideLead: {
     fontFamily: fonts.text,
-    fontSize: 17,
-    lineHeight: 26,
+    fontSize: 18,
+    lineHeight: 27,
     color: 'rgba(255,255,255,0.86)',
   },
-  wideButtons: { flexDirection: 'row', gap: 12, marginTop: 6 },
+  wideButtons: { flexDirection: 'row', gap: 10, width: 460 },
   ghost: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -327,15 +331,17 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255,255,255,0.15)',
   },
   ghostText: { fontFamily: fonts.textSemiBold, fontSize: 16, color: '#FFFFFF' },
-  wideNext: { height: 56, borderRadius: 18, paddingHorizontal: 28 },
-  wideMedal: { position: 'absolute', right: 80, top: 110, alignItems: 'center', gap: 18 },
+  wideNext: { flexGrow: 1, height: 56, borderRadius: 18, paddingHorizontal: 20 },
+  // Both buttons share the 460 of the mockup.
+  grow: { flexGrow: 1, justifyContent: 'center', paddingHorizontal: 20 },
+  wideMedal: { position: 'absolute', right: 80, top: 110, alignItems: 'center', gap: 14 },
   medalCard: {
     alignItems: 'center',
     gap: 2,
     paddingVertical: 12,
     paddingHorizontal: 22,
-    borderRadius: 18,
+    borderRadius: 20,
   },
-  medalTitle: { fontFamily: fonts.display, fontSize: 21 },
-  medalText: { fontFamily: fonts.text, fontSize: 13 },
+  medalTitle: { fontFamily: fonts.display, fontSize: 22 },
+  medalText: { fontFamily: fonts.text, fontSize: 14.5 },
 });

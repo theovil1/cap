@@ -82,7 +82,8 @@
     "walking": "{{name}} is walking",
     "raceToLead": "{{km}} {{unit}} to take the lead",
     "raceAhead": "{{km}} {{unit}} ahead",
-    "thisWeek": "This week"
+    "thisWeek": "This week",
+    "ofStepsShort": "/ {{goal}} steps"
   },
   "journeys": {
     "title": "My journeys",
@@ -384,7 +385,8 @@
     "notStarted": "Not started yet",
     "leader": "Leader",
     "rule": "The first to reach {{place}} wins. Positions move live.",
-    "shareText": "I am {{place}} of {{count}} in the {{title}} race on Cap."
+    "shareText": "I am {{place}} of {{count}} in the {{title}} race on Cap.",
+    "fromLeader": "{{km}} km behind the leader"
   },
   "ago": {
     "now": "Just now",

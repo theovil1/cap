@@ -1,5 +1,5 @@
 import { Redirect, router, useLocalSearchParams } from 'expo-router';
-import { Check, Flag, Flame, Share as ShareIcon, Sparkle, Swords, X } from 'lucide-react-native';
+import { Check, Flag, Share as ShareIcon, Sparkle, Swords, X } from 'lucide-react-native';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ScrollView, Share, StyleSheet, Text, View } from 'react-native';
@@ -27,7 +27,6 @@ import { HOME } from '@/ui/routes';
 import { SpeedBars, SpeedChart } from '@/ui/charts';
 import { useWide } from '@/ui/layout';
 import { Button, Card, Figure, Glass, GlassButton, Label } from '@/ui/primitives';
-import { StatTile } from '@/ui/stats';
 
 /** Playful comparisons, picked by distance (identity: "équivalence ludique"). */
 const EQUIVALENCES = [
@@ -126,7 +125,7 @@ export default function SummaryScreen() {
           />
         )}
         {detail && (
-          <Glass style={[styles.mapTitle, { top: insets.top + 16 }]}>
+          <Glass style={[styles.mapTitle, { top: 28 }]}>
             <Text style={[styles.mapTitleText, { color: colors.text }]} numberOfLines={1}>
               {journeyTitle(detail)}
             </Text>
@@ -139,12 +138,7 @@ export default function SummaryScreen() {
             </Text>
           </Glass>
         )}
-        <View
-          style={[
-            styles.panel,
-            { backgroundColor: colors.surface, top: insets.top + 16, bottom: insets.bottom + 16 },
-          ]}
-        >
+        <View style={[styles.panel, { backgroundColor: colors.surface, top: 20, bottom: 20 }]}>
           <ScrollView contentContainerStyle={styles.panelContent}>
             <View style={styles.panelTop}>
               <View style={styles.inline}>
@@ -159,22 +153,31 @@ export default function SummaryScreen() {
               <Label style={styles.hello}>
                 {t('summary.wellDone', { name: user?.first_name ?? '' })}
               </Label>
-              <Figure value={formatKm(session.distanceM, 2)} unit={t('units.km')} size={104} />
-            </View>
-            <View style={styles.tiles}>
-              <StatTile label={t('summary.duration')} value={formatMinutes(minutes)} />
-              <StatTile label={t('session.steps')} value={formatNumber(session.steps)} />
-              <StatTile
-                label={t('session.speed')}
-                value={formatSpeed(avgSpeed)}
-                unit={t('units.kmh')}
+              <Figure
+                value={formatKm(session.distanceM, 2)}
+                unit={t('units.km')}
+                size={96}
+                unitSize={28}
               />
+            </View>
+            {/* Three small tiles of the mockup: 12 pt label, 20 pt figure. */}
+            <View style={styles.tiles}>
+              {[
+                [t('summary.duration'), formatMinutes(minutes), undefined],
+                [t('session.steps'), formatNumber(session.steps), undefined],
+                [t('session.speed'), formatSpeed(avgSpeed), t('units.kmh')],
+              ].map(([label, value, unit]) => (
+                <View key={label} style={[styles.smallTile, { backgroundColor: colors.inset }]}>
+                  <Text style={[styles.smallLabel, { color: colors.textSecondary }]}>{label}</Text>
+                  <Figure value={value ?? ''} unit={unit} size={20} unitSize={11} />
+                </View>
+              ))}
             </View>
             {session.speeds.length >= 2 && (
               <View style={[styles.bars, { backgroundColor: colors.inset }]}>
                 <View style={styles.chartHeader}>
-                  <Label>{t('session.speed')}</Label>
-                  <Text style={[styles.axis, { color: colors.textMuted }]}>
+                  <Label style={styles.barsLabel}>{t('session.speed')}</Label>
+                  <Text style={[styles.axis, styles.axisWide, { color: colors.textMuted }]}>
                     {[0, 1 / 4, 1 / 2, 1].map((f) => Math.round(minutes * f)).join(' · ')} min
                   </Text>
                 </View>
@@ -199,9 +202,8 @@ export default function SummaryScreen() {
                 </View>
               </View>
             )}
-            <View style={[styles.note, { backgroundColor: colors.successSoft }]}>
-              <Flame size={17} color={colors.success} strokeWidth={2.2} />
-              <Text style={[styles.noteText, styles.flex, { color: colors.text }]}>{goalText}</Text>
+            <View style={[styles.goalNote, { backgroundColor: colors.successSoft }]}>
+              <Text style={[styles.goalText, { color: colors.text }]}>{goalText}</Text>
             </View>
             {!session.result && (
               <Text style={[styles.pending, { color: colors.textMuted }]}>
@@ -215,13 +217,13 @@ export default function SummaryScreen() {
               title={t('summary.share')}
               icon={<ShareIcon size={18} color={colors.text} />}
               onPress={share}
-              style={styles.flex}
+              style={styles.shareWide}
             />
             <Button
               tone="dark"
               title={t('summary.finish')}
               onPress={close}
-              style={styles.flexWide}
+              style={[styles.flex, styles.buttonWide]}
             />
           </View>
         </View>
@@ -403,25 +405,47 @@ const styles = StyleSheet.create({
     height: 48,
     paddingHorizontal: 20,
   },
-  mapTitleText: { fontFamily: fonts.textSemiBold, fontSize: 15 },
-  mapTitleDetail: { fontFamily: fonts.text, fontSize: 13, fontVariant: ['tabular-nums'] },
+  mapTitleText: { fontFamily: fonts.textSemiBold, fontSize: 16 },
+  mapTitleDetail: { fontFamily: fonts.text, fontSize: 14, fontVariant: ['tabular-nums'] },
   panel: {
     position: 'absolute',
     right: 20,
     width: 412,
-    borderRadius: 30,
+    borderRadius: 34,
     borderCurve: 'continuous',
     overflow: 'hidden',
   },
   panelContent: { gap: 14, padding: 26, paddingBottom: 12 },
   panelTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  date: { fontFamily: fonts.text, fontSize: 13.5, textTransform: 'capitalize' },
+  date: { fontFamily: fonts.text, fontSize: 14, textTransform: 'capitalize' },
   hello: { fontSize: 15 },
-  bars: { gap: 12, padding: 16, borderRadius: 20 },
-  note: { flexDirection: 'row', alignItems: 'center', gap: 14, padding: 16, borderRadius: 20 },
+  bars: { gap: 8, paddingVertical: 14, paddingHorizontal: 16, borderRadius: 20 },
+  barsLabel: { fontSize: 13 },
+  axisWide: { fontSize: 12.5 },
+  smallTile: {
+    flex: 1,
+    justifyContent: 'space-between',
+    gap: 6,
+    paddingVertical: 13,
+    paddingHorizontal: 14,
+    borderRadius: 18,
+  },
+  smallLabel: { fontFamily: fonts.textMedium, fontSize: 12 },
+  goalNote: { paddingVertical: 12, paddingHorizontal: 14, borderRadius: 18 },
+  goalText: { fontFamily: fonts.text, fontSize: 13.5, lineHeight: 19.5 },
+  shareWide: { width: 150, height: 56, borderRadius: 18 },
+  buttonWide: { height: 56, borderRadius: 18 },
+  note: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    borderRadius: 20,
+  },
   noteIcon: {
-    width: 48,
-    height: 48,
+    width: 44,
+    height: 44,
     borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
@@ -432,10 +456,10 @@ const styles = StyleSheet.create({
   flexWide: { flex: 1.5 },
   actions: {
     flexDirection: 'row',
-    gap: 12,
+    gap: 10,
     paddingHorizontal: 26,
     paddingBottom: 26,
-    paddingTop: 8,
+    paddingTop: 14,
   },
   race: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 14 },
   raceIcon: {
