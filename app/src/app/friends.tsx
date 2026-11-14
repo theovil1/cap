@@ -141,7 +141,14 @@ export default function FriendsScreen() {
         {searching && (
           <Card>
             {(search.data ?? []).map((user, i) => (
-              <Row key={user.id} name={user.first_name} username={user.username} first={i === 0}>
+              <Row
+                key={user.id}
+                id={user.id}
+                name={user.first_name}
+                username={user.username}
+                photo={user.avatar_url}
+                first={i === 0}
+              >
                 {matchAction(user)}
               </Row>
             ))}
@@ -158,8 +165,10 @@ export default function FriendsScreen() {
             {list.incoming.map((friend, i) => (
               <Row
                 key={friend.id}
+                id={friend.id}
                 name={friend.first_name}
                 username={friend.username}
+                photo={friend.avatar_url}
                 first={i === 0}
               >
                 <IconButton
@@ -182,8 +191,10 @@ export default function FriendsScreen() {
           {list?.friends.map((friend, i) => (
             <Row
               key={friend.id}
+              id={friend.id}
               name={friend.first_name}
               username={friend.username}
+              photo={friend.avatar_url}
               first={i === 0}
             >
               <IconButton
@@ -205,8 +216,10 @@ export default function FriendsScreen() {
             {list.outgoing.map((friend, i) => (
               <Row
                 key={friend.id}
+                id={friend.id}
                 name={friend.first_name}
                 username={friend.username}
+                photo={friend.avatar_url}
                 first={i === 0}
               >
                 <Pressable
@@ -238,13 +251,18 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
 }
 
 function Row({
+  id,
   name,
   username,
+  photo,
   first,
   children,
 }: {
+  id: string;
   name: string;
   username: string;
+  /** Their profile photo, when they set one. */
+  photo: string | null;
   first: boolean;
   children: ReactNode;
 }) {
@@ -256,7 +274,7 @@ function Row({
         !first && { borderTopWidth: StyleSheet.hairlineWidth, borderColor: colors.border },
       ]}
     >
-      <Avatar name={name} size={40} />
+      <Avatar name={name} seed={id} photo={photo} size={40} />
       <View style={{ flex: 1 }}>
         <Text style={[styles.name, { color: colors.text }]} numberOfLines={1}>
           {name}

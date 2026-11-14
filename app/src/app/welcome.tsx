@@ -2,16 +2,23 @@ import * as AppleAuthentication from 'expo-apple-authentication';
 import { ChevronLeft } from 'lucide-react-native';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { KeyboardAvoidingView, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import {
+  Image,
+  KeyboardAvoidingView,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Path } from 'react-native-svg';
 
 import { useAuth } from '@/api/auth';
 import { ApiError } from '@/api/client';
-import { CityLights } from '@/onboarding/city-lights';
+import { CityWord } from '@/onboarding/city-word';
 import { Headline } from '@/onboarding/frame';
 import { CapLogo } from '@/onboarding/logo';
-import { PHONE_WINDOWS, WIDE_WINDOWS } from '@/onboarding/windows';
 import { useDark } from '@/settings/appearance';
 import { fonts, useColors } from '@/theme';
 import { TextField } from '@/ui/controls';
@@ -97,14 +104,25 @@ export default function WelcomeScreen() {
   const hero = (
     <View style={[styles.hero, wide && styles.heroWide]}>
       <CapLogo size={wide ? 72 : 64} />
-      <Text
-        style={[wide ? styles.titleWide : styles.title, { color: colors.text }]}
+      <View
+        accessible
         accessibilityRole="header"
+        accessibilityLabel={`${t('welcome.title')} ${t('welcome.titleAccent')}`}
       >
-        {t('welcome.title')}
-        {'\n'}
-        <Text style={{ color: colors.accentText }}>{t('welcome.titleAccent')}</Text>
-      </Text>
+        {/* The destination changes city now and then: Paris, Rome, Lyon... */}
+        <View style={styles.titleLine}>
+          <Text style={[wide ? styles.titleWide : styles.title, { color: colors.text }]}>
+            {t('welcome.titleLead')}{' '}
+          </Text>
+          <CityWord
+            cities={t('welcome.cities').split(',')}
+            style={[wide ? styles.titleWide : styles.title, { color: colors.text }]}
+          />
+        </View>
+        <Text style={[wide ? styles.titleWide : styles.title, { color: colors.accentText }]}>
+          {t('welcome.titleAccent')}
+        </Text>
+      </View>
       <Text style={[wide ? styles.subtitleWide : styles.subtitle, { color: colors.textSecondary }]}>
         {t('welcome.subtitle')}
       </Text>
@@ -197,11 +215,11 @@ export default function WelcomeScreen() {
     <View style={[styles.screen, { backgroundColor: colors.background }]}>
       {mode === 'welcome' || wide ? (
         <>
-          <CityLights
+          <Image
             source={map}
-            size={wide ? [2388, 1668] : [1170, 2532]}
-            windows={dark ? (wide ? WIDE_WINDOWS : PHONE_WINDOWS) : []}
             style={wide ? StyleSheet.absoluteFill : styles.map}
+            resizeMode="cover"
+            accessibilityIgnoresInvertColors
           />
           <View
             pointerEvents="none"
@@ -255,6 +273,7 @@ const styles = StyleSheet.create({
   heroWide: { width: 480, gap: 18 },
   title: { fontFamily: fonts.display, fontSize: 42, lineHeight: 43, letterSpacing: -1.68 },
   titleWide: { fontFamily: fonts.display, fontSize: 60, lineHeight: 60, letterSpacing: -2.7 },
+  titleLine: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'flex-end' },
   subtitle: { fontFamily: fonts.text, fontSize: 16, lineHeight: 24 },
   subtitleWide: { fontFamily: fonts.text, fontSize: 18, lineHeight: 27 },
   buttons: { gap: 10, marginTop: 8 },

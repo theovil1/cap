@@ -327,7 +327,6 @@ export default function NewJourneyScreen() {
 function PlacesMap({ start, end }: { start: Place | null; end: Place | null }) {
   const { t } = useTranslation();
   const colors = useColors();
-  const insets = useSafeAreaInsets();
   const mapStyle = useMapStyle();
   const points = [start, end].filter((p): p is Place => !!p);
   const lons = points.map((p) => p.lon);

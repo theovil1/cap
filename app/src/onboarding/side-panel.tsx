@@ -11,7 +11,6 @@ import {
 import { useTranslation } from 'react-i18next';
 import { Image } from 'expo-image';
 import { StyleSheet, Text, useWindowDimensions, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useDark } from '@/settings/appearance';
 import { fonts, useColors, useShadows } from '@/theme';
@@ -46,7 +45,6 @@ export function SidePanel({ rows }: { rows: SideRow[] }) {
   const shadows = useShadows();
   const dark = useDark();
   const { width } = useWindowDimensions();
-  const insets = useSafeAreaInsets();
   return (
     <View style={[styles.panel, { width: Math.round(width * 0.469) }]}>
       <Image
