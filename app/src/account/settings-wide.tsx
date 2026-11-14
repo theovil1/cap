@@ -17,6 +17,7 @@ import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { countryLabel } from '@/i18n/countries';
 import type { ProfilePatch } from '@/api/profile';
 import type { UserProfile } from '@/api/types';
 import { fonts, useColors } from '@/theme';
@@ -185,7 +186,7 @@ export function SettingsWide({
                     >
                       <Globe size={17} color={colors.textSecondary} />
                       <Text style={[styles.pickerText, { color: colors.text }]}>
-                        {t(`account.countries.${country}`, { defaultValue: country })}
+                        {countryLabel(country)}
                       </Text>
                     </Pressable>
                   </View>

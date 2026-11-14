@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, Text } from 'react-native';
 
+import { countryLabel } from '@/i18n/countries';
 import { useLeaderboard } from '@/api/queries';
 import type {
   Leaderboard,
@@ -32,7 +33,7 @@ export function Rankings() {
   const entries = current?.entries ?? [];
   const me = current?.me ?? null;
   const streak = period === 'streak';
-  const countryName = (code: string) => t(`account.countries.${code}`, { defaultValue: code });
+  const countryName = (code: string) => countryLabel(code);
   const value = (entry: LeaderboardEntry) =>
     streak ? formatNumber(entry.value) : formatKm(entry.value, entry.value >= 100_000 ? 0 : 1);
   const unit = (entry: LeaderboardEntry) =>
@@ -124,7 +125,7 @@ type T = TFunction;
 
 function subtitle(board: Leaderboard, t: T): string {
   const scope = t(`rankings.scopeLabel.${board.scope}`, {
-    country: t(`account.countries.${board.country}`, { defaultValue: board.country }),
+    country: countryLabel(board.country),
   });
   // Dates come as `YYYY-MM-DD`: read them at noon to stay on the right day.
   const day = (iso: string) => new Date(`${iso}T12:00:00`);

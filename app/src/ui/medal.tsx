@@ -203,7 +203,8 @@ export function Medal({
           <G transform="translate(24 72) scale(0.72)">{face.picture}</G>
         </G>
       ) : null}
-      {face?.kind === 'number' ? (
+      {/* A locked medal shows its padlock only; its name is written under it. */}
+      {face?.kind === 'number' && metal !== 'locked' ? (
         <Engraved light={light} dark={engrave}>
           {(color) => (
             <>
@@ -235,7 +236,7 @@ export function Medal({
       {face?.kind === 'icon' || metal === 'locked' ? (
         <Engraved light={light} dark={engrave}>
           {(color) =>
-            face?.kind === 'icon' ? (
+            face?.kind === 'icon' && metal !== 'locked' ? (
               <>
                 <G
                   transform="translate(43 84) scale(1.4167)"

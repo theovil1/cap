@@ -66,6 +66,7 @@
     "createJourney": "Create a journey",
     "dailyGoal": "Daily goal",
     "ofSteps": "of {{goal}} steps",
+    "weekdays": "M,T,W,T,F,S,S",
     "stillKm": "{{km}} {{unit}} to go",
     "goalReached": "goal reached",
     "streak": "Streak",
@@ -400,13 +401,6 @@
     "homeCity": "Home town",
     "height": "Height",
     "heightPrompt": "Height in cm",
-    "countries": {
-      "FR": "France",
-      "BE": "Belgium",
-      "CH": "Switzerland",
-      "LU": "Luxembourg",
-      "CA": "Canada"
-    },
     "language": "Language",
     "languages": {
       "fr": "Français",
@@ -428,7 +422,8 @@
     "save": "Save",
     "delete": "Delete my account",
     "deleteTitle": "Delete your account?",
-    "deleteBody": "Your sessions, journeys and friends are erased for good. This cannot be undone."
+    "deleteBody": "Your sessions, journeys and friends are erased for good. This cannot be undone.",
+    "searchCountry": "Search a country"
   },
   "history": {
     "title": "My sessions",

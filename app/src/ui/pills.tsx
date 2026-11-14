@@ -16,7 +16,12 @@ export function Tag({ label, icon: Icon, style }: PillProps) {
   const colors = useColors();
   return (
     <View style={[styles.pill, styles.tag, { backgroundColor: colors.accentSoft }, style]}>
-      {Icon ? <Icon size={13} color={colors.accentText} strokeWidth={2.4} /> : null}
+      {/* A solid accent dot keeps the icon readable over any photo. */}
+      {Icon ? (
+        <View style={[styles.tagIcon, { backgroundColor: colors.accent }]}>
+          <Icon size={12} color={colors.onAccent} strokeWidth={2.6} />
+        </View>
+      ) : null}
       <Text style={[styles.bold12, { color: colors.accentText }]}>{label}</Text>
     </View>
   );
@@ -128,6 +133,14 @@ export function InfoBanner({ icon: Icon, children }: { icon: LucideIcon; childre
 }
 
 const styles = StyleSheet.create({
+  tagIcon: {
+    width: 20,
+    height: 20,
+    borderRadius: 99,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginLeft: -4,
+  },
   pill: {
     flexDirection: 'row',
     alignItems: 'center',

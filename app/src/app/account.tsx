@@ -16,6 +16,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { countryLabel } from '@/i18n/countries';
 import { useAuth } from '@/api/auth';
 import { api, ApiError } from '@/api/client';
 import { useUpdateProfile, type ProfilePatch } from '@/api/profile';
@@ -24,8 +25,6 @@ import { SettingsWide } from '@/account/settings-wide';
 import { fonts, useColors } from '@/theme';
 import { useWide } from '@/ui/layout';
 import { Avatar, GlassButton } from '@/ui/primitives';
-
-const COUNTRIES = ['FR', 'BE', 'CH', 'LU', 'CA'] as const;
 
 export default function AccountScreen() {
   const { t, i18n } = useTranslation();
@@ -218,13 +217,7 @@ export default function AccountScreen() {
         busy={busy}
         onPhoto={changePhoto}
         onRemovePhoto={removePhoto}
-        onCountry={(pick) =>
-          choose(
-            t('account.country'),
-            COUNTRIES.map((c) => ({ value: c, label: t(`account.countries.${c}`) })),
-            pick,
-          )
-        }
+        onCountry={() => router.push('/country')}
         onSave={save}
         onSignOut={signOut}
         onDelete={confirmDelete}
@@ -321,14 +314,8 @@ export default function AccountScreen() {
           />
           <Row
             label={t('account.country')}
-            value={t(`account.countries.${user.country}`, { defaultValue: user.country })}
-            onPress={() =>
-              choose(
-                t('account.country'),
-                COUNTRIES.map((c) => ({ value: c, label: t(`account.countries.${c}`) })),
-                (country) => save({ country }),
-              )
-            }
+            value={countryLabel(user.country)}
+            onPress={() => router.push('/country')}
           />
           <Row
             label={t('account.homeCity')}

@@ -16,6 +16,7 @@ import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { countryLabel } from '@/i18n/countries';
 import { useAuth } from '@/api/auth';
 import { useProfile } from '@/api/community';
 import { useActiveJourney, useFriends, useJourneys, useSessions } from '@/api/queries';
@@ -65,9 +66,7 @@ export default function MyProfileScreen() {
   const won = medals.filter((m) => m.metal !== 'locked').length;
   const place = [
     `@${user.username}`,
-    [user.home_city, t(`account.countries.${user.country}`, { defaultValue: user.country })]
-      .filter(Boolean)
-      .join(', '),
+    [user.home_city, countryLabel(user.country)].filter(Boolean).join(', '),
     t('me.since', {
       date: formatDate(new Date(user.created_at), { month: 'long', year: 'numeric' }),
     }),

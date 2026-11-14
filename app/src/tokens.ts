@@ -24,7 +24,8 @@ export const palette = {
     scrimBorder: 'rgba(255,255,255,0.32)',
     text: '#15161A',
     textSecondary: '#5C5E67',
-    textMuted: '#8B8D96',
+    // Darkened from the mockups' #8B8D96 to reach a 4.5:1 contrast (WCAG AA).
+    textMuted: '#6C6E77',
     /** Strong inverted fill: active segment, dark buttons, active filter chip. */
     inverse: '#15161A',
     onInverse: '#F4F2EE',
@@ -62,7 +63,8 @@ export const palette = {
     scrimBorder: 'rgba(255,255,255,0.32)',
     text: '#F3F1EC',
     textSecondary: '#A2A4AD',
-    textMuted: '#777A84',
+    // Lightened from the mockups' #777A84 to reach a 4.5:1 contrast (WCAG AA).
+    textMuted: '#8A8D97',
     inverse: '#F3F1EC',
     onInverse: '#0B0C0F',
     segmentThumb: '#24262C',

@@ -5,7 +5,12 @@ import {
   Inter_700Bold,
 } from '@expo-google-fonts/inter';
 import { SpaceGrotesk_500Medium, SpaceGrotesk_700Bold } from '@expo-google-fonts/space-grotesk';
-import { focusManager, QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import {
+  focusManager,
+  keepPreviousData,
+  QueryClient,
+  QueryClientProvider,
+} from '@tanstack/react-query';
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
@@ -31,7 +36,14 @@ focusManager.setEventListener((setFocused) => {
 
 export default function RootLayout() {
   const [queryClient] = useState(
-    () => new QueryClient({ defaultOptions: { queries: { retry: 1, staleTime: 30_000 } } }),
+    () =>
+      new QueryClient({
+        defaultOptions: {
+          // A new filter or page keeps the previous list on screen until its own
+          // arrives, instead of flashing an empty state.
+          queries: { retry: 1, staleTime: 30_000, placeholderData: keepPreviousData },
+        },
+      }),
   );
   const [loaded, error] = useFonts({
     Inter_400Regular,
@@ -102,6 +114,7 @@ function Screens() {
         <Stack.Screen name="event-live/[id]" options={{ presentation: 'fullScreenModal' }} />
         <Stack.Screen name="post/[id]" />
         <Stack.Screen name="catalog" />
+        <Stack.Screen name="country" options={{ presentation: 'modal' }} />
       </Stack.Protected>
       <Stack.Protected guard={status === 'signedOut'}>
         <Stack.Screen name="welcome" />

@@ -64,21 +64,19 @@ export default function HomeScreen() {
                   ratio={stats.todaySteps / goal}
                   label={`${formatNumber(Math.min(999, (100 * stats.todaySteps) / goal))} %`}
                 />
-                <View style={{ gap: 3, flex: 1 }}>
+                <View style={styles.goalFigure}>
                   <Figure value={formatNumber(stats.todaySteps)} size={21} />
-                  <Text style={[styles.caption, { color: colors.textSecondary }]} numberOfLines={1}>
+                  <Text style={[styles.caption, { color: colors.textSecondary }]}>
                     {t('home.ofSteps', { goal: formatNumber(goal) })}
-                  </Text>
-                  <Text
-                    style={[styles.caption, styles.strong, { color: colors.accentText }]}
-                    numberOfLines={1}
-                  >
-                    {leftSteps > 0
-                      ? t('home.stillKm', { km: formatKm(leftSteps * strideM) })
-                      : t('home.goalReached')}
                   </Text>
                 </View>
               </View>
+              {/* Under the ring, on the whole width of the card, so nothing gets cut. */}
+              <Text style={[styles.caption, styles.strong, { color: colors.accentText }]}>
+                {leftSteps > 0
+                  ? t('home.stillKm', { km: formatKm(leftSteps * strideM) })
+                  : t('home.goalReached')}
+              </Text>
             </Card>
             <Card style={[styles.small, { flex: 1 }]}>
               <View style={styles.inline}>
@@ -90,20 +88,39 @@ export default function HomeScreen() {
                 unit={t('home.days', { count: stats.streak })}
                 size={34}
               />
+              {/* This week, Monday first: today is dashed until walked, days to come are faint. */}
               <View style={styles.dots}>
-                {stats.week.map((active, i) => (
-                  <View
-                    key={i}
-                    style={[
-                      styles.dot,
-                      active
-                        ? { backgroundColor: colors.accent }
-                        : i === 6
-                          ? { borderWidth: 2, borderStyle: 'dashed', borderColor: colors.accent }
-                          : { borderWidth: 1.5, borderColor: colors.track },
-                    ]}
-                  />
-                ))}
+                {stats.weekM.map((metres, i) => {
+                  const today = i === stats.todayIndex;
+                  return (
+                    <View key={i} style={styles.day}>
+                      <View
+                        style={[
+                          styles.dot,
+                          metres > 0
+                            ? { backgroundColor: colors.accent }
+                            : today
+                              ? {
+                                  borderWidth: 2,
+                                  borderStyle: 'dashed',
+                                  borderColor: colors.accent,
+                                }
+                              : { borderWidth: 1.5, borderColor: colors.track },
+                          i > stats.todayIndex && styles.later,
+                        ]}
+                      />
+                      <Text
+                        style={[
+                          styles.dayLetter,
+                          { color: today ? colors.text : colors.textMuted },
+                          today && styles.strong,
+                        ]}
+                      >
+                        {t('home.weekdays').split(',')[i]}
+                      </Text>
+                    </View>
+                  );
+                })}
               </View>
               <Text style={[styles.record, { color: colors.textMuted }]}>
                 {t('home.record', { count: stats.bestStreak })}
@@ -259,6 +276,10 @@ const styles = StyleSheet.create({
   row: { flexDirection: 'row', gap: 12 },
   small: { padding: 14, gap: 10 },
   goal: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  goalFigure: { gap: 3, flex: 1, minWidth: 0 },
+  day: { alignItems: 'center', gap: 4 },
+  dayLetter: { fontFamily: fonts.text, fontSize: 10.5 },
+  later: { opacity: 0.45 },
   caption: { fontFamily: fonts.text, fontSize: 12, fontVariant: ['tabular-nums'] },
   strong: { fontFamily: fonts.textSemiBold },
   inline: { flexDirection: 'row', alignItems: 'center', gap: 6 },

@@ -9,7 +9,8 @@ import {
   type LucideIcon,
 } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
-import { Image, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import { Image } from 'expo-image';
+import { StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useDark } from '@/settings/appearance';
@@ -51,7 +52,8 @@ export function SidePanel({ rows }: { rows: SideRow[] }) {
       <Image
         source={dark ? MAP.night : MAP.day}
         style={StyleSheet.absoluteFill}
-        resizeMode="cover"
+        contentFit="cover"
+        cachePolicy="memory"
         accessibilityIgnoresInvertColors
       />
       <Grain on="picture" />

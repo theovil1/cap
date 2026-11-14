@@ -1,6 +1,7 @@
 import { Check } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
-import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Image } from 'expo-image';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { useAuth } from '@/api/auth';
 import { useUpdateProfile } from '@/api/profile';
@@ -79,7 +80,8 @@ export function MoodStep({ nav, next }: { nav: FrameNav; next: () => void }) {
               <Image
                 source={THUMBS[key]}
                 style={styles.thumb}
-                resizeMode="cover"
+                contentFit="cover"
+                cachePolicy="memory"
                 accessibilityIgnoresInvertColors
               />
               <Text style={[styles.mapLabel, { color: colors.text }]}>

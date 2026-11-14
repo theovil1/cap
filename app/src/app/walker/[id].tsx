@@ -20,6 +20,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { countryLabel } from '@/i18n/countries';
 import { useFollow, useProfile, useReport } from '@/api/community';
 import { useAddFriend } from '@/api/queries';
 import type { PublicProfile } from '@/api/types';
@@ -72,12 +73,7 @@ function ProfileView({ profile }: { profile: PublicProfile }) {
   const won = medals.filter((m) => m.metal !== 'locked');
   const place = [
     `@${walker.username}`,
-    [
-      profile.home_city,
-      t(`account.countries.${profile.country}`, { defaultValue: profile.country }),
-    ]
-      .filter(Boolean)
-      .join(', '),
+    [profile.home_city, countryLabel(profile.country)].filter(Boolean).join(', '),
     t('me.since', {
       date: formatDate(new Date(profile.created_at), { month: 'long', year: 'numeric' }),
     }),

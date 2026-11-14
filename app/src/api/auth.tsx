@@ -48,6 +48,9 @@ type Auth = {
 const AuthContext = createContext<Auth | null>(null);
 const PROFILE_KEY = 'profile';
 
+/** The profile as last set, even within the same render (for quick successive changes). */
+export const storedUser = () => getValue<UserProfile>(PROFILE_KEY);
+
 /** Colours, map, units and language follow the profile. */
 function applySettings(profile: UserProfile) {
   syncAppearance({

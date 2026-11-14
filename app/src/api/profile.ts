@@ -1,6 +1,6 @@
 import { useMutation } from '@tanstack/react-query';
 
-import { useAuth } from './auth';
+import { storedUser, useAuth } from './auth';
 import { api } from './client';
 import type { UserProfile } from './types';
 
@@ -25,19 +25,24 @@ export type ProfilePatch = Partial<
   >
 >;
 
+/** Last change sent: an older answer from the server must not undo a newer tap. */
+let latest = 0;
+
 /** Changes the profile at once on screen, then on the server (back on failure). */
 export function useUpdateProfile() {
-  const { user, setUser } = useAuth();
+  const { setUser } = useAuth();
   return useMutation({
     mutationFn: (patch: ProfilePatch) => api<UserProfile>('/me', { method: 'PATCH', body: patch }),
     onMutate: (patch) => {
-      const before = user;
-      if (user) setUser({ ...user, ...patch });
-      return before;
+      const before = storedUser();
+      if (before) setUser({ ...before, ...patch });
+      return { before, id: ++latest };
     },
-    onSuccess: (profile) => setUser(profile),
-    onError: (_error, _patch, before) => {
-      if (before) setUser(before);
+    onSuccess: (profile, _patch, context) => {
+      if (context?.id === latest) setUser(profile);
+    },
+    onError: (_error, _patch, context) => {
+      if (context?.before && context.id === latest) setUser(context.before);
     },
   });
 }

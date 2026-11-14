@@ -17,6 +17,8 @@ export type DayStats = {
   week: boolean[];
   /** Metres walked each day of the calendar week, Monday first. */
   weekM: number[];
+  /** Today in `weekM`: 0 on Monday, 6 on Sunday. */
+  todayIndex: number;
 };
 
 /** Merges the server history with sessions still on the phone (same local id = same session). */
@@ -68,7 +70,8 @@ export function computeDayStats(
         dayKey(new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() + i, 12)),
       ) ?? 0,
   );
-  return { todaySteps, todayM, streak: current, bestStreak: best, week, weekM };
+  const todayIndex = (now.getDay() + 6) % 7;
+  return { todaySteps, todayM, streak: current, bestStreak: best, week, weekM, todayIndex };
 }
 
 /** Current time, refreshed every minute so "today" changes at midnight. */

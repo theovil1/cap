@@ -66,6 +66,7 @@
     "createJourney": "Créer un trajet",
     "dailyGoal": "Objectif du jour",
     "ofSteps": "sur {{goal}} pas",
+    "weekdays": "L,M,M,J,V,S,D",
     "stillKm": "encore {{km}} {{unit}}",
     "goalReached": "objectif atteint",
     "streak": "Série",
@@ -400,13 +401,6 @@
     "homeCity": "Ville de départ",
     "height": "Taille",
     "heightPrompt": "Taille en cm",
-    "countries": {
-      "FR": "France",
-      "BE": "Belgique",
-      "CH": "Suisse",
-      "LU": "Luxembourg",
-      "CA": "Canada"
-    },
     "language": "Langue",
     "languages": {
       "fr": "Français",
@@ -428,7 +422,8 @@
     "save": "Enregistrer",
     "delete": "Supprimer mon compte",
     "deleteTitle": "Supprimer ton compte ?",
-    "deleteBody": "Tes séances, trajets et amis sont effacés pour de bon. Ça ne peut pas être annulé."
+    "deleteBody": "Tes séances, trajets et amis sont effacés pour de bon. Ça ne peut pas être annulé.",
+    "searchCountry": "Rechercher un pays"
   },
   "history": {
     "title": "Mes séances",
