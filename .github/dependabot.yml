@@ -4,7 +4,19 @@ updates:
     directory: /app
     schedule: { interval: weekly }
     groups:
-      expo: { patterns: ["expo", "expo-*", "@expo/*", "react-native", "react", "@types/react"] }
+      expo: { patterns: ["expo", "expo-*", "@expo/*", "react-native", "@types/react"] }
+    # The Expo SDK sets these versions: they move with `npx expo install`.
+    # eslint-config-expo does not support ESLint 10 yet.
+    ignore:
+      - dependency-name: react
+      - dependency-name: react-native-worklets
+      - dependency-name: react-native-gesture-handler
+      - dependency-name: react-native-reanimated
+      - dependency-name: react-native-screens
+      - dependency-name: react-native-safe-area-context
+      - dependency-name: react-native-svg
+      - dependency-name: eslint
+        update-types: ["version-update:semver-major"]
   - package-ecosystem: cargo
     directory: /api
     schedule: { interval: weekly }
