@@ -17,7 +17,6 @@ const MAP_COLORS = {
     road: '#FCFBF8',
     casing: '#D9D2C6',
     building: '#E9E4DB',
-    lit: '#E9E4DB',
     rail: '#C9C2B6',
     label: '#5C5E67',
     halo: '#F4F2EE',
@@ -29,8 +28,6 @@ const MAP_COLORS = {
     road: '#2A2C33',
     casing: '#1A1B22',
     building: '#23252E',
-    /** Lit windows: one building in seven glows, faintly. */
-    lit: '#332D27',
     rail: '#2E303A',
     label: '#A2A4AD',
     halo: '#0B0C0F',
@@ -68,12 +65,7 @@ function recolor(
     delete paint['line-dasharray'];
   } else if (layer.type === 'fill' && id === 'building') paint['fill-color'] = c.building;
   else if (layer.type === 'fill-extrusion') {
-    paint['fill-extrusion-color'] = [
-      'case',
-      ['==', ['%', ['to-number', ['id'], 1], 7], 0],
-      c.lit,
-      c.building,
-    ];
+    paint['fill-extrusion-color'] = c.building;
     paint['fill-extrusion-opacity'] = 0.92;
   } else if (layer.type === 'symbol') {
     paint['text-color'] = c.label;
