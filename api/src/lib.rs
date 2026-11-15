@@ -19,6 +19,7 @@ pub mod photos;
 pub mod privacy;
 pub mod profiles;
 pub mod public_routes;
+pub mod push;
 pub mod races;
 pub mod sessions;
 pub mod stages;

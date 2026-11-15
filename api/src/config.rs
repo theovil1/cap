@@ -14,6 +14,10 @@ pub struct Config {
     pub photon_url: String,
     /// Read the client IP from `X-Forwarded-For` (only behind a trusted reverse proxy).
     pub behind_proxy: bool,
+    /// Push notifications: the .p8 key file, its id and the Apple team. Off without them.
+    pub apns_key_file: String,
+    pub apns_key_id: Option<String>,
+    pub apns_team_id: Option<String>,
 }
 
 impl Config {
@@ -33,6 +37,9 @@ impl Config {
             graphhopper_url: var_or("GRAPHHOPPER_URL", "http://graphhopper:8989"),
             photon_url: var_or("PHOTON_URL", "http://photon:2322"),
             behind_proxy: var_or("BEHIND_PROXY", "false") == "true",
+            apns_key_file: var_or("APNS_KEY_FILE", "/run/secrets/apns.p8"),
+            apns_key_id: std::env::var("APNS_KEY_ID").ok().filter(|v| !v.is_empty()),
+            apns_team_id: std::env::var("APNS_TEAM_ID").ok().filter(|v| !v.is_empty()),
         })
     }
 }

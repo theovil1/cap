@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE push_devices SET sandbox = NOT sandbox WHERE token = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "e4e77e6f064b5a979b2df9dbd10d82bd3378691c104da539ce2d3acac32406fb"
+}

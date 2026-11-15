@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO push_devices (token, user_id, sandbox) VALUES ($1, $2, $3)\n         ON CONFLICT (token) DO UPDATE SET user_id = $2, sandbox = $3, created_at = now()",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Uuid",
+        "Bool"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "721008c2a2808370bea6c4c98410d4ffabc6266374864bbc222ae06fc25a6b56"
+}

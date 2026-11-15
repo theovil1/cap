@@ -21,6 +21,7 @@ import { AppState } from 'react-native';
 import { AuthProvider, useAuth } from '@/api/auth';
 import '@/i18n';
 import '@/map/logs';
+import { usePushNotifications } from '@/notifications/push';
 import { useOnboarding } from '@/onboarding/state';
 import { SessionProvider } from '@/session/session-context';
 import { useColors } from '@/theme';
@@ -70,8 +71,10 @@ export default function RootLayout() {
 }
 
 function Screens() {
-  const { status } = useAuth();
+  const { status, user } = useAuth();
   const { pending } = useOnboarding();
+  // Asked once the walker is in the app, not during the onboarding.
+  usePushNotifications(status === 'signedIn' && !pending, user?.notifications ?? false);
   const colors = useColors();
   // iPad: the treadmill setup is a full screen, as in its mockup.
   const wide = useWide();

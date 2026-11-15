@@ -1,0 +1,62 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT o.id, o.user_id, o.message, u.language FROM push_outbox o JOIN users u ON u.id = o.user_id\n         ORDER BY o.id LIMIT 50 FOR UPDATE OF o SKIP LOCKED",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "push_outbox",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "user_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "push_outbox",
+            "name": "user_id"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "message",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "push_outbox",
+            "name": "message"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "language",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "users",
+            "name": "language"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "9d0fccbdfeb169a17d60198b3c52ea85598acc03cab48e7dce1c8bfb6698d8ff"
+}

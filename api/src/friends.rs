@@ -15,6 +15,7 @@ use uuid::Uuid;
 use crate::{
     auth::AuthUser,
     error::{AppError, AppResult, ErrorBody},
+    push::{self, Message},
     state::AppState,
 };
 
@@ -188,6 +189,8 @@ async fn add_friend(
             )
             .fetch_one(&mut *tx)
             .await?;
+            let from = push::first_name(&mut tx, user_id).await?;
+            push::queue(&mut tx, friend_id, &Message::FriendAccepted { user_id, from }).await?;
             ("accepted", since)
         }
         Some(link) => ("pending", link.since),
@@ -203,6 +206,13 @@ async fn add_friend(
             )
             .fetch_one(&mut *tx)
             .await?;
+            let from = push::first_name(&mut tx, user_id).await?;
+            let message = if by_invite {
+                Message::FriendAccepted { user_id, from }
+            } else {
+                Message::FriendRequest { from }
+            };
+            push::queue(&mut tx, friend_id, &message).await?;
             (status, since)
         }
     };
@@ -233,6 +243,9 @@ async fn accept_friend(
     if updated.rows_affected() == 0 {
         return Err(AppError::not_found("friend request not found"));
     }
+    let mut conn = state.db.acquire().await?;
+    let from = push::first_name(&mut conn, user_id).await?;
+    push::queue(&mut conn, id, &Message::FriendAccepted { user_id, from }).await?;
     Ok(StatusCode::NO_CONTENT)
 }
 

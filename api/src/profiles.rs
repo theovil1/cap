@@ -18,6 +18,7 @@ use crate::{
     geo::Place,
     leaderboards::streaks,
     public_routes::Walker,
+    push::{self, Message},
     state::AppState,
 };
 
@@ -248,6 +249,11 @@ async fn follow(
             .await?;
     if !exists {
         return Err(AppError::not_found("walker not found"));
+    }
+    if inserted.rows_affected() > 0 {
+        let mut conn = state.db.acquire().await?;
+        let from = push::first_name(&mut conn, me).await?;
+        push::queue(&mut conn, id, &Message::NewFollower { user_id: me, from }).await?;
     }
     Ok(StatusCode::NO_CONTENT)
 }

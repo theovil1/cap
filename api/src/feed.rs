@@ -20,6 +20,7 @@ use crate::{
     error::{AppError, AppResult, ErrorBody},
     leaderboards::streaks,
     public_routes::Walker,
+    push::{self, Message},
     state::AppState,
 };
 
@@ -397,10 +398,31 @@ async fn bravo(
     Path(id): Path<Uuid>,
 ) -> AppResult<Json<BravoCount>> {
     visible(&state.db, me, id).await?;
-    sqlx::query!("INSERT INTO bravos (post_id, user_id) VALUES ($1, $2) ON CONFLICT DO NOTHING", id, me)
-        .execute(&state.db)
-        .await?;
+    let added =
+        sqlx::query!("INSERT INTO bravos (post_id, user_id) VALUES ($1, $2) ON CONFLICT DO NOTHING", id, me)
+            .execute(&state.db)
+            .await?;
+    if added.rows_affected() > 0 {
+        tell_author(&state.db, me, id, |from| Message::Bravo { post_id: id, from }).await?;
+    }
     Ok(Json(bravo_count(&state.db, me, id).await?))
+}
+
+/// Tells a post's author what someone else did with it.
+async fn tell_author(
+    db: &PgPool,
+    me: Uuid,
+    post: Uuid,
+    message: impl FnOnce(String) -> Message,
+) -> AppResult<()> {
+    let mut conn = db.acquire().await?;
+    let author =
+        sqlx::query_scalar!("SELECT author_id FROM posts WHERE id = $1", post).fetch_one(&mut *conn).await?;
+    if author != me {
+        let from = push::first_name(&mut conn, me).await?;
+        push::queue(&mut conn, author, &message(from)).await?;
+    }
+    Ok(())
 }
 
 /// Take a Bravo back.
@@ -488,6 +510,7 @@ async fn add_comment(
     )
     .execute(&state.db)
     .await?;
+    tell_author(&state.db, me, id, |from| Message::Comment { post_id: id, from }).await?;
     let Json(list) = list_comments(State(state), AuthUser(me), Path(id)).await?;
     Ok((StatusCode::CREATED, Json(list)))
 }

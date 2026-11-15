@@ -36,8 +36,13 @@ services:
       GRAPHHOPPER_URL: http://graphhopper:8989
       PHOTON_URL: http://photon:2322
       BEHIND_PROXY: ${BEHIND_PROXY:-false}
+      # Push notifications: the .p8 key goes in infra/secrets/apns.p8 (never versioned).
+      APNS_KEY_ID: ${APNS_KEY_ID:-}
+      APNS_TEAM_ID: ${APNS_TEAM_ID:-}
       LOG_FORMAT: json
       RUST_LOG: info,tower_http=info
+    volumes:
+      - ./secrets:/run/secrets:ro
     ports:
       - "${API_BIND:-127.0.0.1}:${API_PORT:-8080}:8080"
 

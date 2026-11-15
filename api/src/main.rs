@@ -1,7 +1,7 @@
 use std::net::SocketAddr;
 
 use anyhow::Context;
-use cap_api::{MIGRATOR, app, base_routes, config::Config, state::AppState};
+use cap_api::{MIGRATOR, app, base_routes, config::Config, push, state::AppState};
 use sqlx::postgres::PgPoolOptions;
 use tracing_subscriber::{EnvFilter, fmt};
 
@@ -32,6 +32,7 @@ async fn main() -> anyhow::Result<()> {
     let state = AppState::new(db, config)?;
     // In the background: GraphHopper and Wikimedia Commons can be slow.
     tokio::spawn(base_routes::publish_missing(state.clone()));
+    tokio::spawn(push::run(state.clone()));
     let app = app::router(state);
     axum::serve(listener, app.into_make_service_with_connect_info::<SocketAddr>())
         .with_graceful_shutdown(shutdown_signal())

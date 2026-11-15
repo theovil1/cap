@@ -1,0 +1,40 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT token, sandbox FROM push_devices WHERE user_id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "token",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "push_devices",
+            "name": "token"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "sandbox",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "push_devices",
+            "name": "sandbox"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false
+    ]
+  },
+  "hash": "4d04a07b59173affd6375cdeb88d79e1ad79c7868995ebcb250b8f5a7772b5b5"
+}

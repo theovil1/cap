@@ -1,0 +1,35 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "WITH due AS (\n             UPDATE users u SET streak_reminded_on = $1\n             WHERE u.notifications AND u.streak_reminded_on IS DISTINCT FROM $1\n               AND EXISTS (SELECT 1 FROM push_devices d WHERE d.user_id = u.id)\n               AND u.id IN (SELECT user_id FROM sessions WHERE source = 'treadmill' GROUP BY user_id\n                            HAVING max((started_at AT TIME ZONE 'Europe/Paris')::date) = $1 - 1)\n             RETURNING u.id)\n         SELECT due.id AS \"id!\", array_agg(DISTINCT (s.started_at AT TIME ZONE 'Europe/Paris')::date)\n                    AS \"days!: Vec<time::Date>\"\n         FROM due JOIN sessions s ON s.user_id = due.id AND s.source = 'treadmill'\n         GROUP BY due.id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id!",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "users",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "days!: Vec<time::Date>",
+        "type_info": "DateArray",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Date"
+      ]
+    },
+    "nullable": [
+      false,
+      null
+    ]
+  },
+  "hash": "98cd0cc3c4e8f4793f6092c2926df54bf56cde86782a90a80fd1fdd8a53bad21"
+}

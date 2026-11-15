@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO push_outbox (user_id, message)\n         SELECT u.id, $2 FROM users u\n         WHERE u.id = $1 AND u.notifications AND EXISTS (SELECT 1 FROM push_devices d WHERE d.user_id = u.id)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Jsonb"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "612491f0fe414df6b0a9f5527a56c2d5698377ee81b08c21dce357a535d3c883"
+}

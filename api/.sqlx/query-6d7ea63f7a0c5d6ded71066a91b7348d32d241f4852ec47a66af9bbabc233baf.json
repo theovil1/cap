@@ -1,0 +1,12 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM push_outbox WHERE created_at < now() - interval '1 day'",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": []
+  },
+  "hash": "6d7ea63f7a0c5d6ded71066a91b7348d32d241f4852ec47a66af9bbabc233baf"
+}

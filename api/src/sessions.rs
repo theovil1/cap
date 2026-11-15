@@ -14,7 +14,9 @@ use uuid::Uuid;
 use crate::{
     auth::AuthUser,
     error::{AppError, AppResult, ErrorBody},
-    feed, races,
+    feed,
+    push::{self, Message},
+    races,
     stages::Stage,
     state::AppState,
 };
@@ -302,6 +304,26 @@ async fn allocate(
     )
     .execute(&mut *tx)
     .await?;
+    if kind == "race" && added > 0.0 {
+        // Rivals left behind by this session.
+        let passed = sqlx::query_scalar!(
+            "SELECT user_id FROM journey_participants
+             WHERE journey_id = $1 AND user_id <> $2 AND arrived_at IS NULL
+               AND distance_m >= $3 AND distance_m < $4",
+            journey_id,
+            user_id,
+            done_m,
+            total_m
+        )
+        .fetch_all(&mut *tx)
+        .await?;
+        if !passed.is_empty() {
+            let by = push::first_name(&mut *tx, user_id).await?;
+            for rival in passed {
+                push::queue(&mut *tx, rival, &Message::Overtaken { journey_id, by: by.clone() }).await?;
+            }
+        }
+    }
     if arrived && kind == "solo" {
         sqlx::query!("UPDATE journeys SET status = 'finished' WHERE id = $1", journey_id)
             .execute(&mut *tx)

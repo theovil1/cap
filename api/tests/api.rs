@@ -84,6 +84,9 @@ async fn server(db: PgPool) -> TestServer {
         graphhopper_url: fakes.clone(),
         photon_url: fakes,
         behind_proxy: false,
+        apns_key_file: String::new(),
+        apns_key_id: None,
+        apns_team_id: None,
     };
     let app = app::router(AppState::new(db, config).unwrap());
     TestServer::builder().http_transport().build(app.into_make_service_with_connect_info::<SocketAddr>())
@@ -1508,4 +1511,69 @@ async fn suggestions_are_friends_of_friends(db: PgPool) {
     let list: Value =
         server.get("/users/suggestions").add_header("authorization", bearer(&theo)).await.json();
     assert_eq!(list.as_array().unwrap().len(), 0);
+}
+
+#[sqlx::test(migrator = "cap_api::MIGRATOR")]
+async fn push_notifications_wait_in_the_outbox(db: PgPool) {
+    let server = server(db.clone()).await;
+    let theo = register(&server, "theo").await;
+    let lilou = register(&server, "lilou").await;
+    let theo_id = theo["user"]["id"].as_str().unwrap();
+    let outbox = || async {
+        sqlx::query_scalar::<_, Value>("SELECT message FROM push_outbox ORDER BY id")
+            .fetch_all(&db)
+            .await
+            .unwrap()
+    };
+
+    server
+        .post("/me/devices")
+        .add_header("authorization", bearer(&lilou))
+        .json(&json!({ "token": "not hex" }))
+        .await
+        .assert_status_bad_request();
+    server
+        .post("/me/devices")
+        .add_header("authorization", bearer(&lilou))
+        .json(&json!({ "token": "ABCDEF0123", "sandbox": true }))
+        .await
+        .assert_status(StatusCode::NO_CONTENT);
+
+    // Lilou has a phone: she hears of Théo's request. Théo has none: nothing for him.
+    server
+        .post("/friends")
+        .add_header("authorization", bearer(&theo))
+        .json(&json!({ "username": "lilou" }))
+        .await
+        .assert_status_ok();
+    server
+        .post(&format!("/friends/{theo_id}/accept"))
+        .add_header("authorization", bearer(&lilou))
+        .await
+        .assert_status(StatusCode::NO_CONTENT);
+    let messages = outbox().await;
+    assert_eq!(messages.len(), 1);
+    assert_eq!(messages[0]["type"], "friend_request");
+    assert_eq!(messages[0]["from"], "Théo");
+
+    // Notifications off, or the phone signed out: nothing more is queued.
+    server
+        .patch("/me")
+        .add_header("authorization", bearer(&lilou))
+        .json(&json!({ "notifications": false }))
+        .await
+        .assert_status_ok();
+    server
+        .post(&format!("/users/{}/follow", lilou["user"]["id"].as_str().unwrap()))
+        .add_header("authorization", bearer(&theo))
+        .await
+        .assert_status(StatusCode::NO_CONTENT);
+    assert_eq!(outbox().await.len(), 1);
+    server
+        .delete("/me/devices/abcdef0123")
+        .add_header("authorization", bearer(&lilou))
+        .await
+        .assert_status(StatusCode::NO_CONTENT);
+    let left: i64 = sqlx::query_scalar("SELECT count(*) FROM push_devices").fetch_one(&db).await.unwrap();
+    assert_eq!(left, 0);
 }

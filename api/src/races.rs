@@ -14,6 +14,7 @@ use crate::{
     auth::AuthUser,
     error::{AppError, AppResult, ErrorBody},
     journeys::{JourneyDetail, fetch_detail},
+    push::{self, Message},
     state::AppState,
 };
 
@@ -87,6 +88,10 @@ async fn create_race(
     .await?;
     if usize::try_from(invited.rows_affected()).ok() != Some(friend_ids.len()) {
         return Err(AppError::unprocessable("not_friends", "only friends can be invited"));
+    }
+    let from = push::first_name(&mut tx, user_id).await?;
+    for friend in &friend_ids {
+        push::queue(&mut tx, *friend, &Message::RaceInvite { journey_id, from: from.clone() }).await?;
     }
     tx.commit().await?;
     Ok((StatusCode::CREATED, Json(fetch_detail(&state.db, &state.live, user_id, journey_id).await?)))
@@ -178,6 +183,17 @@ async fn start_race(
     sqlx::query!("DELETE FROM journey_participants WHERE journey_id = $1 AND joined_at IS NULL", id)
         .execute(&mut *tx)
         .await?;
+    let from = push::first_name(&mut tx, user_id).await?;
+    let walkers = sqlx::query_scalar!(
+        "SELECT user_id FROM journey_participants WHERE journey_id = $1 AND user_id <> $2",
+        id,
+        user_id
+    )
+    .fetch_all(&mut *tx)
+    .await?;
+    for walker in walkers {
+        push::queue(&mut tx, walker, &Message::RaceStarted { journey_id: id, from: from.clone() }).await?;
+    }
     tx.commit().await?;
     Ok(Json(fetch_detail(&state.db, &state.live, user_id, id).await?))
 }
@@ -201,14 +217,26 @@ pub async fn record_arrival(tx: &mut sqlx::PgConnection, journey_id: Uuid) -> Ap
 
 /// A race is over once every walker still in it has arrived.
 pub async fn finish_if_everyone_arrived(tx: &mut sqlx::PgConnection, journey_id: Uuid) -> AppResult<()> {
-    sqlx::query!(
+    let finished = sqlx::query!(
         "UPDATE journeys j SET status = 'finished'
          WHERE j.id = $1 AND j.kind = 'race' AND j.status = 'active'
            AND NOT EXISTS (SELECT 1 FROM journey_participants p
                            WHERE p.journey_id = j.id AND p.arrived_at IS NULL)",
         journey_id
     )
-    .execute(tx)
+    .execute(&mut *tx)
     .await?;
+    if finished.rows_affected() == 0 {
+        return Ok(());
+    }
+    let places = sqlx::query!(
+        "SELECT user_id, rank AS \"rank!\" FROM journey_participants WHERE journey_id = $1 AND rank IS NOT NULL",
+        journey_id
+    )
+    .fetch_all(&mut *tx)
+    .await?;
+    for place in places {
+        push::queue(tx, place.user_id, &Message::RaceFinished { journey_id, rank: place.rank }).await?;
+    }
     Ok(())
 }

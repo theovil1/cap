@@ -14,6 +14,7 @@ import { isNewAccount, resetOnboarding, startOnboarding } from '@/onboarding/sta
 import { clearAll, getValue, localOwner, setValue } from '@/session/store';
 import { syncAppearance } from '@/settings/appearance';
 import { syncPending } from '@/session/sync';
+import { unregisterForPush } from '@/notifications/push';
 
 import {
   api,
@@ -158,6 +159,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       signOut: async () => {
         // Send what is still waiting before the local data is wiped.
         await syncPending().catch(() => 0);
+        await unregisterForPush();
         const refreshToken = storedRefreshToken();
         if (refreshToken) {
           await api('/auth/logout', {

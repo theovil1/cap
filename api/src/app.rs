@@ -16,7 +16,7 @@ use utoipa_scalar::{Scalar, Servable};
 
 use crate::{
     account, auth, badges, events, feed, friends, geo, history, journeys, leaderboards, live, privacy,
-    profiles, public_routes, races, sessions, state::AppState, users,
+    profiles, public_routes, push, races, sessions, state::AppState, users,
 };
 
 #[derive(OpenApi)]
@@ -64,6 +64,7 @@ fn api_router() -> OpenApiRouter<AppState> {
         .merge(auth::router())
         .merge(users::router())
         .merge(account::router())
+        .merge(push::router())
         .merge(friends::router())
         .merge(leaderboards::router())
         .merge(geo::router())
