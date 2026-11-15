@@ -27,10 +27,13 @@ export function Tabs<T extends string>({
   options,
   value,
   onChange,
+  height,
 }: {
   options: { value: T; label: string; dot?: boolean }[];
   value: T;
   onChange: (value: T) => void;
+  /** iPad Explorer: 50, as high as the search bar next to it. */
+  height?: number;
 }) {
   const colors = useColors();
   return (
@@ -45,6 +48,7 @@ export function Tabs<T extends string>({
             accessibilityState={{ selected: on }}
             style={[
               styles.tab,
+              height ? { height, borderRadius: 16 } : null,
               on
                 ? { backgroundColor: colors.inverse, borderColor: colors.inverse }
                 : { backgroundColor: colors.surface, borderColor: colors.track },

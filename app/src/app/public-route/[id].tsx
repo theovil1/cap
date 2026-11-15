@@ -150,10 +150,13 @@ function Gallery({
   route,
   height,
   width,
+  under = 0,
 }: {
   route: PublicRouteDetail;
   height: number;
   width: number;
+  /** Points hidden on the right under a panel: the dots and credit keep clear. */
+  under?: number;
 }) {
   const { t } = useTranslation();
   const [page, setPage] = useState(0);
@@ -205,7 +208,7 @@ function Gallery({
               style={[styles.chip, { bottom: 52 }]}
             />
             {route.photos.find((p) => p.kind === kind)?.credit ? (
-              <Text style={[styles.credit, { bottom: 24 }]} numberOfLines={1}>
+              <Text style={[styles.credit, { bottom: 24, right: 16 + under }]} numberOfLines={1}>
                 {t('publicRoute.credit', {
                   credit: route.photos.find((p) => p.kind === kind)?.credit,
                 })}
@@ -214,7 +217,7 @@ function Gallery({
           </View>
         ))}
       </ScrollView>
-      <View style={[styles.dots, { bottom: 60 }]} pointerEvents="none">
+      <View style={[styles.dots, { bottom: 60, right: 20 + under }]} pointerEvents="none">
         {slides.map((kind, i) => (
           <View
             key={kind}
@@ -438,23 +441,21 @@ function Wide({ route }: { route: PublicRouteDetail }) {
   const colors = useColors();
   const shadows = useShadows();
   const { width, height } = useWindowDimensions();
-  // Mockup: the pictures take the width the 412 panel leaves, the panel lies
-  // over their edge, 20 from the screen's.
-  const panel = 412;
+  const insets = useSafeAreaInsets();
+  // The panel is docked on the right, its round corners over the pictures,
+  // which run under them.
+  const panel = 432;
+  const round = 34;
   return (
     <View style={[styles.screen, { backgroundColor: colors.background }]}>
-      <Gallery route={route} width={width - panel} height={height} />
+      <Gallery route={route} width={width - panel + round} height={height} under={round} />
       <View
-        style={[
-          styles.panel,
-          { backgroundColor: colors.surface, width: panel, top: 20, bottom: 20 },
-          shadows.floating,
-        ]}
+        style={[styles.panel, { backgroundColor: colors.surface, width: panel }, shadows.floating]}
       >
-        <ScrollView contentContainerStyle={styles.panelContent}>
+        <ScrollView contentContainerStyle={[styles.panelContent, { paddingTop: insets.top + 26 }]}>
           <Body route={route} wide />
         </ScrollView>
-        <View style={styles.panelFooter}>
+        <View style={[styles.panelFooter, { paddingBottom: insets.bottom + 26 }]}>
           <ActionBar route={route} />
         </View>
       </View>
@@ -539,7 +540,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  panel: { position: 'absolute', right: 20, borderRadius: 34, overflow: 'hidden' },
+  panel: {
+    position: 'absolute',
+    right: 0,
+    top: 0,
+    bottom: 0,
+    borderTopLeftRadius: 34,
+    borderBottomLeftRadius: 34,
+    overflow: 'hidden',
+  },
   panelContent: { padding: 26, paddingBottom: 12, gap: 16 },
   panelFooter: { paddingHorizontal: 26, paddingBottom: 26, paddingTop: 10 },
   smallTile: {

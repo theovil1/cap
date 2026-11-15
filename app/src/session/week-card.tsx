@@ -60,7 +60,7 @@ const styles = StyleSheet.create({
   weekHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline' },
   weekLabel: { fontSize: 14 },
   weekProfile: { borderRadius: 30, paddingVertical: 18, paddingHorizontal: 22, gap: 10 },
-  weekLabelProfile: { fontSize: 15, fontFamily: fonts.textSemiBold, color: undefined },
+  weekLabelProfile: { fontSize: 15, fontFamily: fonts.textSemiBold },
   bars: { flex: 1, flexDirection: 'row', alignItems: 'flex-end', gap: 10 },
   barColumn: { flex: 1, height: '100%', alignItems: 'center', justifyContent: 'flex-end', gap: 6 },
   bar: { width: '100%', borderRadius: 8 },

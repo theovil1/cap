@@ -68,6 +68,7 @@ export default function ExploreScreen() {
             ]}
             value={part}
             onChange={setPart}
+            height={wide ? 50 : undefined}
           />
         </View>
         <View style={wide ? styles.flex : null}>
