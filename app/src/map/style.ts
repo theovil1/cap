@@ -29,8 +29,8 @@ const MAP_COLORS = {
     road: '#2A2C33',
     casing: '#1A1B22',
     building: '#23252E',
-    /** Lit windows: one building in seven glows. */
-    lit: '#5C4A2E',
+    /** Lit windows: one building in seven glows, faintly. */
+    lit: '#332D27',
     rail: '#2E303A',
     label: '#A2A4AD',
     halo: '#0B0C0F',
@@ -48,6 +48,9 @@ function recolor(
 ): LayerSpecification | null {
   const id = layer.id;
   if (HIDDEN.test(id)) return null;
+  // Patterned areas (pedestrian squares, wetlands...) come with Liberty's own
+  // light hatching, which stood out as white stripes on the night map.
+  if ('paint' in layer && layer.paint && 'fill-pattern' in layer.paint) return null;
   const paint = { ...(('paint' in layer && layer.paint) || {}) } as Record<string, unknown>;
   if (layer.type === 'background') paint['background-color'] = c.ground;
   else if (layer.type === 'fill' && /park|wood|grass|pitch|track|cemetery/.test(id)) {

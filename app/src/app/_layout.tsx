@@ -20,6 +20,7 @@ import { AppState } from 'react-native';
 
 import { AuthProvider, useAuth } from '@/api/auth';
 import '@/i18n';
+import '@/map/logs';
 import { useOnboarding } from '@/onboarding/state';
 import { SessionProvider } from '@/session/session-context';
 import { useColors } from '@/theme';
