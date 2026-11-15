@@ -157,6 +157,15 @@ async fn add_friend(
     }
 
     let mut tx = state.db.begin().await?;
+    // Both asking each other at the same moment: one after the other, so the
+    // second sees the first one's request and accepts it.
+    sqlx::query!(
+        "SELECT pg_advisory_xact_lock(hashtextextended(LEAST($1::uuid, $2::uuid)::text || GREATEST($1::uuid, $2::uuid)::text, 0))",
+        user_id,
+        friend_id
+    )
+    .execute(&mut *tx)
+    .await?;
     let existing = sqlx::query!(
         "SELECT user_id, status, COALESCE(accepted_at, created_at) AS \"since!\" FROM friendships
          WHERE LEAST(user_id, friend_id) = LEAST($1::uuid, $2::uuid)

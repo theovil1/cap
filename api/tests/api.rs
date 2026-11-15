@@ -660,14 +660,23 @@ async fn races_from_invitation_to_finish(db: PgPool) {
     assert_eq!(started["status"], "active");
     assert_eq!(started["players"], 2);
 
-    // A session from before the start does not count.
+    // A session over before the start does not count; one under way at the start
+    // counts from then on.
     let early: Value = server
         .post("/sessions")
         .add_header("authorization", bearer(&theo))
-        .json(&session(Uuid::now_v7(), 100.0, 90))
+        .json(&session_from_now(-200, 100.0, 90))
         .await
         .json();
     assert_eq!(early["allocations"].as_array().unwrap().len(), 0);
+    let warm_up: Value = server
+        .post("/sessions")
+        .add_header("authorization", bearer(&lilou))
+        .json(&session_from_now(-60, 120.0, 120))
+        .await
+        .json();
+    let counted = warm_up["allocations"][0]["distance_m"].as_f64().unwrap();
+    assert!((50.0..=70.0).contains(&counted), "{counted}");
 
     // Live: Théo walks, Lilou sees his pawn move.
     let mut lilou_live = server

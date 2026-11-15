@@ -68,11 +68,18 @@ impl LiveHub {
     ) -> Option<LivePosition> {
         let walking = self.walking.lock().unwrap_or_else(PoisonError::into_inner);
         let w = walking.get(&user_id)?;
-        let counts = starts_at.is_some_and(|start| w.started_at >= start);
-        (w.at.elapsed() <= FRESH && counts).then(|| LivePosition {
-            distance_m: (synced_m + w.session_m).min(route_m),
-            speed_kmh: w.speed_kmh,
-        })
+        let start = starts_at?;
+        // A session begun before the start counts from the start on, at an even pace.
+        let session_m = if w.started_at >= start {
+            w.session_m
+        } else {
+            let now = OffsetDateTime::now_utc();
+            let total = (now - w.started_at).as_seconds_f64();
+            let after = (now - start).as_seconds_f64().max(0.0);
+            if total > 0.0 { w.session_m * (after / total).min(1.0) } else { 0.0 }
+        };
+        (w.at.elapsed() <= FRESH)
+            .then(|| LivePosition { distance_m: (synced_m + session_m).min(route_m), speed_kmh: w.speed_kmh })
     }
 
     /// Whether a walker sent fresh news of a session under way.
@@ -277,8 +284,10 @@ mod tests {
             Some(LivePosition { distance_m: 1_800.0, speed_kmh: 5.0 })
         );
         assert_eq!(hub.race_position(user, before, 4_900.0, 5_000.0).unwrap().distance_m, 5_000.0);
-        // A race started after this session: the session does not count.
-        assert_eq!(hub.race_position(user, Some(OffsetDateTime::now_utc()), 0.0, 5_000.0), None);
+        // A race started halfway through this session: half of it counts.
+        let halfway = Some(started + time::Duration::minutes(5));
+        let half = hub.race_position(user, halfway, 0.0, 5_000.0).unwrap().distance_m;
+        assert!((390.0..=410.0).contains(&half), "{half}");
         // A jump too big for the time since the last message is refused.
         assert!(!hub.update(user, started, 2_000.0, 5.0));
         hub.stop(user);

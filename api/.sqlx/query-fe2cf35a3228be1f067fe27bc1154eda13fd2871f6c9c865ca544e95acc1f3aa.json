@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM journey_participants p USING journeys j\n         WHERE j.id = p.journey_id AND p.journey_id = $1 AND p.user_id = $2\n           AND j.kind = 'race' AND j.created_by <> $2\n           AND j.status <> 'finished' AND p.arrived_at IS NULL",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "fe2cf35a3228be1f067fe27bc1154eda13fd2871f6c9c865ca544e95acc1f3aa"
+}

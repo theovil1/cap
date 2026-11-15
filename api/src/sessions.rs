@@ -168,35 +168,42 @@ async fn upload_session(
     };
 
     crate::events::tick(&state.db).await?;
-    // Not counted: manual sessions in races, sessions before the start, before signing up or after the end.
+    // Not counted: manual sessions in races, sessions before signing up or after the end.
+    // A session begun before a race start (or an event sign-up) counts from then on.
     let targets = sqlx::query!(
-        "SELECT j.id, j.kind, p.distance_m, r.distance_m AS route_distance_m
+        "SELECT j.id, j.kind, CASE j.kind WHEN 'race' THEN j.starts_at WHEN 'event' THEN GREATEST(j.starts_at, p.joined_at) END AS counts_from,
+                p.distance_m, r.distance_m AS route_distance_m
          FROM journey_participants p
          JOIN journeys j ON j.id = p.journey_id
          JOIN routes r ON r.id = j.route_id
          WHERE p.user_id = $1 AND j.status = 'active' AND p.arrived_at IS NULL AND p.joined_at IS NOT NULL
            AND ($2::uuid[] IS NULL OR j.id = ANY($2))
-           AND (j.kind = 'solo' OR ($3 = 'treadmill' AND $4 >= j.starts_at
-                AND (j.kind <> 'event' OR ($4 >= p.joined_at AND $4 < j.ends_at))))
+           AND (j.kind = 'solo' OR ($3 = 'treadmill' AND (
+                (j.kind = 'race' AND $5 > j.starts_at)
+                OR (j.kind = 'event' AND $5 > GREATEST(j.starts_at, p.joined_at) AND $4 < j.ends_at))))
          ORDER BY j.created_at
          FOR UPDATE OF p",
         user_id,
         body.journey_ids.as_deref(),
         body.source.as_str(),
         body.started_at,
+        body.ended_at,
     )
     .fetch_all(&mut *tx)
     .await?;
 
     let mut allocations = Vec::with_capacity(targets.len());
     for target in targets {
+        // The share walked after the start, at an even pace.
+        let from = target.counts_from.map_or(body.started_at, |start| start.max(body.started_at));
+        let walk = Walk::new(body.started_at, body.ended_at, body.distance_m).from(from);
         let allocation = allocate(
             &mut tx,
             Ids { session: session_id, user: user_id, journey: target.id },
             &target.kind,
             target.distance_m,
             target.route_distance_m,
-            body.distance_m,
+            walk,
         )
         .await?;
         allocations.push(allocation);
@@ -215,6 +222,44 @@ async fn upload_session(
     Ok((StatusCode::CREATED, Json(SessionResult { id: session_id, created: true, allocations })))
 }
 
+/// A stretch of a session at an even pace: when it began and ended, and how far it went.
+#[derive(Clone, Copy)]
+struct Walk {
+    started_at: OffsetDateTime,
+    ended_at: OffsetDateTime,
+    distance_m: f64,
+}
+
+impl Walk {
+    const fn new(started_at: OffsetDateTime, ended_at: OffsetDateTime, distance_m: f64) -> Self {
+        Self { started_at, ended_at, distance_m }
+    }
+
+    /// The part of the walk after `from`.
+    fn from(self, from: OffsetDateTime) -> Self {
+        if from <= self.started_at {
+            return self;
+        }
+        let share = self.share_until(from);
+        Self { started_at: from, ended_at: self.ended_at, distance_m: self.distance_m * (1.0 - share) }
+    }
+
+    /// Share of the walk's time elapsed at `at`, between 0 and 1.
+    fn share_until(self, at: OffsetDateTime) -> f64 {
+        let total = (self.ended_at - self.started_at).as_seconds_f64();
+        if total <= 0.0 {
+            return 1.0;
+        }
+        ((at - self.started_at).as_seconds_f64() / total).clamp(0.0, 1.0)
+    }
+
+    /// When `metres` of the walk were behind.
+    fn at_distance(self, metres: f64) -> OffsetDateTime {
+        let share = if self.distance_m > 0.0 { (metres / self.distance_m).clamp(0.0, 1.0) } else { 1.0 };
+        self.started_at + (self.ended_at - self.started_at) * share
+    }
+}
+
 /// The session, its walker and one journey it counts for.
 struct Ids {
     session: Uuid,
@@ -230,11 +275,13 @@ async fn allocate(
     kind: &str,
     done_m: f64,
     route_m: f64,
-    session_m: f64,
+    walk: Walk,
 ) -> AppResult<Allocation> {
-    let added = session_m.min(route_m - done_m).max(0.0);
+    let added = walk.distance_m.min(route_m - done_m).max(0.0);
     let total_m = done_m + added;
     let arrived = total_m >= route_m;
+    // The moment the line was crossed, for race places.
+    let arrived_at = walk.at_distance(added);
     sqlx::query!(
         "INSERT INTO session_allocations (session_id, journey_id, distance_m) VALUES ($1, $2, $3)",
         session_id,
@@ -245,12 +292,13 @@ async fn allocate(
     .await?;
     sqlx::query!(
         "UPDATE journey_participants
-         SET distance_m = $3, arrived_at = CASE WHEN $4 THEN now() ELSE arrived_at END
+         SET distance_m = $3, arrived_at = CASE WHEN $4 THEN $5 ELSE arrived_at END
          WHERE journey_id = $1 AND user_id = $2",
         journey_id,
         user_id,
         total_m,
-        arrived
+        arrived,
+        arrived_at
     )
     .execute(&mut *tx)
     .await?;
@@ -259,7 +307,7 @@ async fn allocate(
             .execute(&mut *tx)
             .await?;
     } else if arrived {
-        races::record_arrival(&mut *tx, journey_id, user_id).await?;
+        races::record_arrival(&mut *tx, journey_id).await?;
     }
     sqlx::query!(
         "INSERT INTO stage_unlocks (user_id, journey_id, stage_id, session_id)

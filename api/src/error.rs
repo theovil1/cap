@@ -61,6 +61,12 @@ impl AppError {
 
 impl From<sqlx::Error> for AppError {
     fn from(error: sqlx::Error) -> Self {
+        // Two requests creating the same row at once: the second is told so, not a 500.
+        if let sqlx::Error::Database(db) = &error
+            && db.is_unique_violation()
+        {
+            return Self::new(StatusCode::CONFLICT, "conflict", "it already exists, try again");
+        }
         Self::internal(error)
     }
 }

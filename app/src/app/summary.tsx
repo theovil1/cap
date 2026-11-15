@@ -56,7 +56,12 @@ export default function SummaryScreen() {
   const summary = detail;
   const day = useDayStats();
   const { data: journeys = [] } = useJourneys();
-  const races = journeys.filter((j) => j.kind === 'race' && j.status !== 'waiting' && j.joined);
+  // The races this session counted for; before the sync, the ones under way.
+  const counted = session?.result?.allocations.map((a) => a.journey_id);
+  const races = journeys.filter(
+    (j) =>
+      j.kind === 'race' && j.joined && (counted ? counted.includes(j.id) : j.status === 'active'),
+  );
   const [chartWidth, setChartWidth] = useState(0);
   const wide = useWide();
 

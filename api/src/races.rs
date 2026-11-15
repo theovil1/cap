@@ -130,7 +130,8 @@ async fn leave_race(
     let left = sqlx::query!(
         "DELETE FROM journey_participants p USING journeys j
          WHERE j.id = p.journey_id AND p.journey_id = $1 AND p.user_id = $2
-           AND j.kind = 'race' AND j.created_by <> $2",
+           AND j.kind = 'race' AND j.created_by <> $2
+           AND j.status <> 'finished' AND p.arrived_at IS NULL",
         id,
         user_id
     )
@@ -181,14 +182,17 @@ async fn start_race(
     Ok(Json(fetch_detail(&state.db, &state.live, user_id, id).await?))
 }
 
-/// Arrival order of a walker in a race; the race ends when everyone is in.
-pub async fn record_arrival(tx: &mut sqlx::PgConnection, journey_id: Uuid, user_id: Uuid) -> AppResult<()> {
+/// Places in a race, by the time each walker crossed the line (sessions may
+/// arrive late from a phone that was offline); the race ends when everyone is in.
+pub async fn record_arrival(tx: &mut sqlx::PgConnection, journey_id: Uuid) -> AppResult<()> {
+    // One arrival at a time per race, so two at once cannot both be first.
+    sqlx::query!("SELECT id FROM journeys WHERE id = $1 FOR UPDATE", journey_id).fetch_one(&mut *tx).await?;
     sqlx::query!(
-        "UPDATE journey_participants SET rank = (
-             SELECT count(*) FROM journey_participants WHERE journey_id = $1 AND arrived_at IS NOT NULL)
-         WHERE journey_id = $1 AND user_id = $2",
-        journey_id,
-        user_id
+        "UPDATE journey_participants p SET rank = placed.place
+         FROM (SELECT user_id, (row_number() OVER (ORDER BY arrived_at, user_id))::int AS place
+               FROM journey_participants WHERE journey_id = $1 AND arrived_at IS NOT NULL) placed
+         WHERE p.journey_id = $1 AND p.user_id = placed.user_id",
+        journey_id
     )
     .execute(&mut *tx)
     .await?;
