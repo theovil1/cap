@@ -11,6 +11,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { fonts, useColors } from '@/theme';
+import { TIGHT_TEXT_SCALE } from '@/tokens';
 
 import { Grain } from './grain';
 
@@ -87,6 +88,7 @@ export function ScreenHeader({
           style={[headerStyles.title, wide && headerStyles.titleWide, { color: colors.text }]}
           numberOfLines={1}
           accessibilityRole="header"
+          maxFontSizeMultiplier={TIGHT_TEXT_SCALE}
         >
           {title}
         </Text>

@@ -110,6 +110,12 @@ export const avatarTones = [
   '#C9611B',
 ] as const;
 
+/**
+ * How far iOS text size may grow text in tight places (pills, tabs, buttons,
+ * big figures). Body text elsewhere follows the walker's setting freely.
+ */
+export const TIGHT_TEXT_SCALE = 1.35;
+
 export const fonts = {
   display: 'SpaceGrotesk_700Bold',
   displayMedium: 'SpaceGrotesk_500Medium',

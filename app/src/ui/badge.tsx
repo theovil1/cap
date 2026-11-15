@@ -12,7 +12,7 @@ import Svg, {
 } from 'react-native-svg';
 
 import { fonts, useColors } from '@/theme';
-import { badges, type BadgeKind } from '@/tokens';
+import { TIGHT_TEXT_SCALE, badges, type BadgeKind } from '@/tokens';
 
 /** The 12 scallop seal of every badge, in a 100 box. */
 const SEAL = (() => {
@@ -138,7 +138,12 @@ export function BadgeChip({ kind, label }: { kind: BadgeKind; label: string }) {
   return (
     <View style={[styles.chip, { backgroundColor: colors.inset }]}>
       <Badge kind={kind} size={20} label={label} />
-      <Text style={[styles.chipText, { color: colors.text }]}>{label}</Text>
+      <Text
+        maxFontSizeMultiplier={TIGHT_TEXT_SCALE}
+        style={[styles.chipText, { color: colors.text }]}
+      >
+        {label}
+      </Text>
     </View>
   );
 }

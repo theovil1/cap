@@ -5,6 +5,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { fonts, useColors } from '@/theme';
+import { TIGHT_TEXT_SCALE } from '@/tokens';
 
 import { Glass } from './primitives';
 import { useWide } from './layout';
@@ -61,6 +62,7 @@ export function FloatingNav({ state, navigateToTab }: BottomTabBarProps) {
                 strokeWidth={focused ? 2 : 1.7}
               />
               <Text
+                maxFontSizeMultiplier={TIGHT_TEXT_SCALE}
                 style={[
                   styles.label,
                   { color, fontFamily: focused ? fonts.textSemiBold : fonts.textMedium },

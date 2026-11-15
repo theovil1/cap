@@ -18,7 +18,7 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import { fonts, useColors, useShadows } from '@/theme';
-import { radius, size, type } from '@/tokens';
+import { TIGHT_TEXT_SCALE, radius, size, type } from '@/tokens';
 
 import { Figure } from './primitives';
 
@@ -54,7 +54,10 @@ export function Tabs<T extends string>({
                 : { backgroundColor: colors.surface, borderColor: colors.track },
             ]}
           >
-            <Text style={[styles.tabText, { color: on ? colors.onInverse : colors.text }]}>
+            <Text
+              maxFontSizeMultiplier={TIGHT_TEXT_SCALE}
+              style={[styles.tabText, { color: on ? colors.onInverse : colors.text }]}
+            >
               {option.label}
             </Text>
             {option.dot ? <StatusDot /> : null}
@@ -116,6 +119,7 @@ export function Chip({
       {icon}
       {/* Long names (countries) end with "…" instead of leaving the screen. */}
       <Text
+        maxFontSizeMultiplier={TIGHT_TEXT_SCALE}
         style={[type.label, styles.chipLabel, { color: on ? colors.onInverse : colors.text }]}
         numberOfLines={1}
       >
@@ -167,6 +171,7 @@ export function SearchBar({
     >
       <Search size={19} color={colors.text} strokeWidth={2.2} />
       <TextInput
+        maxFontSizeMultiplier={TIGHT_TEXT_SCALE}
         value={value}
         onChangeText={onChangeText}
         placeholder={placeholder}
@@ -198,9 +203,15 @@ export function TextField({ label, multiline, ...input }: TextInputProps & { lab
   return (
     <View style={styles.field}>
       {label ? (
-        <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>{label}</Text>
+        <Text
+          maxFontSizeMultiplier={TIGHT_TEXT_SCALE}
+          style={[styles.fieldLabel, { color: colors.textSecondary }]}
+        >
+          {label}
+        </Text>
       ) : null}
       <TextInput
+        maxFontSizeMultiplier={TIGHT_TEXT_SCALE}
         {...input}
         multiline={multiline}
         placeholderTextColor={colors.textMuted}
@@ -288,7 +299,12 @@ export function Stepper({
   );
   return (
     <View style={styles.stepper}>
-      <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>{label}</Text>
+      <Text
+        maxFontSizeMultiplier={TIGHT_TEXT_SCALE}
+        style={[styles.fieldLabel, { color: colors.textSecondary }]}
+      >
+        {label}
+      </Text>
       <View style={styles.stepperRow}>
         {step(<Minus size={20} color={colors.text} strokeWidth={2} />, onMinus, minusLabel)}
         <Figure value={value} unit={unit} size={64} style={styles.stepperValue} />
@@ -312,7 +328,10 @@ export function StepProgress({
   const colors = useColors();
   return (
     <View style={styles.progress} accessibilityRole="progressbar" accessibilityLabel={label}>
-      <Text style={[type.footnoteStrong, styles.tnum, { color: colors.textSecondary }]}>
+      <Text
+        maxFontSizeMultiplier={TIGHT_TEXT_SCALE}
+        style={[type.footnoteStrong, styles.tnum, { color: colors.textSecondary }]}
+      >
         {label}
       </Text>
       <View style={styles.segments}>
@@ -343,12 +362,21 @@ export function SectionHeader({
   const colors = useColors();
   return (
     <View style={styles.section}>
-      <Text style={[styles.sectionTitle, { color: colors.text }]} accessibilityRole="header">
+      <Text
+        maxFontSizeMultiplier={TIGHT_TEXT_SCALE}
+        style={[styles.sectionTitle, { color: colors.text }]}
+        accessibilityRole="header"
+      >
         {title}
       </Text>
       {action && onAction ? (
         <Pressable onPress={onAction} accessibilityRole="link" hitSlop={8}>
-          <Text style={[type.label, { color: colors.blueText }]}>{action}</Text>
+          <Text
+            maxFontSizeMultiplier={TIGHT_TEXT_SCALE}
+            style={[type.label, { color: colors.blueText }]}
+          >
+            {action}
+          </Text>
         </Pressable>
       ) : null}
     </View>

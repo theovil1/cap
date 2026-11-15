@@ -14,7 +14,7 @@ import {
 
 import { API_URL } from '@/api/client';
 import { fonts, useColors, useShadows } from '@/theme';
-import { avatarTones, radius, size as sizes } from '@/tokens';
+import { TIGHT_TEXT_SCALE, radius, size as sizes, avatarTones } from '@/tokens';
 
 export function Card({
   children,
@@ -146,6 +146,7 @@ export function Figure({
   const colors = useColors();
   return (
     <Text
+      maxFontSizeMultiplier={TIGHT_TEXT_SCALE}
       style={[
         styles.figure,
         {
@@ -162,6 +163,7 @@ export function Figure({
       {value}
       {unit ? (
         <Text
+          maxFontSizeMultiplier={TIGHT_TEXT_SCALE}
           style={{
             fontFamily: fonts.textSemiBold,
             fontSize: unitSize ?? Math.max(11, Math.round(size * 0.32)),
@@ -179,7 +181,14 @@ export function Figure({
 
 export function Label({ children, style }: { children: ReactNode; style?: StyleProp<TextStyle> }) {
   const colors = useColors();
-  return <Text style={[styles.label, { color: colors.textSecondary }, style]}>{children}</Text>;
+  return (
+    <Text
+      maxFontSizeMultiplier={TIGHT_TEXT_SCALE}
+      style={[styles.label, { color: colors.textSecondary }, style]}
+    >
+      {children}
+    </Text>
+  );
 }
 
 type ButtonTone = 'blue' | 'bluetooth' | 'accent' | 'dark' | 'light';
@@ -248,6 +257,7 @@ export function Button({
         icon
       )}
       <Text
+        maxFontSizeMultiplier={TIGHT_TEXT_SCALE}
         style={[
           styles.buttonText,
           { color: foreground, fontSize, letterSpacing: size === 'large' ? -0.16 : 0 },
@@ -366,6 +376,7 @@ export function Avatar({
   return (
     <View style={[box, styles.center]}>
       <Text
+        maxFontSizeMultiplier={TIGHT_TEXT_SCALE}
         style={{
           fontFamily: fonts.display,
           fontSize: Math.round((ring ? size - 6 : size) * 0.39),

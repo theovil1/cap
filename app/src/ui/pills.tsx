@@ -4,7 +4,7 @@ import type { ReactNode } from 'react';
 import { StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
 
 import { fonts, useColors, useShadows } from '@/theme';
-import { blur, radius } from '@/tokens';
+import { TIGHT_TEXT_SCALE, blur, radius } from '@/tokens';
 
 import { StatusDot } from './controls';
 
@@ -16,7 +16,12 @@ export function Tag({ label, icon: Icon, style }: PillProps) {
   return (
     <View style={[styles.pill, styles.tag, { backgroundColor: colors.accentSoft }, style]}>
       {Icon ? <Icon size={13} color={colors.accentText} strokeWidth={2.4} /> : null}
-      <Text style={[styles.bold12, { color: colors.accentText }]}>{label}</Text>
+      <Text
+        maxFontSizeMultiplier={TIGHT_TEXT_SCALE}
+        style={[styles.bold12, { color: colors.accentText }]}
+      >
+        {label}
+      </Text>
     </View>
   );
 }
@@ -43,7 +48,12 @@ export function GlassTag({ label, icon: Icon, style }: PillProps) {
           <Icon size={12} color={colors.onAccent} strokeWidth={2.6} />
         </View>
       ) : null}
-      <Text style={[styles.bold12, { color: colors.text }]}>{label}</Text>
+      <Text
+        maxFontSizeMultiplier={TIGHT_TEXT_SCALE}
+        style={[styles.bold12, { color: colors.text }]}
+      >
+        {label}
+      </Text>
     </View>
   );
 }
@@ -73,7 +83,9 @@ export function PhotoChip({ label, icon: Icon, style }: PillProps) {
         <BlurView intensity={blur.chip * 2} tint="light" style={StyleSheet.absoluteFill} />
       ) : null}
       {Icon ? <Icon size={14} color="#FFFFFF" strokeWidth={2.2} /> : null}
-      <Text style={[styles.bold125, styles.onPhoto]}>{label}</Text>
+      <Text maxFontSizeMultiplier={TIGHT_TEXT_SCALE} style={[styles.bold125, styles.onPhoto]}>
+        {label}
+      </Text>
     </View>
   );
 }
@@ -91,7 +103,10 @@ export function LivePill({ label, large, style }: PillProps & { large?: boolean 
       ]}
     >
       <View style={styles.liveDot} />
-      <Text style={[large ? styles.bold125 : styles.liveText, styles.tnum, { color: '#FFFFFF' }]}>
+      <Text
+        maxFontSizeMultiplier={TIGHT_TEXT_SCALE}
+        style={[large ? styles.bold125 : styles.liveText, styles.tnum, { color: '#FFFFFF' }]}
+      >
         {label}
       </Text>
     </View>
@@ -103,7 +118,12 @@ export function DeltaPill({ label, style }: PillProps) {
   const colors = useColors();
   return (
     <View style={[styles.pill, styles.delta, style]}>
-      <Text style={[styles.bold125, styles.tnum, { color: colors.onAccent }]}>{label}</Text>
+      <Text
+        maxFontSizeMultiplier={TIGHT_TEXT_SCALE}
+        style={[styles.bold125, styles.tnum, { color: colors.onAccent }]}
+      >
+        {label}
+      </Text>
     </View>
   );
 }
@@ -114,7 +134,12 @@ export function StatusLabel({ label }: { label: string }) {
   return (
     <View style={styles.status}>
       <StatusDot />
-      <Text style={[styles.semi125, { color: colors.success }]}>{label}</Text>
+      <Text
+        maxFontSizeMultiplier={TIGHT_TEXT_SCALE}
+        style={[styles.semi125, { color: colors.success }]}
+      >
+        {label}
+      </Text>
     </View>
   );
 }
@@ -125,7 +150,12 @@ export function InfoPill({ label, icon: Icon }: PillProps) {
   return (
     <View style={[styles.pill, styles.info, { backgroundColor: colors.blueSoft }]}>
       {Icon ? <Icon size={16} color={colors.blueText} strokeWidth={2} /> : null}
-      <Text style={[styles.semi135, styles.tnum, { color: colors.blueText }]}>{label}</Text>
+      <Text
+        maxFontSizeMultiplier={TIGHT_TEXT_SCALE}
+        style={[styles.semi135, styles.tnum, { color: colors.blueText }]}
+      >
+        {label}
+      </Text>
     </View>
   );
 }
@@ -136,7 +166,12 @@ export function InfoBanner({ icon: Icon, children }: { icon: LucideIcon; childre
   return (
     <View style={[styles.banner, { backgroundColor: colors.blueSoft }]}>
       <Icon size={18} color={colors.blueText} strokeWidth={2} />
-      <Text style={[styles.bannerText, { color: colors.text }]}>{children}</Text>
+      <Text
+        maxFontSizeMultiplier={TIGHT_TEXT_SCALE}
+        style={[styles.bannerText, { color: colors.text }]}
+      >
+        {children}
+      </Text>
     </View>
   );
 }

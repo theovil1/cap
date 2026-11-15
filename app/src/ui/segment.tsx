@@ -1,6 +1,7 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { fonts, useColors, useShadows } from '@/theme';
+import { TIGHT_TEXT_SCALE } from '@/tokens';
 
 /** Segmented control, as in the mockups (sessions per week, map mood...). */
 export function Segment<T extends string | number>({
@@ -32,7 +33,10 @@ export function Segment<T extends string | number>({
               on && { backgroundColor: colors.segmentThumb, ...shadows.card },
             ]}
           >
-            <Text style={[styles.segmentText, { color: on ? colors.text : colors.textSecondary }]}>
+            <Text
+              maxFontSizeMultiplier={TIGHT_TEXT_SCALE}
+              style={[styles.segmentText, { color: on ? colors.text : colors.textSecondary }]}
+            >
               {option.label}
             </Text>
           </Pressable>

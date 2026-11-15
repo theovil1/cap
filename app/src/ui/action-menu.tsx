@@ -7,7 +7,7 @@ import { Pressable, StyleSheet, Text, View, type StyleProp, type ViewStyle } fro
 import type { SFSymbol } from 'sf-symbols-typescript';
 
 import { useColors } from '@/theme';
-import { size, type } from '@/tokens';
+import { TIGHT_TEXT_SCALE, size, type } from '@/tokens';
 
 import { showActions } from './action-sheet';
 
@@ -122,7 +122,11 @@ export function MenuPill({
     <ActionMenu title={title} items={items} label={title ? `${title} : ${label}` : label}>
       <View style={[styles.pill, { backgroundColor: colors.surface, borderColor: colors.track }]}>
         {icon}
-        <Text style={[type.label, styles.pillText, { color: colors.text }]} numberOfLines={1}>
+        <Text
+          maxFontSizeMultiplier={TIGHT_TEXT_SCALE}
+          style={[type.label, styles.pillText, { color: colors.text }]}
+          numberOfLines={1}
+        >
           {label}
         </Text>
         <ChevronDown size={16} color={colors.textSecondary} strokeWidth={2.2} />

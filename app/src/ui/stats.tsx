@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import { Pressable, StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
 
 import { fonts, useColors } from '@/theme';
-import { radius, type } from '@/tokens';
+import { TIGHT_TEXT_SCALE, radius, type } from '@/tokens';
 
 import { Grain } from './grain';
 import { DeltaPill } from './pills';
@@ -23,6 +23,7 @@ export function Amount({
   const colors = useColors();
   return (
     <Text
+      maxFontSizeMultiplier={TIGHT_TEXT_SCALE}
       style={[
         styles.amount,
         { fontSize: size, letterSpacing: -size * 0.035, color: color ?? colors.text },
@@ -32,6 +33,7 @@ export function Amount({
       {value}
       {unit ? (
         <Text
+          maxFontSizeMultiplier={TIGHT_TEXT_SCALE}
           style={[styles.unit, { fontSize: size >= 20 ? 11 : 10, color: colors.textSecondary }]}
         >
           {' '}
@@ -57,7 +59,11 @@ export function StatTile({
   const colors = useColors();
   return (
     <View style={[styles.tile, { backgroundColor: colors.inset }, style]}>
-      <Text style={[styles.tileLabel, { color: colors.textSecondary }]} numberOfLines={1}>
+      <Text
+        maxFontSizeMultiplier={TIGHT_TEXT_SCALE}
+        style={[styles.tileLabel, { color: colors.textSecondary }]}
+        numberOfLines={1}
+      >
         {label}
       </Text>
       <Amount value={value} unit={unit} />
@@ -71,7 +77,12 @@ export function CountTile({ value, label }: { value: string; label: string }) {
   return (
     <View style={[styles.count, { backgroundColor: colors.inset }]}>
       <Amount value={value} size={30} />
-      <Text style={[type.caption, { color: colors.textSecondary }]}>{label}</Text>
+      <Text
+        maxFontSizeMultiplier={TIGHT_TEXT_SCALE}
+        style={[type.caption, { color: colors.textSecondary }]}
+      >
+        {label}
+      </Text>
     </View>
   );
 }
@@ -153,6 +164,7 @@ export function RankRow({
       ]}
     >
       <Text
+        maxFontSizeMultiplier={TIGHT_TEXT_SCALE}
         style={[
           styles.rank,
           { width: compact ? 34 : 26 },
@@ -164,6 +176,7 @@ export function RankRow({
       {avatar}
       <View style={styles.rowText}>
         <Text
+          maxFontSizeMultiplier={TIGHT_TEXT_SCALE}
           style={[compact ? type.callout : styles.name, { color: colors.text }]}
           numberOfLines={1}
         >
@@ -173,6 +186,7 @@ export function RankRow({
           <View style={styles.detailRow}>
             {detailIcon}
             <Text
+              maxFontSizeMultiplier={TIGHT_TEXT_SCALE}
               style={[styles.detail, styles.shrink, { color: colors.textSecondary }]}
               numberOfLines={1}
             >
@@ -206,12 +220,21 @@ export function RankCard({
     <View style={[styles.rankCard, { backgroundColor: colors.accent }]}>
       <Grain on="accent" />
       <View style={styles.rankCardText}>
-        <Text style={[styles.rankCardLabel, ink]}>{label}</Text>
-        <Text style={[styles.place, ink]}>
-          {place}
-          {suffix ? <Text style={styles.placeSuffix}> {suffix}</Text> : null}
+        <Text maxFontSizeMultiplier={TIGHT_TEXT_SCALE} style={[styles.rankCardLabel, ink]}>
+          {label}
         </Text>
-        <Text style={[styles.rankCardDetail, ink]}>{detail}</Text>
+        <Text maxFontSizeMultiplier={TIGHT_TEXT_SCALE} style={[styles.place, ink]}>
+          {place}
+          {suffix ? (
+            <Text maxFontSizeMultiplier={TIGHT_TEXT_SCALE} style={styles.placeSuffix}>
+              {' '}
+              {suffix}
+            </Text>
+          ) : null}
+        </Text>
+        <Text maxFontSizeMultiplier={TIGHT_TEXT_SCALE} style={[styles.rankCardDetail, ink]}>
+          {detail}
+        </Text>
       </View>
       {delta ? <DeltaPill label={delta} style={styles.center} /> : null}
     </View>
