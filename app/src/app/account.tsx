@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
   Alert,
+  Linking,
   Pressable,
   ScrollView,
   Share,
@@ -18,7 +19,7 @@ import { Toggle } from '@/ui/controls';
 import { ActionMenu, type MenuItem } from '@/ui/action-menu';
 import { countryName } from '@/i18n/countries';
 import { useAuth } from '@/api/auth';
-import { api, ApiError } from '@/api/client';
+import { api, API_URL, ApiError } from '@/api/client';
 import { useUpdateProfile, type ProfilePatch } from '@/api/profile';
 import type { UserProfile } from '@/api/types';
 import { SettingsWide } from '@/account/settings-wide';
@@ -134,6 +135,9 @@ export default function AccountScreen() {
     }
   };
 
+  const openPrivacy = () =>
+    Linking.openURL(`${API_URL}/privacy?lang=${i18n.language.startsWith('en') ? 'en' : 'fr'}`);
+
   const confirmDelete = () =>
     Alert.alert(t('account.deleteTitle'), t('account.deleteBody'), [
       { text: t('journeys.cancel'), style: 'cancel' },
@@ -237,6 +241,7 @@ export default function AccountScreen() {
             <Group>
               {visibilityRow}
               <Row label={t('account.export')} onPress={exportData} />
+              <Row label={t('account.privacyPolicy')} onPress={openPrivacy} />
             </Group>
           ),
         }}
@@ -353,6 +358,7 @@ export default function AccountScreen() {
 
         <Group>
           <Row label={t('account.export')} onPress={exportData} />
+          <Row label={t('account.privacyPolicy')} onPress={openPrivacy} />
         </Group>
         <Group>
           <Row label={t('profile.signOut')} onPress={signOut} tone="link" />

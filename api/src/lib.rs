@@ -16,6 +16,7 @@ pub mod journeys;
 pub mod leaderboards;
 pub mod live;
 pub mod photos;
+pub mod privacy;
 pub mod profiles;
 pub mod public_routes;
 pub mod races;

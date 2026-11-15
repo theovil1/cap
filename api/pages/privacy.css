@@ -1,0 +1,8 @@
+body{margin:0;background:#F4F2EE;color:#15161A;font:17px/1.55 -apple-system,system-ui,sans-serif}
+main{max-width:680px;margin:0 auto;padding:40px 22px 64px}
+h1{font-size:34px;line-height:1.1;letter-spacing:-.8px;margin:0 0 6px}
+h2{font-size:21px;margin:34px 0 8px}
+p,li{color:#3A3C44}ul{padding-left:20px}
+.date{color:#7A7C86;margin:0 0 26px}
+a{color:#FF5A1F}
+@media (prefers-color-scheme:dark){body{background:#0B0C0F;color:#F4F2EE}p,li{color:#C8CAD2}.date{color:#8A8D97}}
