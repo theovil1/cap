@@ -11,7 +11,7 @@ import {
 
 import i18n from '@/i18n';
 import { isNewAccount, resetOnboarding, startOnboarding } from '@/onboarding/state';
-import { clearAll, getValue, setValue } from '@/session/store';
+import { clearAll, getValue, localOwner, setValue } from '@/session/store';
 import { syncAppearance } from '@/settings/appearance';
 import { syncPending } from '@/session/sync';
 
@@ -93,13 +93,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (stored) applySettings(stored);
   }, []);
 
-  const forget = useCallback(() => {
-    clearAll();
-    resetOnboarding();
-    queryClient.clear();
-    setUserState(null);
-    setStatus('signedOut');
-  }, [queryClient]);
+  /** Signs out locally. Unsynced sessions stay unless the account is gone. */
+  const forget = useCallback(
+    (accountGone = false) => {
+      clearAll(accountGone ? undefined : getValue<UserProfile>(PROFILE_KEY)?.id);
+      resetOnboarding();
+      queryClient.clear();
+      setUserState(null);
+      setStatus('signedOut');
+    },
+    [queryClient],
+  );
 
   useEffect(() => {
     setSignedOutHandler(forget);
@@ -113,7 +117,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const accept = useCallback(
     async (auth: AuthResponse, fresh = false) => {
       // Another account on this phone: its local data must not leak to this one.
-      if (getValue<UserProfile>(PROFILE_KEY)?.id !== auth.user.id) {
+      if (localOwner(getValue<UserProfile>(PROFILE_KEY)?.id) !== auth.user.id) {
         clearAll();
         resetOnboarding();
       }
@@ -167,7 +171,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       deleteAccount: async () => {
         await api('/me', { method: 'DELETE' });
         await clearSession();
-        forget();
+        forget(true);
       },
     }),
     [status, user, setUser, accept, forget],

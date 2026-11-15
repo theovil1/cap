@@ -45,8 +45,28 @@ export function setValue(key: string, value: unknown): void {
   );
 }
 
-export function clearAll(): void {
-  database().execSync('DELETE FROM kv; DELETE FROM live_session; DELETE FROM sessions;');
+/** Whose unsynced sessions are kept on the phone after a sign-out. */
+const OWNER_KEY = 'pendingOwner';
+
+/**
+ * Wipes the local data. With an owner, sessions not yet confirmed by the server
+ * (and a session in progress) are kept for when that account signs in again:
+ * an expired token must never cost distance.
+ */
+export function clearAll(keepPendingFor?: string): void {
+  const keep =
+    keepPendingFor !== undefined && (pendingSessions().length > 0 || loadLive() !== null);
+  if (!keep) {
+    database().execSync('DELETE FROM kv; DELETE FROM live_session; DELETE FROM sessions;');
+    return;
+  }
+  database().execSync('DELETE FROM kv; DELETE FROM sessions WHERE result IS NOT NULL;');
+  setValue(OWNER_KEY, keepPendingFor);
+}
+
+/** The account the local data belongs to, signed in or not. */
+export function localOwner(profileId: string | undefined): string | null {
+  return profileId ?? getValue<string>(OWNER_KEY);
 }
 
 /** Written every 5 s during a session (specification: never lose distance). */

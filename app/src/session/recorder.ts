@@ -5,6 +5,8 @@ import type { TreadmillData } from '@/treadmill/ftms';
 export const STOP_AFTER_MS = 90_000;
 /** One point of the speed curve every this many milliseconds. */
 const SAMPLE_EVERY_MS = 15_000;
+/** Beyond this gap between frames, time is not counted as walking time. */
+const MAX_GAP_MS = 10_000;
 /** Shorter sessions are a belt nudged by accident and are dropped; anything walked counts. */
 export const MIN_DISTANCE_M = 10;
 
@@ -17,6 +19,8 @@ export type LiveSnapshot = {
   movingMs: number;
   inclineSum: number;
   speeds: number[];
+  /** Raw treadmill counter at the last save: distance walked while closed is not lost. */
+  rawCounterM?: number | null;
 };
 
 export type FinishedSession = {
@@ -47,6 +51,8 @@ export class SessionRecorder {
   private sampleMs = 0;
   private speedKmh = 0;
   private inclinePct = 0;
+  /** After a manual finish, the belt still slowing down must not start a new session. */
+  private waitForStillUntil = 0;
 
   constructor(private readonly newId: () => string) {}
 
@@ -59,13 +65,17 @@ export class SessionRecorder {
   resume(saved: LiveSnapshot): void {
     this.snapshot = { ...saved, speeds: [...saved.speeds] };
     this.offsetM = saved.distanceM;
-    this.tracker = new DistanceTracker();
+    this.tracker = new DistanceTracker(saved.rawCounterM ?? null);
   }
 
   /** Feeds one frame. Returns the finished session when this frame ends it. */
   update(data: TreadmillData, timeMs: number): FinishedSession | null {
     this.speedKmh = data.speedKmh;
     this.inclinePct = data.inclinePct ?? 0;
+    if (timeMs < this.waitForStillUntil) {
+      if (data.speedKmh > 0) return null;
+      this.waitForStillUntil = 0;
+    }
     if (!this.snapshot) {
       if (data.speedKmh <= 0) return null;
       this.snapshot = {
@@ -83,7 +93,8 @@ export class SessionRecorder {
     const tracker = this.tracker ?? new DistanceTracker();
     this.tracker = tracker;
 
-    const gap = this.lastFrameAt === null ? 0 : Math.min(timeMs - this.lastFrameAt, 10_000);
+    const rawGap = this.lastFrameAt === null ? 0 : timeMs - this.lastFrameAt;
+    const gap = Math.min(rawGap, MAX_GAP_MS);
     this.lastFrameAt = timeMs;
     if (gap > 0 && data.speedKmh > 0) {
       snap.movingMs += gap;
@@ -99,8 +110,17 @@ export class SessionRecorder {
       }
     }
 
+    const before = tracker.distanceM;
     tracker.update(data, timeMs);
+    // After a long Bluetooth gap the counter catches up the distance walked
+    // meanwhile: count the time it took too, or the average speed looks impossible.
+    if (rawGap > MAX_GAP_MS && data.speedKmh > 0) {
+      const caughtUpM = tracker.distanceM - before - (data.speedKmh / 3.6) * (gap / 1000);
+      if (caughtUpM > 0)
+        snap.movingMs += Math.min(rawGap - gap, (caughtUpM / (data.speedKmh / 3.6)) * 1000);
+    }
     snap.distanceM = this.offsetM + tracker.distanceM;
+    snap.rawCounterM = tracker.rawCounterM;
     snap.updatedAt = timeMs;
 
     if (data.speedKmh > 0) {
@@ -110,6 +130,14 @@ export class SessionRecorder {
       if (timeMs - this.stillSince >= STOP_AFTER_MS) return this.finish(this.stillSince);
     }
     return null;
+  }
+
+  /** Ends the session from the button: the belt may still be slowing down. */
+  finishByHand(endedAt: number): FinishedSession | null {
+    const finished = this.finish(endedAt);
+    // At most a minute: a belt that never reports 0 must not block the next session.
+    this.waitForStillUntil = this.speedKmh > 0 ? endedAt + 60_000 : 0;
+    return finished;
   }
 
   /** Ends the session now (button, or the treadmill went away). Null if too short. */

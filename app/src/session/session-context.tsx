@@ -13,7 +13,6 @@ import {
 import { AppState } from 'react-native';
 
 import { useAuth } from '@/api/auth';
-import type { JourneySummary } from '@/api/types';
 import { sendProgress, sendStop, setLiveWanted } from '@/live/live-client';
 import { stepsFor } from '@/journey/progress';
 import { useOnboarding } from '@/onboarding/state';
@@ -63,13 +62,6 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     setLiveWanted(status === 'signedIn');
   }, [status]);
-  const onRace = useCallback(
-    () =>
-      (queryClient.getQueryData<JourneySummary[]>(['journeys']) ?? []).some(
-        (j) => (j.kind === 'race' || j.kind === 'event') && j.status === 'active' && j.joined,
-      ),
-    [queryClient],
-  );
   const strideCm = useRef<number | null>(null);
   useEffect(() => {
     strideCm.current = user?.stride_cm ?? null;
@@ -155,7 +147,9 @@ export function SessionProvider({ children }: { children: ReactNode }) {
           onSessionScreen.current = true;
           router.push('/session');
         }
-        if (current && now - lastSent.current >= 2_000 && onRace()) {
+        // The server only relays it to the walker's races: no need to know them here,
+        // where the cached list may be stale when a race has just started.
+        if (current && now - lastSent.current >= 2_000) {
           sendProgress(current.startedAt, current.distanceM, current.speedKmh);
           lastSent.current = now;
         }
@@ -182,9 +176,9 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       clearInterval(timer);
       appState.remove();
     };
-  }, [status, bluetooth, store, sync, onRace]);
+  }, [status, bluetooth, store, sync]);
 
-  const finishNow = useCallback(() => store(recorder.current.finish(Date.now())), [store]);
+  const finishNow = useCallback(() => store(recorder.current.finishByHand(Date.now())), [store]);
 
   return (
     <SessionContext.Provider value={{ connection, data, live, finishNow }}>

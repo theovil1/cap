@@ -18,6 +18,8 @@ const WS_URL = `${API_URL.replace(/^http/, 'ws')}/live`;
 let socket: WebSocket | null = null;
 let opening = false;
 let wanted = false;
+/** A session is being recorded: keep the socket even with the app in the background. */
+let recording = false;
 let retryMs = 1_000;
 let retryTimer: ReturnType<typeof setTimeout> | null = null;
 /** journey id -> user id -> position. Replaced on each change for React. */
@@ -29,7 +31,7 @@ function emit() {
 }
 
 async function open() {
-  if (!wanted || socket || opening || AppState.currentState !== 'active') return;
+  if (!wanted || socket || opening || !(recording || AppState.currentState === 'active')) return;
   opening = true;
   const token = await freshAccessToken().finally(() => {
     opening = false;
@@ -94,9 +96,13 @@ function close() {
   socket = null;
 }
 
+// Bluetooth keeps recording with the phone locked: rivals must still see the pawn
+// move. Without a session, the socket rests while the app is not in front.
 AppState.addEventListener('change', (state) => {
-  if (state === 'active') open();
-  else close();
+  if (state === 'active') {
+    retryMs = 1_000;
+    open();
+  } else if (state === 'background' && !recording) close();
 });
 
 /** Keeps the live socket open while signed in and the app is in front. */
@@ -116,6 +122,8 @@ function send(message: object) {
 
 /** Distance of the session under way, about every 2 seconds. */
 export function sendProgress(startedAt: number, sessionM: number, speedKmh: number) {
+  recording = true;
+  open();
   send({
     type: 'progress',
     started_at: new Date(startedAt).toISOString(),
@@ -125,7 +133,9 @@ export function sendProgress(startedAt: number, sessionM: number, speedKmh: numb
 }
 
 export function sendStop() {
+  recording = false;
   send({ type: 'stop' });
+  if (AppState.currentState === 'background') close();
 }
 
 /** Rivals heard live on a race, by user id. */

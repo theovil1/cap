@@ -46,7 +46,14 @@ export function syncPending(): Promise<number> {
             markSynced(session.localId, { id: '', created: false, allocations: [] });
             continue;
           }
-          break;
+          // Offline, signed out, or the server is down: try them all again later.
+          const later =
+            !(error instanceof ApiError) ||
+            error.status === 401 ||
+            error.status === 429 ||
+            error.status >= 500;
+          if (later) break;
+          // A problem with this session only: the others must still go through.
         }
       }
     } finally {

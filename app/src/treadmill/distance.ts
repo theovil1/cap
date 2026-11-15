@@ -12,6 +12,15 @@ const MAX_GAP_MS = 10_000;
  * re-anchored on the treadmill distance counter (see tools/ble-probe/README.md).
  */
 export class DistanceTracker {
+  /**
+   * @param lastRawM the raw counter last seen before the app was closed: what the
+   * belt counted in between is credited on the first frame after a resume.
+   */
+  constructor(lastRawM: number | null = null) {
+    this.baselineM = lastRawM;
+    this.lastRawCounterM = lastRawM;
+  }
+
   private integralM = 0;
   private lastTimeMs: number | null = null;
   private lastSpeedKmh = 0;
@@ -43,6 +52,11 @@ export class DistanceTracker {
       this.integralM = Math.min(this.integralM, high);
     }
     this.integralM = Math.max(this.integralM, 0);
+  }
+
+  /** The raw treadmill counter last seen, saved to resume after a restart. */
+  get rawCounterM(): number | null {
+    return this.lastRawCounterM;
   }
 
   /** Distance to credit when the session ends. */

@@ -71,4 +71,37 @@ describe('SessionRecorder', () => {
     expect(finished?.distanceM).toBeGreaterThan(199);
     expect(finished?.distanceM).toBeLessThan(204);
   });
+  it('credits what the counter walked while the app was closed', () => {
+    const recorder = newRecorder();
+    for (let s = 0; s < 120; s++)
+      recorder.update({ speedKmh: 6, distanceM: Math.round((s * 6) / 3.6 / 100) * 100 }, s * 1000);
+    const saved = recorder.live!;
+    expect(saved.rawCounterM).toBe(200);
+    // Closed for two minutes at 6 km/h: the counter moved on by 200 m.
+    const resumed = newRecorder();
+    resumed.resume(saved);
+    resumed.update({ speedKmh: 6, distanceM: 400 }, 240_000);
+    expect(resumed.live!.distanceM).toBeGreaterThan(saved.distanceM + 140);
+  });
+
+  it('counts the time behind a Bluetooth gap so the speed stays credible', () => {
+    const recorder = newRecorder();
+    for (let s = 0; s <= 60; s++)
+      recorder.update({ speedKmh: 6, distanceM: Math.round((s * 6) / 3.6 / 100) * 100 }, s * 1000);
+    // Three minutes without frames, the belt kept going: 300 m more on the counter.
+    recorder.update({ speedKmh: 6, distanceM: 400 }, 240_000);
+    const finished = recorder.finish()!;
+    expect((finished.distanceM / finished.durationS) * 3.6).toBeLessThan(8);
+  });
+
+  it('does not start a new session while the belt slows down after Finish', () => {
+    const recorder = newRecorder();
+    walk(recorder, 0, 120, 5);
+    expect(recorder.finishByHand(120_000)).not.toBeNull();
+    walk(recorder, 120_000, 5, 2);
+    expect(recorder.live).toBeNull();
+    walk(recorder, 125_000, 2, 0);
+    walk(recorder, 127_000, 5, 4);
+    expect(recorder.live).not.toBeNull();
+  });
 });
