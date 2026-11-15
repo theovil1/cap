@@ -45,7 +45,7 @@
     "react-native-worklets": "0.13.0"
   },
   "devDependencies": {
-    "@maplibre/maplibre-gl-style-spec": "26.4.4",
+    "@maplibre/maplibre-gl-style-spec": "26.6.0",
     "@types/geojson": "7946.0.16",
     "@types/jest": "30.0.0",
     "@types/node": "26.6.6",
