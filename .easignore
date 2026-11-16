@@ -31,6 +31,7 @@ Thumbs.db
 !.vscode/extensions.json
 
 # EAS only builds the app: leave out the server side and its data.
-infra/
-api/
-tools/
+# Anchored with a leading slash, or app/src/api would go too.
+/infra/
+/api/
+/tools/
