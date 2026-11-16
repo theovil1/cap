@@ -98,6 +98,8 @@ pub struct SessionItem {
     avg_speed_kmh: f64,
     avg_incline_pct: f64,
     source: String,
+    /// Already posted in the feed.
+    posted: bool,
 }
 
 #[derive(Deserialize, IntoParams)]
@@ -410,7 +412,8 @@ async fn list_sessions(
     let rows = sqlx::query_as!(
         SessionItem,
         "SELECT id, local_id, started_at, ended_at, distance_m, duration_s, steps,
-                avg_speed_kmh, avg_incline_pct, source
+                avg_speed_kmh, avg_incline_pct, source,
+                EXISTS (SELECT 1 FROM posts p WHERE p.session_id = sessions.id) AS \"posted!\"
          FROM sessions WHERE user_id = $1 ORDER BY started_at DESC LIMIT $2",
         user_id,
         limit

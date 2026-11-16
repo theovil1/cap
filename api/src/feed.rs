@@ -200,7 +200,7 @@ pub struct FeedQuery {
 }
 
 /// Posts of me, my friends and the walkers I follow (a profile for friends
-/// only stays among friends), newest first.
+/// only, or a post for friends only, stays among friends), newest first.
 #[utoipa::path(get, path = "/feed", tag = "feed", security(("bearer" = [])), params(FeedQuery),
     responses((status = 200, body = Vec<FeedPost>)))]
 async fn feed(
@@ -215,7 +215,7 @@ async fn feed(
          SELECT p.id FROM posts p JOIN users u ON u.id = p.author_id
          WHERE NOT p.hidden
            AND (p.author_id = $1 OR p.author_id IN (SELECT id FROM friends)
-                OR (u.visibility = 'everyone' AND EXISTS (
+                OR (p.audience = 'all' AND u.visibility = 'everyone' AND EXISTS (
                     SELECT 1 FROM follows f WHERE f.follower_id = $1 AND f.followee_id = p.author_id)))
            AND ($2::timestamptz IS NULL OR p.created_at < $2)
          ORDER BY p.created_at DESC LIMIT $3",
@@ -228,7 +228,7 @@ async fn feed(
     Ok(Json(posts(&state.db, me, &ids).await?))
 }
 
-async fn posts(db: &PgPool, me: Uuid, ids: &[Uuid]) -> AppResult<Vec<FeedPost>> {
+pub(crate) async fn posts(db: &PgPool, me: Uuid, ids: &[Uuid]) -> AppResult<Vec<FeedPost>> {
     let mut rows: Vec<FeedPost> = sqlx::query!(
         "SELECT p.id, p.kind, p.data, p.journey_id, p.text, p.edited_at, p.created_at,
                 u.id AS author_id, u.first_name, u.username, u.avatar_url,
@@ -279,7 +279,7 @@ async fn visible(db: &PgPool, me: Uuid, post: Uuid) -> AppResult<()> {
         "SELECT EXISTS (SELECT 1 FROM posts p JOIN users u ON u.id = p.author_id WHERE p.id = $2 AND NOT p.hidden
            AND (p.author_id = $1 OR EXISTS (SELECT 1 FROM friendships f WHERE f.status = 'accepted'
                 AND ((f.user_id = $1 AND f.friend_id = p.author_id) OR (f.friend_id = $1 AND f.user_id = p.author_id)))
-                OR (u.visibility = 'everyone' AND EXISTS (
+                OR (p.audience = 'all' AND u.visibility = 'everyone' AND EXISTS (
                     SELECT 1 FROM follows f WHERE f.follower_id = $1 AND f.followee_id = p.author_id))))
          AS \"ok!\"",
         me,

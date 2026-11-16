@@ -21,6 +21,7 @@ pub mod profiles;
 pub mod public_routes;
 pub mod push;
 pub mod races;
+pub mod session_posts;
 pub mod sessions;
 pub mod stages;
 pub mod state;

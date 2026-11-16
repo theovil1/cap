@@ -1,0 +1,110 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT j.id, j.kind, j.title, r.path, r.distance_m AS route_m, a.distance_m AS added_m,\n                (SELECT name FROM route_stages WHERE route_id = r.id ORDER BY position LIMIT 1) AS start_town,\n                (SELECT name FROM route_stages WHERE route_id = r.id ORDER BY position DESC LIMIT 1) AS end_town,\n                (SELECT COALESCE(sum(b.distance_m), 0) FROM session_allocations b JOIN sessions s ON s.id = b.session_id\n                 WHERE b.journey_id = j.id AND s.started_at < $2) AS \"before_m!\"\n         FROM session_allocations a JOIN journeys j ON j.id = a.journey_id JOIN routes r ON r.id = j.route_id\n         WHERE a.session_id = $1\n         ORDER BY (j.kind = 'solo') DESC, a.distance_m DESC LIMIT 1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "journeys",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "kind",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "journeys",
+            "name": "kind"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "title",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "journeys",
+            "name": "title"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "path",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "routes",
+            "name": "path"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "route_m",
+        "type_info": "Float8",
+        "origin": {
+          "Table": {
+            "table": "routes",
+            "name": "distance_m"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "added_m",
+        "type_info": "Float8",
+        "origin": {
+          "Table": {
+            "table": "session_allocations",
+            "name": "distance_m"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "start_town",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 7,
+        "name": "end_town",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 8,
+        "name": "before_m!",
+        "type_info": "Float8",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Timestamptz"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      true,
+      false,
+      false,
+      false,
+      null,
+      null,
+      null
+    ]
+  },
+  "hash": "d46d7fb8bdaa66a783e2f1c2935bf2e2f5e543a90d435133c1bf60c02ca5fc08"
+}

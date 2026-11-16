@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT id, local_id, started_at, ended_at, distance_m, duration_s, steps,\n                avg_speed_kmh, avg_incline_pct, source\n         FROM sessions WHERE user_id = $1 ORDER BY started_at DESC LIMIT $2",
+  "query": "SELECT id, local_id, started_at, ended_at, distance_m, duration_s, steps,\n                avg_speed_kmh, avg_incline_pct, source,\n                EXISTS (SELECT 1 FROM posts p WHERE p.session_id = sessions.id) AS \"posted!\"\n         FROM sessions WHERE user_id = $1 ORDER BY started_at DESC LIMIT $2",
   "describe": {
     "columns": [
       {
@@ -112,6 +112,12 @@
             "name": "source"
           }
         }
+      },
+      {
+        "ordinal": 10,
+        "name": "posted!",
+        "type_info": "Bool",
+        "origin": "Expression"
       }
     ],
     "parameters": {
@@ -130,8 +136,9 @@
       false,
       false,
       false,
-      false
+      false,
+      null
     ]
   },
-  "hash": "764fd7a713904c3cde8a979437746dbef7d2c82be2d884791b6c9afc69bad059"
+  "hash": "0239ec4f1de54976e5e39daf66a741a7cd355bebed1db120eb0d148a2fa244bc"
 }

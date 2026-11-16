@@ -1624,3 +1624,54 @@ async fn an_apple_account_can_add_a_password(db: PgPool) {
         .await
         .assert_status(StatusCode::NO_CONTENT);
 }
+
+#[sqlx::test(migrator = "cap_api::MIGRATOR")]
+async fn sessions_posted_to_friends_only(db: PgPool) {
+    let server = server(db).await;
+    let theo = register(&server, "theo").await;
+    let lilou = register(&server, "lilou").await;
+    let marc = register(&server, "marc").await;
+    befriend(&server, &theo, &lilou).await;
+    let theo_id = theo["user"]["id"].as_str().unwrap();
+    server
+        .post(&format!("/users/{theo_id}/follow"))
+        .add_header("authorization", bearer(&marc))
+        .await
+        .assert_status(StatusCode::NO_CONTENT);
+
+    create_journey(&server, &theo).await;
+    let uploaded: Value = server
+        .post("/sessions")
+        .add_header("authorization", bearer(&theo))
+        .json(&session(Uuid::now_v7(), 200.0, 180))
+        .await
+        .json();
+    let url = format!("/sessions/{}/post", uploaded["id"].as_str().unwrap());
+    server
+        .post(&url)
+        .add_header("authorization", bearer(&lilou))
+        .json(&json!({ "audience": "friends" }))
+        .await
+        .assert_status_not_found();
+    let post: Value = server
+        .post(&url)
+        .add_header("authorization", bearer(&theo))
+        .json(&json!({ "audience": "friends", "text": "Première séance" }))
+        .await
+        .json();
+    assert_eq!(post["kind"], "session");
+    assert_eq!(post["data"]["distance_m"], 200.0);
+    assert!(post["data"]["journey"]["walked"].as_array().unwrap().len() >= 2);
+    server
+        .post(&url)
+        .add_header("authorization", bearer(&theo))
+        .json(&json!({ "audience": "all" }))
+        .await
+        .assert_status(StatusCode::CONFLICT);
+
+    // A friend sees it; a follower does not, since it is for friends only.
+    let feed: Value = server.get("/feed").add_header("authorization", bearer(&lilou)).await.json();
+    assert!(feed.as_array().unwrap().iter().any(|p| p["kind"] == "session"));
+    let feed: Value = server.get("/feed").add_header("authorization", bearer(&marc)).await.json();
+    assert!(!feed.as_array().unwrap().iter().any(|p| p["kind"] == "session"));
+}
