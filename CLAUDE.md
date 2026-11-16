@@ -60,4 +60,4 @@ docs/github/  README banners and social preview
 - Push notifications done (16 Nov 2026), tried on the iPhone: sent straight to APNs from the API (key in infra/secrets/apns.p8 on the server), races, friends, feed and streak reminder.
 - Set aside: Soutenir Cap (proto only, in-app purchases later).
 - Next: TestFlight; try races with a second walker.
-- Still to verify: whether the treadmill counters reset between two sessions (if not, up to 50 m may be over-credited), and the speed calibration scaling the counter.
+- Verified on the treadmill (16 Nov 2026), walking and running: the counter starts from zero each session and the speed calibration is accurate.
