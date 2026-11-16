@@ -343,7 +343,11 @@ export function useDeletePost() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => api<void>(`/posts/${id}`, { method: 'DELETE' }),
-    onSuccess: (_, id) => patchPost(queryClient, id, () => null),
+    onSuccess: (_, id) => {
+      patchPost(queryClient, id, () => null);
+      // A deleted session post makes the session postable again in My sessions.
+      queryClient.invalidateQueries({ queryKey: ['sessions'] });
+    },
   });
 }
 
