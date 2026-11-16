@@ -6,12 +6,13 @@ import {
   Footprints,
   Gauge,
   LocateFixed,
+  MapPin,
   PanelRightClose,
   PanelRightOpen,
-  Target,
   TrendingUp,
 } from 'lucide-react-native';
-import { useCallback, useState, type ReactNode } from 'react';
+import * as Haptics from 'expo-haptics';
+import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ScrollView, StyleSheet, Text, View, type LayoutChangeEvent } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -32,11 +33,13 @@ import { rivalPawns, useRacers } from '@/live/use-racers';
 import { MapKindButton } from '@/map/map-kind-button';
 import { RouteMap } from '@/map/route-map';
 import { useSession } from '@/session/session-context';
+import { GoalTile } from '@/session/goal-tile';
 import { useDayStats } from '@/session/stats';
-import { pendingSessions } from '@/session/store';
+import { getValue, pendingSessions, setValue } from '@/session/store';
 import { fonts, useColors, type Colors } from '@/theme';
 import { useWide } from '@/ui/layout';
 import { Avatar, Button, Figure, Glass, GlassButton, Label, ProgressBar } from '@/ui/primitives';
+import { ConfettiBurst } from '@/ui/confetti-burst';
 import { Sheet } from '@/ui/sheet';
 
 /** Height of the top bar (minimise button, journey and place) over the map. */
@@ -90,6 +93,24 @@ export default function SessionScreen() {
   const name = connection.deviceName ?? t('treadmill.unknownName');
   const connected = connection.status === 'connected';
 
+  // Steps per minute, from the speed and the stride (the treadmill does not count steps).
+  const strideM = (user?.stride_cm && user.stride_cm > 0 ? user.stride_cm : 70) / 100;
+  const stepsPerMinute = live && speed > 0 ? (speed / 3.6 / strideM) * 60 : 0;
+  const reached = day.todaySteps >= goal;
+  const [celebrating, setCelebrating] = useState(false);
+  const wasReached = useRef(reached);
+  useEffect(() => {
+    // Confetti once a day, when the goal is passed during a session.
+    const today = new Date().toDateString();
+    if (reached && !wasReached.current && live && getValue<string>(GOAL_KEY) !== today) {
+      setValue(GOAL_KEY, today);
+      setCelebrating(true);
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
+    }
+    wasReached.current = reached;
+  }, [reached, live]);
+  const endCelebration = useCallback(() => setCelebrating(false), []);
+
   const tiles: [ReactNode, string, string, string?][] = [
     [
       <Gauge key="pace" size={15} color={colors.textSecondary} />,
@@ -110,14 +131,6 @@ export default function SessionScreen() {
     ],
   ];
   if (wide) tiles.splice(1, 0, tiles.splice(2, 1)[0]);
-  if (wide) {
-    tiles.push([
-      <Target key="goal" size={15} color={colors.textSecondary} />,
-      t('session.goal'),
-      formatNumber(Math.min(999, (100 * day.todaySteps) / goal)),
-      '%',
-    ]);
-  }
 
   const content = (
     <>
@@ -187,7 +200,12 @@ export default function SessionScreen() {
         {tiles.map(([icon, label, value, unit]) => (
           <View
             key={label}
-            style={[styles.tile, { backgroundColor: colors.inset }, wide && styles.tileWide]}
+            style={[
+              styles.tile,
+              styles.tileHalf,
+              { backgroundColor: colors.inset },
+              wide && styles.tileWide,
+            ]}
           >
             <View style={styles.inline}>
               {icon}
@@ -209,6 +227,13 @@ export default function SessionScreen() {
             />
           </View>
         ))}
+        <GoalTile
+          steps={day.todaySteps}
+          goal={goal}
+          stepsPerMinute={stepsPerMinute}
+          wide={wide}
+          style={[styles.tile, styles.tileHalf, wide && styles.tileWide]}
+        />
       </View>
 
       {wide && walking && me ? (
@@ -232,27 +257,38 @@ export default function SessionScreen() {
       {summary && (
         <View style={{ gap: wide ? 10 : 9 }}>
           <ProgressBar ratio={walked / total} marks={marks} height={wide ? 10 : 8} />
-          <View style={styles.progressRow}>
-            <Text
-              style={[styles.caption, wide && styles.captionWide, { color: colors.textSecondary }]}
-              numberOfLines={1}
-            >
-              <Text style={{ color: colors.text, fontFamily: fonts.textSemiBold }}>
+          <View
+            style={styles.progressRow}
+            accessible
+            accessibilityLabel={`${formatKm(walked)} ${t('units.km')} ${t('session.fromStart', {
+              place: summary.start_town ?? '',
+            })}, ${t('session.toEnd', { place: summary.end_town ?? '', km: formatKm(total - walked) })}`}
+          >
+            <View style={styles.inline}>
+              <MapPin size={wide ? 16 : 15} color={colors.textSecondary} strokeWidth={2.2} />
+              <Text
+                style={[
+                  styles.caption,
+                  wide && styles.captionWide,
+                  styles.barKm,
+                  { color: colors.text },
+                ]}
+              >
                 {formatKm(walked)} {t('units.km')}
-              </Text>{' '}
-              {t('session.fromStart', { place: summary.start_town ?? '' })}
-            </Text>
-            <Text
-              style={[
-                styles.caption,
-                wide && styles.captionWide,
-                styles.right,
-                { color: colors.textSecondary },
-              ]}
-              numberOfLines={1}
-            >
-              {t('session.toEnd', { place: summary.end_town ?? '', km: formatKm(total - walked) })}
-            </Text>
+              </Text>
+            </View>
+            <View style={styles.inline}>
+              <Text
+                style={[
+                  styles.caption,
+                  wide && styles.captionWide,
+                  { color: colors.textSecondary },
+                ]}
+              >
+                {formatKm(total - walked)} {t('units.km')}
+              </Text>
+              <Flag size={wide ? 16 : 15} color={colors.text} strokeWidth={2.2} />
+            </View>
           </View>
         </View>
       )}
@@ -277,6 +313,7 @@ export default function SessionScreen() {
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.inset }]}>
+      {celebrating ? <ConfettiOverlay onDone={endCelebration} /> : null}
       {detail ? (
         <RouteMap
           path={detail.path}
@@ -573,8 +610,22 @@ const styles = StyleSheet.create({
   },
   tiles: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   tile: { flex: 1, minWidth: 96, gap: 8, padding: 14, paddingBottom: 13, borderRadius: 20 },
+  tileHalf: { flexBasis: '45%' },
+  barKm: { fontFamily: fonts.textSemiBold },
   tileWide: { flexBasis: '45%', padding: 18, paddingBottom: 18, gap: 10, borderRadius: 22 },
   tileLabel: { fontFamily: fonts.textMedium, fontSize: 12.5 },
   progressRow: { flexDirection: 'row', justifyContent: 'space-between', gap: 8 },
   caption: { fontFamily: fonts.text, fontSize: 12.5, fontVariant: ['tabular-nums'], flexShrink: 1 },
 });
+
+/** Kept for the day the goal was last celebrated, so confetti falls once. */
+const GOAL_KEY = 'goalCelebrated';
+
+/** Above the map and the panel, without taking touches. */
+function ConfettiOverlay({ onDone }: { onDone: () => void }) {
+  return (
+    <View style={[StyleSheet.absoluteFill, { zIndex: 50 }]} pointerEvents="none">
+      <ConfettiBurst onDone={onDone} />
+    </View>
+  );
+}
