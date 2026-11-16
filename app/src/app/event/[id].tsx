@@ -30,6 +30,7 @@ import { RouteCover } from '@/community/route-cover';
 import { formatDate, formatKm, formatNumber } from '@/i18n/format';
 import { fonts, useColors, useShadows } from '@/theme';
 import { useWide } from '@/ui/layout';
+import { useWindowControlsInset } from '@/ui/window-controls';
 import { LivePill, PhotoChip } from '@/ui/pills';
 import { Button, Card, GlassButton } from '@/ui/primitives';
 import { AvatarStack, CountTile } from '@/ui/stats';
@@ -88,6 +89,7 @@ function EventView({ event }: { event: EventCard }) {
   const { t } = useTranslation();
   const colors = useColors();
   const shadows = useShadows();
+  const controls = useWindowControlsInset();
   const insets = useSafeAreaInsets();
   const wide = useWide();
   const register = useRegister();
@@ -266,7 +268,7 @@ function EventView({ event }: { event: EventCard }) {
     return (
       <View style={[styles.screen, { backgroundColor: colors.background }]}>
         <View style={[StyleSheet.absoluteFill, { right: 412 }]}>{cover()}</View>
-        <View style={styles.wideBack}>
+        <View style={[styles.wideBack, { top: 28 + controls }]}>
           <GlassButton
             icon={<ChevronLeft size={22} color={colors.text} />}
             onPress={() => router.back()}

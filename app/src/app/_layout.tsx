@@ -15,8 +15,9 @@ import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { AppState } from 'react-native';
+import { SafeAreaInsetsContext, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AuthProvider, useAuth } from '@/api/auth';
 import '@/i18n';
@@ -26,6 +27,7 @@ import { useOnboarding } from '@/onboarding/state';
 import { SessionProvider } from '@/session/session-context';
 import { useColors } from '@/theme';
 import { useWide } from '@/ui/layout';
+import { useWindowControlsInset } from '@/ui/window-controls';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -63,11 +65,24 @@ export default function RootLayout() {
       <AuthProvider>
         <SessionProvider>
           <StatusBar style="auto" />
-          <Screens />
+          <WindowSafeArea>
+            <Screens />
+          </WindowSafeArea>
         </SessionProvider>
       </AuthProvider>
     </QueryClientProvider>
   );
+}
+
+/** In an iPadOS window, the top safe area also clears the window buttons. */
+function WindowSafeArea({ children }: { children: ReactNode }) {
+  const insets = useSafeAreaInsets();
+  const extra = useWindowControlsInset();
+  const value = useMemo(
+    () => (extra ? { ...insets, top: insets.top + extra } : insets),
+    [insets, extra],
+  );
+  return <SafeAreaInsetsContext.Provider value={value}>{children}</SafeAreaInsetsContext.Provider>;
 }
 
 function Screens() {

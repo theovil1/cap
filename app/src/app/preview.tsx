@@ -17,6 +17,7 @@ import { fonts, useColors, useShadows } from '@/theme';
 import { Tabs } from '@/ui/controls';
 import { HOME } from '@/ui/routes';
 import { useWide } from '@/ui/layout';
+import { useWindowControlsInset } from '@/ui/window-controls';
 import { Avatar, Button, Figure, Glass, GlassButton, Label } from '@/ui/primitives';
 import { AvatarStack, StatTile } from '@/ui/stats';
 
@@ -32,6 +33,7 @@ export default function PreviewScreen() {
   const { t } = useTranslation();
   const colors = useColors();
   const shadows = useShadows();
+  const controls = useWindowControlsInset();
   const insets = useSafeAreaInsets();
   const wide = useWide();
   const { user } = useAuth();
@@ -365,7 +367,7 @@ export default function PreviewScreen() {
         <View
           style={[
             styles.top,
-            wide ? { top: 28, left: 28 } : { top: insets.top + 12 },
+            wide ? { top: 28 + controls, left: 28 } : { top: insets.top + 12 },
             wide && styles.topWide,
           ]}
         >

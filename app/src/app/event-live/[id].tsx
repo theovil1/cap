@@ -11,6 +11,7 @@ import type { Rival } from '@/map/route-map';
 import { RouteMap } from '@/map/route-map';
 import { fonts, useColors, useShadows } from '@/theme';
 import { useWide } from '@/ui/layout';
+import { useWindowControlsInset } from '@/ui/window-controls';
 import { LivePill } from '@/ui/pills';
 import { Avatar, Button, Glass, GlassButton, ProgressBar } from '@/ui/primitives';
 import { RankRow } from '@/ui/stats';
@@ -34,6 +35,7 @@ export default function EventLiveScreen() {
   const { t } = useTranslation();
   const colors = useColors();
   const shadows = useShadows();
+  const controls = useWindowControlsInset();
   const insets = useSafeAreaInsets();
   const wide = useWide();
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -156,7 +158,10 @@ export default function EventLiveScreen() {
         />
       ) : null}
       <View
-        style={[styles.top, wide ? { top: 28, left: 28 } : { top: insets.top + 8, right: 20 }]}
+        style={[
+          styles.top,
+          wide ? { top: 28 + controls, left: 28 } : { top: insets.top + 8, right: 20 },
+        ]}
         pointerEvents="box-none"
       >
         <GlassButton

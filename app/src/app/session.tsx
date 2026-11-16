@@ -40,6 +40,7 @@ import { useDayStats } from '@/session/stats';
 import { getValue, pendingSessions, setValue } from '@/session/store';
 import { fonts, useColors, type Colors } from '@/theme';
 import { useWide } from '@/ui/layout';
+import { useWindowControlsInset } from '@/ui/window-controls';
 import { Avatar, Button, Figure, Glass, GlassButton, Label, ProgressBar } from '@/ui/primitives';
 import { ConfettiBurst } from '@/ui/confetti-burst';
 import { Sheet } from '@/ui/sheet';
@@ -51,6 +52,7 @@ export default function SessionScreen() {
   useKeepAwake();
   const { t } = useTranslation();
   const colors = useColors();
+  const controls = useWindowControlsInset();
   const insets = useSafeAreaInsets();
   const wide = useWide();
   const { user } = useAuth();
@@ -348,7 +350,7 @@ export default function SessionScreen() {
         style={[
           styles.top,
           wide
-            ? { top: 28, left: 28, right: panelHidden ? 28 : 448, gap: 14 }
+            ? { top: 28 + controls, left: 28, right: panelHidden ? 28 : 448, gap: 14 }
             : { top: insets.top + 8, right: 20 },
         ]}
       >

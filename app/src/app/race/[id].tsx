@@ -21,11 +21,13 @@ import { rivalPawns, useRacers } from '@/live/use-racers';
 import { RouteMap } from '@/map/route-map';
 import { fonts, useColors, useShadows } from '@/theme';
 import { useWide } from '@/ui/layout';
+import { useWindowControlsInset } from '@/ui/window-controls';
 import { Avatar, Button, Card, Glass, GlassButton, ProgressBar } from '@/ui/primitives';
 
 export default function RaceScreen() {
   const { t } = useTranslation();
   const colors = useColors();
+  const controls = useWindowControlsInset();
   const insets = useSafeAreaInsets();
   const wide = useWide();
   const shadows = useShadows();
@@ -101,7 +103,9 @@ export default function RaceScreen() {
           padding={{ top: insets.top + 90, bottom: 60, left: 40, right: wide ? 470 : 40 }}
           style={StyleSheet.absoluteFill}
         />
-        <View style={[styles.top, wide ? { top: 28, left: 28 } : { top: insets.top + 12 }]}>
+        <View
+          style={[styles.top, wide ? { top: 28 + controls, left: 28 } : { top: insets.top + 12 }]}
+        >
           <GlassButton
             icon={<ChevronLeft size={22} color={colors.text} />}
             onPress={() => router.back()}
