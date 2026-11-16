@@ -9,6 +9,8 @@ const SAMPLE_EVERY_MS = 15_000;
 const MAX_GAP_MS = 10_000;
 /** Shorter sessions are a belt nudged by accident and are dropped; anything walked counts. */
 export const MIN_DISTANCE_M = 10;
+/** One heart rate value kept every this many milliseconds. */
+const HEART_EVERY_MS = 5_000;
 
 /** Everything needed to resume a session after the app was killed. */
 export type LiveSnapshot = {
@@ -21,6 +23,8 @@ export type LiveSnapshot = {
   speeds: number[];
   /** Raw treadmill counter at the last save: distance walked while closed is not lost. */
   rawCounterM?: number | null;
+  /** `[timeMs, bpm]` from a heart rate sensor. Stays on the phone. */
+  heartRates?: [number, number][];
 };
 
 export type FinishedSession = {
@@ -32,6 +36,8 @@ export type FinishedSession = {
   avgInclinePct: number;
   /** Average speed every 15 s, in km/h, for the summary curve. */
   speeds: number[];
+  /** `[timeMs, bpm]` from a heart rate sensor. Stays on the phone. */
+  heartRates?: [number, number][];
 };
 
 export type LiveSession = LiveSnapshot & { speedKmh: number; inclinePct: number };
@@ -63,7 +69,11 @@ export class SessionRecorder {
 
   /** Continues a session saved before the app was closed. */
   resume(saved: LiveSnapshot): void {
-    this.snapshot = { ...saved, speeds: [...saved.speeds] };
+    this.snapshot = {
+      ...saved,
+      speeds: [...saved.speeds],
+      heartRates: [...(saved.heartRates ?? [])],
+    };
     this.offsetM = saved.distanceM;
     this.tracker = new DistanceTracker(saved.rawCounterM ?? null);
   }
@@ -132,6 +142,15 @@ export class SessionRecorder {
     return null;
   }
 
+  /** Keeps a heart rate value while a session runs, at most one every 5 s. */
+  addHeartRate(bpm: number, timeMs: number): void {
+    const snap = this.snapshot;
+    if (!snap) return;
+    const samples = (snap.heartRates ??= []);
+    const last = samples[samples.length - 1];
+    if (!last || timeMs - last[0] >= HEART_EVERY_MS) samples.push([timeMs, bpm]);
+  }
+
   /** Ends the session from the button: the belt may still be slowing down. */
   finishByHand(endedAt: number): FinishedSession | null {
     const finished = this.finish(endedAt);
@@ -156,6 +175,7 @@ export class SessionRecorder {
       avgInclinePct:
         snap.movingMs > 0 ? Math.round((snap.inclineSum / snap.movingMs) * 10) / 10 : 0,
       speeds: snap.speeds,
+      ...(snap.heartRates?.length ? { heartRates: snap.heartRates } : {}),
     };
   }
 

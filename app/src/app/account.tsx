@@ -24,6 +24,7 @@ import { api, API_URL, ApiError } from '@/api/client';
 import { useUpdateProfile, type ProfilePatch } from '@/api/profile';
 import { musicEnabled, musicSupported, setMusicEnabled } from '@/music/use-music';
 import { setVideoTipEnabled, videoTipEnabled } from '@/session/video-tip';
+import { healthEnabled, healthSupported, setHealthEnabled } from '@/health/health';
 import type { UserProfile } from '@/api/types';
 import { SettingsWide } from '@/account/settings-wide';
 import { fonts, useColors } from '@/theme';
@@ -39,6 +40,7 @@ export default function AccountScreen() {
   const [busy, setBusy] = useState(false);
   const [music, setMusic] = useState(musicEnabled);
   const [videoTip, setVideoTip] = useState(videoTipEnabled);
+  const [health, setHealth] = useState(healthEnabled);
   const wide = useWide();
   if (!user) return null;
 
@@ -286,6 +288,29 @@ export default function AccountScreen() {
       />
     </Row>
   );
+  // Per device: sessions saved in Apple Health, heart rate and steps read back.
+  const healthRow = healthSupported() ? (
+    <Row label={t('account.appleHealth')}>
+      <Toggle
+        value={health}
+        onChange={(on) => {
+          setHealth(on);
+          void setHealthEnabled(on).then((linked) => {
+            setHealth(linked);
+            if (on && !linked) Alert.alert(t('health.denied'));
+          });
+        }}
+        label={t('account.appleHealth')}
+      />
+    </Row>
+  ) : null;
+  const devicesGroup = (
+    <Group>
+      <Row label={t('settings.treadmills')} onPress={() => router.push('/treadmill')} />
+      <Row label={t('settings.heartSensors')} onPress={() => router.push('/sensors')} />
+      {healthRow}
+    </Group>
+  );
   const visibilityRow = (
     <Row
       label={t('account.visibility')}
@@ -320,11 +345,7 @@ export default function AccountScreen() {
               {unitsRow}
             </Group>
           ),
-          treadmill: (
-            <Group>
-              <Row label={t('settings.treadmills')} onPress={() => router.push('/treadmill')} />
-            </Group>
-          ),
+          treadmill: devicesGroup,
           notifications: (
             <Group>
               {notificationsRow}
@@ -449,9 +470,7 @@ export default function AccountScreen() {
           {visibilityRow}
         </Group>
 
-        <Group>
-          <Row label={t('settings.treadmills')} onPress={() => router.push('/treadmill')} />
-        </Group>
+        {devicesGroup}
 
         <Group>
           {passwordRow}

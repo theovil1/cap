@@ -1,7 +1,9 @@
 {
   "CFBundleDisplayName": "Tapiroute",
-  "NSBluetoothAlwaysUsageDescription": "Tapiroute uses Bluetooth to read speed and distance from your treadmill.",
+  "NSBluetoothAlwaysUsageDescription": "Tapiroute uses Bluetooth to read speed and distance from your treadmill, and your heart rate from a sensor.",
   "NSLocationWhenInUseUsageDescription": "Tapiroute never uses your location: your routes start from the addresses you choose. The map library requires this text.",
   "NSPhotoLibraryUsageDescription": "Tapiroute uses your photos to set your profile picture.",
-  "NSAppleMusicUsageDescription": "Tapiroute shows and controls the music you listen to during your session."
+  "NSAppleMusicUsageDescription": "Tapiroute shows and controls the music you listen to during your session.",
+  "NSHealthShareUsageDescription": "Tapiroute reads your heart rate during sessions and your steps of the day. This data stays on your phone.",
+  "NSHealthUpdateUsageDescription": "Tapiroute saves your treadmill sessions in Apple Health as walks or runs."
 }

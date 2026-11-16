@@ -1,4 +1,6 @@
-import { BleManager, State, type Device, type Subscription } from 'react-native-ble-plx';
+import { State, type Device, type Subscription } from 'react-native-ble-plx';
+
+import { bleManager, scanFor } from '@/ble/manager';
 
 import {
   FTMS_SERVICE_UUID,
@@ -45,7 +47,8 @@ function score(device: Device): number {
  * its own. Read-only: Cap never writes to the treadmill.
  */
 export class TreadmillConnection {
-  private readonly manager = new BleManager();
+  private readonly manager = bleManager();
+  private stopScan: (() => void) | null = null;
   private readonly subscriptions: Subscription[] = [];
   private readonly connectionSubscriptions: Subscription[] = [];
   private status: ConnectionStatus = 'starting';
@@ -69,7 +72,7 @@ export class TreadmillConnection {
     this.clearTimers();
     this.dropConnectionSubscriptions();
     this.subscriptions.splice(0).forEach((s) => s.remove());
-    void this.manager.destroy();
+    if (this.deviceId) void this.manager.cancelDeviceConnection(this.deviceId).catch(() => {});
   }
 
   private setStatus(status: ConnectionStatus): void {
@@ -97,8 +100,8 @@ export class TreadmillConnection {
     }
     this.setStatus('scanning');
     let best: Device | null = null;
-    void this.manager.startDeviceScan([FTMS_SERVICE_UUID], null, async (error, device) => {
-      if (error || !device) return;
+    this.stopScan?.();
+    this.stopScan = scanFor(FTMS_SERVICE_UUID, (device) => {
       if (!best || score(device) > score(best)) best = device;
       // A FitShow module is what we want: connect right away. Otherwise wait a bit.
       if (score(device) > 0) this.pick(device);
@@ -109,7 +112,8 @@ export class TreadmillConnection {
   private pick(device: Device): void {
     if (this.status !== 'scanning') return;
     this.clearTimers();
-    void this.manager.stopDeviceScan();
+    this.stopScan?.();
+    this.stopScan = null;
     this.deviceId = device.id;
     this.deviceName = device.localName ?? device.name ?? null;
     void this.connect(device.id);
@@ -121,6 +125,10 @@ export class TreadmillConnection {
     try {
       const device = await this.manager.connectToDevice(id, { timeout: CONNECT_TIMEOUT_MS });
       await device.discoverAllServicesAndCharacteristics();
+      if (this.stopped) {
+        await device.cancelConnection();
+        return;
+      }
       this.deviceName = device.localName ?? device.name ?? this.deviceName;
       this.dropConnectionSubscriptions();
       this.connectionSubscriptions.push(
@@ -162,6 +170,10 @@ export class TreadmillConnection {
   }
 
   private clearTimers(): void {
+    if (this.stopped) {
+      this.stopScan?.();
+      this.stopScan = null;
+    }
     if (this.reconnectTimer) clearTimeout(this.reconnectTimer);
     if (this.scanTimer) clearTimeout(this.scanTimer);
     this.reconnectTimer = null;

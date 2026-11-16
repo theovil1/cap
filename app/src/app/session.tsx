@@ -45,6 +45,7 @@ import { useSession } from '@/session/session-context';
 import { MusicCard, MusicPill } from '@/music/music-player';
 import { useMusic } from '@/music/use-music';
 import { GoalTile } from '@/session/goal-tile';
+import { HeartTile } from '@/heart/heart-tile';
 import { useDayStats } from '@/session/stats';
 import { useVideoTip } from '@/session/video-tip';
 import { getValue, pendingSessions, setValue } from '@/session/store';
@@ -252,6 +253,7 @@ export default function SessionScreen() {
           wide={wide}
           style={[styles.tile, styles.tileHalf, wide && styles.tileWide]}
         />
+        <HeartTile wide={wide} />
       </View>
 
       {wide && walking && me ? (

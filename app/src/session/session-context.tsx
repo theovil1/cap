@@ -13,6 +13,8 @@ import {
 import { AppState } from 'react-native';
 
 import { useAuth } from '@/api/auth';
+import { saveToHealth } from '@/health/health';
+import { startHeartMonitor } from '@/heart/monitor';
 import { sendProgress, sendStop, setLiveWanted } from '@/live/live-client';
 import { stepsFor } from '@/journey/progress';
 import { useOnboarding } from '@/onboarding/state';
@@ -95,11 +97,9 @@ export function SessionProvider({ children }: { children: ReactNode }) {
         clearLive();
         return;
       }
-      saveFinished({
-        ...finished,
-        steps: stepsFor(finished.distanceM, strideCm.current),
-        journeyIds: null,
-      });
+      const steps = stepsFor(finished.distanceM, strideCm.current);
+      saveFinished({ ...finished, steps, journeyIds: null });
+      void saveToHealth(finished, steps);
       router.push({ pathname: '/summary', params: { localId: finished.localId } });
       sync().catch(() => {});
     },
@@ -160,6 +160,10 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       },
     });
     treadmill.start();
+    // A heart rate sensor, when one was paired: its values join the session.
+    const stopHeart = startHeartMonitor((bpm, timeMs) =>
+      recorder.current.addHeartRate(bpm, timeMs),
+    );
 
     const timer = setInterval(() => {
       const current = recorder.current.live;
@@ -173,6 +177,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     sync().catch(() => {});
     return () => {
       treadmill.destroy();
+      stopHeart();
       clearInterval(timer);
       appState.remove();
     };

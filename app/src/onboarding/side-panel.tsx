@@ -3,6 +3,7 @@ import {
   Check,
   Flame,
   Footprints,
+  Heart,
   Loader,
   Route as RouteIcon,
   User,
@@ -24,7 +25,8 @@ const MAP = {
   night: require('../../assets/images/onboarding/side-night.jpg'),
 };
 
-export type SideKey = 'destination' | 'profile' | 'goal' | 'mood' | 'bluetooth' | 'treadmill';
+export type SideKey =
+  'destination' | 'profile' | 'goal' | 'mood' | 'bluetooth' | 'treadmill' | 'health';
 
 /** One line of "Ton départ": done with its choice, under way, or still to come. */
 export type SideRow = { key: SideKey; state: 'done' | 'current' | 'todo'; value?: string };
@@ -36,6 +38,7 @@ const ICONS: Record<SideKey, LucideIcon> = {
   mood: Loader,
   bluetooth: Bluetooth,
   treadmill: Footprints,
+  health: Heart,
 };
 
 /** iPad: the isometric map with Cap's pill and the checklist of the onboarding. */

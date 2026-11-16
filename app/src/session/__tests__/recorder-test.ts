@@ -16,6 +16,16 @@ function walk(recorder: SessionRecorder, fromMs: number, seconds: number, speedK
 }
 
 describe('SessionRecorder', () => {
+  it('keeps one heart rate value every 5 s, only while recording', () => {
+    const recorder = newRecorder();
+    recorder.addHeartRate(90, 0);
+    walk(recorder, 0, 60, 6);
+    for (let s = 0; s < 60; s++) recorder.addHeartRate(120, s * 1000);
+    const finished = recorder.finish(60_000);
+    expect(finished?.heartRates).toHaveLength(12);
+    expect(finished?.heartRates?.[0]).toEqual([0, 120]);
+  });
+
   it('waits for the belt to move', () => {
     const recorder = newRecorder();
     expect(walk(recorder, 0, 30, 0)).toBeNull();

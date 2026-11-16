@@ -230,7 +230,10 @@
     "duration": "Durée",
     "stageReached": "Étape atteinte : {{name}}",
     "finish": "Terminer",
-    "mapProgress": "{{walked}} sur {{total}} {{unit}} · {{percent}} %"
+    "mapProgress": "{{walked}} sur {{total}} {{unit}} · {{percent}} %",
+    "cardio": "Cardio",
+    "cardioAvg": "moy.",
+    "cardioMax": "max {{bpm}} bpm"
   },
   "rankings": {
     "week": "Semaine",
@@ -448,7 +451,8 @@
     "delete": "Supprimer mon compte",
     "deleteTitle": "Supprimer ton compte ?",
     "deleteBody": "Tes séances, trajets et amis sont effacés pour de bon. Ça ne peut pas être annulé.",
-    "searchCountry": "Rechercher un pays"
+    "searchCountry": "Rechercher un pays",
+    "appleHealth": "Apple Santé"
   },
   "history": {
     "title": "Mes séances",
@@ -585,14 +589,15 @@
     "sections": {
       "account": "Mon compte",
       "appearance": "Apparence",
-      "treadmill": "Mes tapis",
+      "treadmill": "Appareils",
       "notifications": "Notifications",
       "privacy": "Confidentialité"
     },
     "version": "Tapiroute {{version}}",
     "removePhoto": "Retirer",
     "placeNote": "Ton pays et ta ville servent aux classements et aux idées de trajets. Jamais ta position exacte.",
-    "treadmills": "Gérer mes tapis"
+    "treadmills": "Gérer mes tapis",
+    "heartSensors": "Capteurs cardio"
   },
   "treadmillSetup": {
     "progress": "Ajouter un tapis · {{step}} sur {{total}}",
@@ -934,7 +939,8 @@
         "auto": "carte auto",
         "day": "carte de jour",
         "night": "carte de nuit"
-      }
+      },
+      "health": "Santé"
     },
     "destination": {
       "kicker": "Ta première aventure",
@@ -1015,6 +1021,16 @@
       "around": "vers le {{date}}",
       "treadmill": "Tapis",
       "start": "Commencer"
+    },
+    "health": {
+      "kicker": "Ta santé",
+      "title": "Relions Apple Santé",
+      "text": "Tes séances remplissent tes anneaux, et ton cardio s'affiche dans tes résumés.",
+      "workout": "Chaque séance devient un entraînement",
+      "watch": "Le cardio de ta montre et tes pas du jour",
+      "private": "Tes données de santé restent sur ton téléphone",
+      "note": "iOS va te demander ce que Tapiroute peut lire et écrire.",
+      "allow": "Relier Apple Santé"
     }
   },
   "feedSide": {
@@ -1023,5 +1039,34 @@
     "toFollow": "À suivre",
     "mutual_one": "{{n}} ami en commun",
     "mutual_other": "{{n}} amis en commun"
+  },
+  "heart": {
+    "title": "Cardio",
+    "bpm": "bpm",
+    "zone": "Zone {{zone}}",
+    "zones": {
+      "easy": "récup",
+      "endurance": "endurance",
+      "tempo": "tempo",
+      "threshold": "seuil",
+      "max": "max"
+    },
+    "sensors": "Capteurs cardio",
+    "intro": "Une ceinture ou une montre qui diffuse son cardio en Bluetooth. Tapiroute l'affiche en direct pendant la séance.",
+    "mine": "Mon capteur",
+    "nearby": "Capteurs à proximité",
+    "searching": "Recherche…",
+    "bluetoothOff": "Bluetooth non autorisé",
+    "forget": "Oublier",
+    "pair": "Associer",
+    "unnamed": "Capteur sans nom",
+    "connected": "Connecté",
+    "connectedBpm": "Connecté · {{bpm}} bpm",
+    "notConnected": "En attente du capteur",
+    "note": "Montre Garmin : active « Diffuser la FC ». Apple Watch et la plupart des autres montres : leur cardio arrive par Apple Santé, dans le résumé."
+  },
+  "health": {
+    "title": "Apple Santé",
+    "denied": "Apple Santé n'a pas été relié. Tu peux le relier plus tard depuis Mon compte."
   }
 }

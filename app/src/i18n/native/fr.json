@@ -1,7 +1,9 @@
 {
   "CFBundleDisplayName": "Tapiroute",
-  "NSBluetoothAlwaysUsageDescription": "Tapiroute utilise le Bluetooth pour lire la vitesse et la distance de ton tapis.",
+  "NSBluetoothAlwaysUsageDescription": "Tapiroute utilise le Bluetooth pour lire la vitesse et la distance de ton tapis, et ton cardio depuis un capteur.",
   "NSLocationWhenInUseUsageDescription": "Tapiroute n'utilise jamais ta position : tes trajets partent des adresses que tu choisis. La bibliothèque de carte demande ce texte.",
   "NSPhotoLibraryUsageDescription": "Tapiroute utilise tes photos pour ta photo de profil.",
-  "NSAppleMusicUsageDescription": "Tapiroute affiche et pilote la musique que tu écoutes pendant ta séance."
+  "NSAppleMusicUsageDescription": "Tapiroute affiche et pilote la musique que tu écoutes pendant ta séance.",
+  "NSHealthShareUsageDescription": "Tapiroute lit ton cardio pendant les séances et tes pas de la journée. Ces données restent sur ton téléphone.",
+  "NSHealthUpdateUsageDescription": "Tapiroute enregistre tes séances de tapis dans Apple Santé, en marche ou en course."
 }

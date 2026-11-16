@@ -130,6 +130,7 @@ function Screens() {
           name="treadmill"
           options={{ presentation: wide ? 'fullScreenModal' : 'modal' }}
         />
+        <Stack.Screen name="sensors" />
         <Stack.Screen name="me" />
         <Stack.Screen name="walker/[id]" />
         <Stack.Screen name="public-route/[id]" />

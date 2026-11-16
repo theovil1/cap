@@ -10,6 +10,7 @@ import type { FrameNav } from '@/onboarding/frame';
 import type { SideKey, SideRow } from '@/onboarding/side-panel';
 import { allowBluetooth, finishOnboarding } from '@/onboarding/state';
 import { BluetoothStep } from '@/onboarding/steps/bluetooth';
+import { HealthStep } from '@/onboarding/steps/health';
 import { DestinationStep } from '@/onboarding/steps/destination';
 import { GoalStep } from '@/onboarding/steps/goal';
 import { MoodStep } from '@/onboarding/steps/mood';
@@ -17,16 +18,26 @@ import { ProfileStep } from '@/onboarding/steps/profile';
 import { ReadyStep } from '@/onboarding/steps/ready';
 import { TreadmillStep } from '@/onboarding/steps/treadmill';
 import { useSession } from '@/session/session-context';
+import { healthEnabled, healthSupported, setHealthEnabled } from '@/health/health';
 
-/** The six steps listed on iPad; the seventh is the summary. */
-const KEYS: SideKey[] = ['destination', 'profile', 'goal', 'mood', 'bluetooth', 'treadmill'];
-const READY = 7;
+/** The seven steps listed on iPad; the eighth is the summary. */
+const KEYS: SideKey[] = [
+  'destination',
+  'profile',
+  'goal',
+  'mood',
+  'bluetooth',
+  'treadmill',
+  'health',
+];
+const READY = 8;
 const BLUETOOTH = 5;
+const HEALTH = 7;
 
 /**
  * The onboarding of a new walker, after the welcome screen: destination,
- * profile, goal, mood, Bluetooth, treadmill, then the summary that starts
- * the first journey.
+ * profile, goal, mood, Bluetooth, treadmill, Apple Health, then the summary
+ * that starts the first journey.
  */
 export default function OnboardingScreen() {
   const { t } = useTranslation();
@@ -48,6 +59,9 @@ export default function OnboardingScreen() {
   }));
   const setDraft = (patch: Partial<Draft>) => setDraftState((d) => ({ ...d, ...patch }));
   const step = path[path.length - 1];
+  const [linked, setLinked] = useState(healthEnabled);
+  // Without Apple Health (some iPads), the step is skipped.
+  const afterTreadmill = healthSupported() ? HEALTH : READY;
 
   const goTo = (target: number) => setPath((p) => [...p, target]);
   const next = () => goTo(step + 1);
@@ -91,6 +105,7 @@ export default function OnboardingScreen() {
     }),
     bluetooth: path.includes(BLUETOOTH + 1) ? t('onboarding.side.allowed') : undefined,
     treadmill: connection.status === 'connected' ? (connection.deviceName ?? undefined) : undefined,
+    health: linked ? t('onboarding.side.allowed') : undefined,
   };
   const side: SideRow[] = KEYS.map((key, index) => ({
     key,
@@ -100,7 +115,10 @@ export default function OnboardingScreen() {
   const nav: FrameNav = {
     step,
     onBack: back,
-    onSkip: step < READY ? () => goTo(step === BLUETOOTH ? READY : step + 1) : undefined,
+    onSkip:
+      step < READY
+        ? () => goTo(step === BLUETOOTH || step === HEALTH - 1 ? afterTreadmill : step + 1)
+        : undefined,
     side,
   };
 
@@ -124,7 +142,20 @@ export default function OnboardingScreen() {
         />
       );
     case 6:
-      return <TreadmillStep nav={nav} next={next} />;
+      return <TreadmillStep nav={nav} next={() => goTo(afterTreadmill)} />;
+    case HEALTH:
+      return (
+        <HealthStep
+          nav={nav}
+          allow={() => {
+            // iOS shows its own sheet; whatever the answer, the onboarding goes on.
+            void setHealthEnabled(true).then((on) => {
+              setLinked(on);
+              next();
+            });
+          }}
+        />
+      );
     default:
       return (
         <ReadyStep

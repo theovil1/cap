@@ -14,7 +14,7 @@ import { RoundButton } from '@/ui/primitives';
 import { SidePanel, type SideRow } from './side-panel';
 
 /** Steps after the welcome screen: "Étape 1 sur 7" to "Étape 7 sur 7". */
-export const STEPS = 7;
+export const STEPS = 8;
 
 /** What every step passes to its frame. */
 export type FrameNav = {

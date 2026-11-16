@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 
 import { useSessions } from '@/api/queries';
 import type { SessionItem } from '@/api/types';
+import { useHealthStepsToday } from '@/health/health';
 import { dayKey, streaks } from '@/journey/progress';
 
 import { sessionsSince, type StoredSession } from './store';
@@ -88,8 +89,19 @@ function useNow(): number {
 export function useDayStats(extraM = 0, extraSteps = 0): DayStats {
   const { data: remote = [] } = useSessions();
   const now = useNow();
-  return useMemo(
-    () => computeDayStats(remote, sessionsSince(now - 400 * DAY_MS), now, extraM, extraSteps),
-    [remote, now, extraM, extraSteps],
-  );
+  // Apple Health counts every source once (iPhone, watch, saved sessions): the larger
+  // figure wins, so steps walked away from the treadmill count without double counting.
+  const healthSteps = useHealthStepsToday(remote);
+  return useMemo(() => {
+    const stats = computeDayStats(
+      remote,
+      sessionsSince(now - 400 * DAY_MS),
+      now,
+      extraM,
+      extraSteps,
+    );
+    if (healthSteps !== null)
+      stats.todaySteps = Math.max(stats.todaySteps, healthSteps + extraSteps);
+    return stats;
+  }, [remote, now, extraM, extraSteps, healthSteps]);
 }

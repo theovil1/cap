@@ -54,6 +54,9 @@ export const palette = {
     gold: '#E8A317',
     onGold: '#2A1A00',
     danger: '#C8281C',
+    /** Heart rate: icon and sensor tile. */
+    heart: '#E11D48',
+    heartSoft: '#FFE4EA',
     /** Pulsing "live" dot. */
     live: '#7CF0A9',
     shadow: 'rgba(21,22,26,0.10)',
@@ -95,6 +98,8 @@ export const palette = {
     gold: '#F2B63A',
     onGold: '#2A1A00',
     danger: '#FF7A6E',
+    heart: '#FF4D6D',
+    heartSoft: '#3A1420',
     live: '#7CF0A9',
     shadow: 'rgba(0,0,0,0.45)',
   },

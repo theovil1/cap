@@ -11,9 +11,7 @@
       "bundleIdentifier": "io.github.theovil1.cap",
       "supportsTablet": true,
       "infoPlist": {
-        "UISupportedInterfaceOrientations": [
-          "UIInterfaceOrientationPortrait"
-        ],
+        "UISupportedInterfaceOrientations": ["UIInterfaceOrientationPortrait"],
         "UISupportedInterfaceOrientations~ipad": [
           "UIInterfaceOrientationLandscapeLeft",
           "UIInterfaceOrientationLandscapeRight",
@@ -22,19 +20,18 @@
         ],
         "ITSAppUsesNonExemptEncryption": false,
         "NSAppleMusicUsageDescription": "Tapiroute shows and controls the music you listen to during your session.",
-        "LSApplicationQueriesSchemes": [
-          "spotify",
-          "deezer",
-          "music"
-        ],
+        "LSApplicationQueriesSchemes": ["spotify", "deezer", "music"],
         "TapirouteSpotifyClientID": "11b8343091a349438e989e5fc500ecbc",
         "NSLocationWhenInUseUsageDescription": "Tapiroute never uses your location: your routes start from the addresses you choose. The map library requires this text.",
-        "CFBundleLocalizations": [
-          "en",
-          "fr"
-        ]
+        "CFBundleLocalizations": ["en", "fr"],
+        "NSHealthShareUsageDescription": "Tapiroute reads your heart rate during sessions and your steps of the day. This data stays on your phone.",
+        "NSHealthUpdateUsageDescription": "Tapiroute saves your treadmill sessions in Apple Health as walks or runs."
       },
-      "usesAppleSignIn": true
+      "usesAppleSignIn": true,
+      "entitlements": {
+        "com.apple.developer.healthkit": true,
+        "com.apple.developer.healthkit.access": []
+      }
     },
     "android": {
       "package": "io.github.theovil1.cap",
@@ -72,24 +69,16 @@
         "react-native-ble-plx",
         {
           "isBackgroundEnabled": true,
-          "modes": [
-            "central"
-          ],
-          "bluetoothAlwaysPermission": "Tapiroute uses Bluetooth to read speed and distance from your treadmill."
+          "modes": ["central"],
+          "bluetoothAlwaysPermission": "Tapiroute uses Bluetooth to read speed and distance from your treadmill, and your heart rate from a sensor."
         }
       ],
       [
         "expo-localization",
         {
           "supportedLocales": {
-            "ios": [
-              "en",
-              "fr"
-            ],
-            "android": [
-              "en",
-              "fr"
-            ]
+            "ios": ["en", "fr"],
+            "android": ["en", "fr"]
           }
         }
       ],
@@ -112,7 +101,10 @@
         {
           "ios": {
             "extraPods": [
-              { "name": "SpotifyiOS", "podspec": "../vendor/SpotifyiOS.podspec" }
+              {
+                "name": "SpotifyiOS",
+                "podspec": "../vendor/SpotifyiOS.podspec"
+              }
             ]
           }
         }

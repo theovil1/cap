@@ -230,7 +230,10 @@
     "duration": "Duration",
     "stageReached": "Stage reached: {{name}}",
     "finish": "Done",
-    "mapProgress": "{{walked}} of {{total}} {{unit}} · {{percent}} %"
+    "mapProgress": "{{walked}} of {{total}} {{unit}} · {{percent}} %",
+    "cardio": "Heart rate",
+    "cardioAvg": "avg",
+    "cardioMax": "max {{bpm}} bpm"
   },
   "rankings": {
     "week": "Week",
@@ -448,7 +451,8 @@
     "delete": "Delete my account",
     "deleteTitle": "Delete your account?",
     "deleteBody": "Your sessions, journeys and friends are erased for good. This cannot be undone.",
-    "searchCountry": "Search a country"
+    "searchCountry": "Search a country",
+    "appleHealth": "Apple Health"
   },
   "history": {
     "title": "My sessions",
@@ -585,14 +589,15 @@
     "sections": {
       "account": "My account",
       "appearance": "Appearance",
-      "treadmill": "My treadmills",
+      "treadmill": "Devices",
       "notifications": "Notifications",
       "privacy": "Privacy"
     },
     "version": "Tapiroute {{version}}",
     "removePhoto": "Remove",
     "placeNote": "Your country and city are used for rankings and journey ideas. Never your exact position.",
-    "treadmills": "Manage my treadmills"
+    "treadmills": "Manage my treadmills",
+    "heartSensors": "Heart rate sensors"
   },
   "treadmillSetup": {
     "progress": "Add a treadmill · {{step}} of {{total}}",
@@ -934,7 +939,8 @@
         "auto": "auto map",
         "day": "day map",
         "night": "night map"
-      }
+      },
+      "health": "Health"
     },
     "destination": {
       "kicker": "Your first adventure",
@@ -1015,6 +1021,16 @@
       "around": "around {{date}}",
       "treadmill": "Treadmill",
       "start": "Start"
+    },
+    "health": {
+      "kicker": "Your health",
+      "title": "Let's link Apple Health",
+      "text": "Your sessions fill your rings, and your heart rate shows in your summaries.",
+      "workout": "Every session becomes a workout",
+      "watch": "Your watch's heart rate and your steps of the day",
+      "private": "Your health data stays on your phone",
+      "note": "iOS will ask what Tapiroute may read and write.",
+      "allow": "Link Apple Health"
     }
   },
   "feedSide": {
@@ -1023,5 +1039,34 @@
     "toFollow": "To follow",
     "mutual_one": "{{n}} friend in common",
     "mutual_other": "{{n}} friends in common"
+  },
+  "heart": {
+    "title": "Heart rate",
+    "bpm": "bpm",
+    "zone": "Zone {{zone}}",
+    "zones": {
+      "easy": "recovery",
+      "endurance": "endurance",
+      "tempo": "tempo",
+      "threshold": "threshold",
+      "max": "max"
+    },
+    "sensors": "Heart rate sensors",
+    "intro": "A strap or a watch that broadcasts its heart rate over Bluetooth. Tapiroute shows it live during the session.",
+    "mine": "My sensor",
+    "nearby": "Sensors nearby",
+    "searching": "Searching…",
+    "bluetoothOff": "Bluetooth not allowed",
+    "forget": "Forget",
+    "pair": "Pair",
+    "unnamed": "Unnamed sensor",
+    "connected": "Connected",
+    "connectedBpm": "Connected · {{bpm}} bpm",
+    "notConnected": "Waiting for the sensor",
+    "note": "Garmin watch: turn on \"Broadcast Heart Rate\". Apple Watch and most other watches: their heart rate comes through Apple Health, in the summary."
+  },
+  "health": {
+    "title": "Apple Health",
+    "denied": "Apple Health was not linked. You can link it later from My account."
   }
 }

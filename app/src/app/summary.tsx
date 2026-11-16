@@ -20,6 +20,7 @@ import { journeyTitle } from '@/journey/names';
 import { useRacers } from '@/live/use-racers';
 import { paceMinPerKm } from '@/journey/progress';
 import { RouteMap } from '@/map/route-map';
+import { SummaryHeartTile, useSessionHeart } from '@/heart/heart-tile';
 import { useDayStats } from '@/session/stats';
 import { getSession, pendingSessions } from '@/session/store';
 import { fonts, useColors } from '@/theme';
@@ -55,6 +56,7 @@ export default function SummaryScreen() {
   const detail = useJourney(journeyId).data ?? null;
   const summary = detail;
   const day = useDayStats();
+  const heart = useSessionHeart(session);
   const { data: journeys = [] } = useJourneys();
   const { data: synced = [] } = useSessions();
   // The races this session counted for; before the sync, the ones under way.
@@ -180,11 +182,27 @@ export default function SummaryScreen() {
                 [t('session.steps'), formatNumber(session.steps), undefined],
                 [t('session.speed'), formatSpeed(avgSpeed), t('units.kmh')],
               ].map(([label, value, unit]) => (
-                <View key={label} style={[styles.smallTile, { backgroundColor: colors.inset }]}>
+                <View
+                  key={label}
+                  style={[
+                    styles.smallTile,
+                    heart && styles.half,
+                    { backgroundColor: colors.inset },
+                  ]}
+                >
                   <Text style={[styles.smallLabel, { color: colors.textSecondary }]}>{label}</Text>
                   <Figure value={value ?? ''} unit={unit} size={20} unitSize={11} />
                 </View>
               ))}
+              {heart && (
+                <SummaryHeartTile
+                  heart={heart}
+                  size={20}
+                  unitSize={11}
+                  style={[styles.smallTile, styles.half]}
+                  labelStyle={styles.smallLabel}
+                />
+              )}
             </View>
             {session.speeds.length >= 2 && (
               <View style={[styles.bars, { backgroundColor: colors.inset }]}>
@@ -348,11 +366,22 @@ export default function SummaryScreen() {
               [t('session.pace'), formatPace(paceMinPerKm(avgSpeed)), t('units.pace')],
               [t('session.incline'), formatNumber(session.avgInclinePct, 1), '%'],
             ].map(([label, value, unit]) => (
-              <View key={label} style={[styles.tile, { backgroundColor: colors.inset }]}>
+              <View
+                key={label}
+                style={[styles.tile, heart && styles.half, { backgroundColor: colors.inset }]}
+              >
                 <Text style={[styles.tileLabel, { color: colors.textSecondary }]}>{label}</Text>
                 <Figure value={value ?? ''} unit={unit} size={22} />
               </View>
             ))}
+            {heart && (
+              <SummaryHeartTile
+                heart={heart}
+                size={22}
+                style={[styles.tile, styles.half]}
+                labelStyle={styles.tileLabel}
+              />
+            )}
           </View>
           {!session.result && (
             <Text style={[styles.pending, { color: colors.textMuted }]}>
@@ -516,7 +545,9 @@ const styles = StyleSheet.create({
   avg: { fontFamily: fonts.textSemiBold, fontSize: 13 },
   chartAxis: { flexDirection: 'row', justifyContent: 'space-between' },
   axis: { fontFamily: fonts.text, fontSize: 12 },
-  tiles: { flexDirection: 'row', gap: 8 },
+  tiles: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  /** With the Cardio tile, the tiles go two by two. */
+  half: { flexBasis: '45%' },
   tile: { flex: 1, gap: 8, padding: 14, borderRadius: 20 },
   tileLabel: { fontFamily: fonts.textMedium, fontSize: 12.5 },
   pending: { fontFamily: fonts.text, fontSize: 12.5, textAlign: 'center' },
