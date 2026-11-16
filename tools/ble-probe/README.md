@@ -29,7 +29,7 @@ CSV columns: `timestamp, t_s, step, kind, characteristic, name, bytes_hex, decod
 
 - Standard **FTMS** (service `0x1826`). Treadmill Data (`0x2ACD`) is notified about once per second, with no initialisation command.
 - Speed and incline match the console exactly.
-- **Distance only moves in 100 m steps** (the console shows 0.1 km). Cap therefore integrates the speed and re-anchors on the counter (see below).
+- **Distance only moves in 100 m steps** (the console shows 0.1 km). Tapiroute therefore integrates the speed and re-anchors on the counter (see below).
 - No step count and no heart rate: those fields stay at zero.
 - The Bluetooth module is a FitShow `FS-BT-T4`, which also speaks a proprietary protocol on `0xFFF0` with the same data and precision.
 
@@ -53,7 +53,7 @@ On iOS the MAC address is hidden: match on the `FS-` name and the advertised `0x
 | | **`0x2ACD` Treadmill Data** | **notify** | **main data source** |
 | | `0x2AD3` Training Status | read, notify | session phases |
 | | `0x2ADA` Machine Status | notify | started, paused |
-| | `0x2AD9` Control Point | write, indicate | unused (Cap never controls the treadmill) |
+| | `0x2AD9` Control Point | write, indicate | unused (Tapiroute never controls the treadmill) |
 | | `0x2AD4` Speed Range | read | `50 00 b0 04 0a 00`: 0.8 to 12.0 km/h, step 0.1 |
 | | `0x2AD5` Inclination Range | read | `00 00 96 00 0a 00`: 0 to 15 %, step 1 % |
 | `0xFFF0` FitShow | `0xFFF1` / `0xFFF2` | notify / write | proprietary status, 1 frame/s |
@@ -95,7 +95,7 @@ Reference session: about 70 s from 0.8 to 2 km/h, then about 145 s at 4 km/h (th
 
 The counter seems to round to the nearest 100 m, a few metres late. Integrating the 1 Hz speed matches the treadmill within 1 %.
 
-**Rule used by Cap:** credited distance = speed integrated at each frame, re-anchored on the treadmill counter whenever it changes (maximum gap: 50 m). At the end of a session, keep the integral if it falls within the step reported by the treadmill, otherwise use the counter.
+**Rule used by Tapiroute:** credited distance = speed integrated at each frame, re-anchored on the treadmill counter whenever it changes (maximum gap: 50 m). At the end of a session, keep the integral if it falls within the step reported by the treadmill, otherwise use the counter.
 
 ### Session phases
 

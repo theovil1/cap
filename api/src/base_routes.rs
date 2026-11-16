@@ -19,7 +19,7 @@ pub const TEAM: Uuid = Uuid::from_u128(0xca9);
 
 const ROUTES: &str = include_str!("../base-routes.json");
 const COMMONS: &str = "https://commons.wikimedia.org/w/api.php";
-const AGENT: &str = "cap-api (https://github.com/theovil1/cap)";
+const AGENT: &str = "cap-api (https://github.com/theovil1/tapiroute)";
 
 #[derive(Deserialize)]
 struct BaseRoute {

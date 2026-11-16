@@ -1,6 +1,6 @@
 # Contributing
 
-Thanks for your interest in Cap! The project is young, so please open an issue to discuss a change before starting a large pull request.
+Thanks for your interest in Tapiroute! The project is young, so please open an issue to discuss a change before starting a large pull request.
 
 ## Guidelines
 

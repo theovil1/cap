@@ -1,6 +1,6 @@
 # Infrastructure
 
-Docker Compose stack for Cap: PostgreSQL, the API, GraphHopper (walking routes) and Photon (geocoding), with OpenStreetMap data for France.
+Docker Compose stack for Tapiroute: PostgreSQL, the API, GraphHopper (walking routes) and Photon (geocoding), with OpenStreetMap data for France.
 
 | Service | Image | Notes |
 | --- | --- | --- |
@@ -39,7 +39,7 @@ docker compose logs -f api
 
 ## Walking profile
 
-Cap's rule is the fastest of the safe routes. `foot_safe` keeps GraphHopper's foot model and adds Cap's safety rules: motorways and expressways (`trunk`) are excluded, primary roads are heavily penalised (x0.1), secondary roads strongly (x0.35) and tertiary roads slightly (x0.7). GraphHopper's foot priority already favours footways, paths, cycleways, residential streets and roads tagged with a sidewalk. Busy roads are penalised rather than banned so that a route always exists in the countryside, where sidewalk data is incomplete.
+Tapiroute's rule is the fastest of the safe routes. `foot_safe` keeps GraphHopper's foot model and adds Tapiroute's safety rules: motorways and expressways (`trunk`) are excluded, primary roads are heavily penalised (x0.1), secondary roads strongly (x0.35) and tertiary roads slightly (x0.7). GraphHopper's foot priority already favours footways, paths, cycleways, residential streets and roads tagged with a sidewalk. Busy roads are penalised rather than banned so that a route always exists in the countryside, where sidewalk data is incomplete.
 
 `foot_fast` (no penalty) is kept as a reference. On six real trips, `foot_safe` cut the share of busy roads from up to 14 % to 0 to 2 %, for a 5 to 9 % longer route.
 

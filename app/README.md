@@ -1,10 +1,10 @@
-# Cap app
+# Tapiroute app
 
 Expo (SDK 58) app for iPhone and iPad, written in TypeScript with Expo Router.
 
 ## Run it
 
-Bluetooth needs native code, so Cap runs in a [development build](https://docs.expo.dev/develop/development-builds/introduction/), never in Expo Go.
+Bluetooth needs native code, so Tapiroute runs in a [development build](https://docs.expo.dev/develop/development-builds/introduction/), never in Expo Go.
 
 ```bash
 npm install
@@ -35,7 +35,7 @@ npm run format      # Prettier
 | `src/api/` | API client, sign-in, TanStack Query hooks |
 | `src/journey/` | Pawn position along the route, stages, steps, streaks |
 | `src/session/` | Session recorder, local SQLite store, sync queue |
-| `src/map/` | MapLibre map and the Cap style derived from OpenFreeMap Liberty |
+| `src/map/` | MapLibre map and the Tapiroute style derived from OpenFreeMap Liberty |
 | `src/treadmill/` | FTMS decoder, distance tracker, Bluetooth connection |
 | `src/ui/` | Shared components and the floating navigation bar |
 | `src/i18n/` | Translations (French and English) and native permission strings |

@@ -1,6 +1,6 @@
-# Cap
+# Cap (Tapiroute)
 
-iPhone and iPad app that moves a pawn along a real walking route (e.g. Romorantin to Paris) using the distance walked on a Bluetooth treadmill, with real-time races between friends. Open source (MIT): https://github.com/theovil1/cap
+iPhone and iPad app that moves a pawn along a real walking route (e.g. Romorantin to Paris) using the distance walked on a Bluetooth treadmill, with real-time races between friends. Public name Tapiroute; Cap is the code name (bundle id, domain, code). Open source (MIT): https://github.com/theovil1/tapiroute
 
 ## Reference documents (local only, not versioned)
 

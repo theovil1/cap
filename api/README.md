@@ -1,4 +1,4 @@
-# Cap API
+# Tapiroute API
 
 Rust API (Axum, Tokio, SQLx, PostgreSQL) for accounts, walking routes, journeys and treadmill sessions. The app never talks to GraphHopper or Photon directly: the API sits in between.
 
