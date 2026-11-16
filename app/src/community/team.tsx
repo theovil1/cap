@@ -1,12 +1,12 @@
 import { CapLogo } from '@/onboarding/logo';
 import { Avatar } from '@/ui/primitives';
 
-/** The Cap team: a system account of the API that publishes the base routes. */
+/** The Tapiroute team: a system account of the API that publishes the base routes. */
 export const TEAM_ID = '00000000-0000-0000-0000-000000000ca9';
 
 export const isTeam = (id: string) => id === TEAM_ID;
 
-/** A walker's picture, or the Cap logo for the team. */
+/** A walker's picture, or the app logo (the tapir) for the team. */
 export function WalkerAvatar({
   walker,
   size,
