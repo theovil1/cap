@@ -33,6 +33,8 @@ import { rivalPawns, useRacers } from '@/live/use-racers';
 import { MapKindButton } from '@/map/map-kind-button';
 import { RouteMap } from '@/map/route-map';
 import { useSession } from '@/session/session-context';
+import { MusicCard, MusicPill } from '@/music/music-player';
+import { useMusic } from '@/music/use-music';
 import { GoalTile } from '@/session/goal-tile';
 import { useDayStats } from '@/session/stats';
 import { getValue, pendingSessions, setValue } from '@/session/store';
@@ -110,6 +112,8 @@ export default function SessionScreen() {
     wasReached.current = reached;
   }, [reached, live]);
   const endCelebration = useCallback(() => setCelebrating(false), []);
+
+  const music = useMusic();
 
   const tiles: [ReactNode, string, string, string?][] = [
     [
@@ -254,6 +258,7 @@ export default function SessionScreen() {
         </View>
       ) : null}
       {wide && <View style={{ flex: 1 }} />}
+      {wide && music.visible ? <MusicCard music={music} /> : null}
       {summary && (
         <View style={{ gap: wide ? 10 : 9 }}>
           <ProgressBar ratio={walked / total} marks={marks} height={wide ? 10 : 8} />
@@ -438,7 +443,12 @@ export default function SessionScreen() {
           onChange={onSheetChange}
           grabberColor={colors.track}
           grabberLabel={t('session.resizePanel')}
-          above={<View style={[styles.mapButtons, styles.mapButtonsPhone]}>{mapButtons}</View>}
+          above={
+            <View style={styles.above} pointerEvents="box-none">
+              <View style={[styles.mapButtons, styles.mapButtonsPhone]}>{mapButtons}</View>
+              {music.visible ? <MusicPill music={music} /> : null}
+            </View>
+          }
           style={[
             styles.panel,
             {
@@ -545,9 +555,8 @@ const styles = StyleSheet.create({
   mapButtonsPhone: {
     position: 'relative',
     alignSelf: 'flex-end',
-    marginRight: 20,
-    marginBottom: 12,
   },
+  above: { gap: 10, paddingHorizontal: 20, marginBottom: 12 },
   stageText: {
     flexShrink: 1,
     fontFamily: fonts.textSemiBold,

@@ -2,5 +2,6 @@
   "CFBundleDisplayName": "Tapiroute",
   "NSBluetoothAlwaysUsageDescription": "Tapiroute utilise le Bluetooth pour lire la vitesse et la distance de ton tapis.",
   "NSLocationWhenInUseUsageDescription": "Tapiroute n'utilise jamais ta position : tes trajets partent des adresses que tu choisis. La bibliothèque de carte demande ce texte.",
-  "NSPhotoLibraryUsageDescription": "Tapiroute utilise tes photos pour ta photo de profil."
+  "NSPhotoLibraryUsageDescription": "Tapiroute utilise tes photos pour ta photo de profil.",
+  "NSAppleMusicUsageDescription": "Tapiroute affiche et pilote la musique que tu écoutes pendant ta séance."
 }

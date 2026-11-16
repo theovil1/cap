@@ -22,6 +22,7 @@ import { countryName } from '@/i18n/countries';
 import { useAuth } from '@/api/auth';
 import { api, API_URL, ApiError } from '@/api/client';
 import { useUpdateProfile, type ProfilePatch } from '@/api/profile';
+import { musicEnabled, musicSupported, setMusicEnabled } from '@/music/use-music';
 import type { UserProfile } from '@/api/types';
 import { SettingsWide } from '@/account/settings-wide';
 import { fonts, useColors } from '@/theme';
@@ -35,6 +36,7 @@ export default function AccountScreen() {
   const { user, setUser, signOut, deleteAccount } = useAuth();
   const update = useUpdateProfile();
   const [busy, setBusy] = useState(false);
+  const [music, setMusic] = useState(musicEnabled);
   const wide = useWide();
   if (!user) return null;
 
@@ -256,6 +258,19 @@ export default function AccountScreen() {
       />
     </Row>
   );
+  // Per device: the player during a session (iPhone pill, iPad card).
+  const musicRow = musicSupported ? (
+    <Row label={t('account.musicInSession')}>
+      <Toggle
+        value={music}
+        onChange={(on) => {
+          setMusicEnabled(on);
+          setMusic(on);
+        }}
+        label={t('account.musicInSession')}
+      />
+    </Row>
+  ) : null;
   const visibilityRow = (
     <Row
       label={t('account.visibility')}
@@ -295,7 +310,13 @@ export default function AccountScreen() {
               <Row label={t('settings.treadmills')} onPress={() => router.push('/treadmill')} />
             </Group>
           ),
-          notifications: <Group>{notificationsRow}</Group>,
+          notifications: (
+            <Group>
+              {notificationsRow}
+              {musicRow}
+              {musicRow}
+            </Group>
+          ),
           privacy: (
             <Group>
               {visibilityRow}

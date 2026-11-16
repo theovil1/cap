@@ -433,6 +433,7 @@
       "mi": "Miles"
     },
     "notifications": "Notifications",
+    "musicInSession": "Music during sessions",
     "visibility": "Profile visible to",
     "visibilityHint": "Who can find you by your username?",
     "visibilities": {
@@ -815,6 +816,16 @@
     "distance": "Distance",
     "duration": "Time",
     "pace": "Pace"
+  },
+  "music": {
+    "source": "Music source",
+    "choose": "Choose your music",
+    "openDeezer": "Open Deezer",
+    "hide": "Hide the player",
+    "play": "Play",
+    "pause": "Pause",
+    "next": "Next track",
+    "previous": "Previous track"
   },
   "feed": {
     "empty": "Your feed is empty",
