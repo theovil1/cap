@@ -17,8 +17,8 @@ node_modules/
 .expo/
 dist/
 web-build/
-ios/
-android/
+/app/ios/
+/app/android/
 
 # Rust
 target/
