@@ -440,6 +440,7 @@
       "friends": "Mes amis"
     },
     "export": "Exporter mes données",
+    "exportFile": "donnees",
     "privacyPolicy": "Politique de confidentialité",
     "save": "Enregistrer",
     "delete": "Supprimer mon compte",

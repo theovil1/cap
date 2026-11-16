@@ -1,3 +1,4 @@
+import { File, Paths } from 'expo-file-system';
 import { router } from 'expo-router';
 import { Camera, ChevronLeft, ChevronRight } from 'lucide-react-native';
 import { useState, type ReactNode } from 'react';
@@ -127,7 +128,13 @@ export default function AccountScreen() {
     setBusy(true);
     try {
       const data = await api<unknown>('/me/export');
-      await Share.share({ message: JSON.stringify(data, null, 2) });
+      // A JSON file the walker can keep in Files, AirDrop or e-mail (GDPR portability).
+      const day = new Date().toISOString().slice(0, 10);
+      const file = new File(Paths.cache, `tapiroute-${t('account.exportFile')}-${day}.json`);
+      if (file.exists) file.delete();
+      file.create();
+      file.write(JSON.stringify(data, null, 2));
+      await Share.share({ url: file.uri });
     } catch (error) {
       failed(error);
     } finally {

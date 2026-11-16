@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT COALESCE(json_agg(x ORDER BY x.granted_at), '[]') AS \"rows!\" FROM (SELECT badge, tier, granted_at FROM user_badges WHERE user_id = $1) x",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "rows!",
+        "type_info": "Json",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "9eb97a8955fef025f6fbde65dcf4ea96c69ba83f01e9fd90be4f0c8f88ae4601"
+}

@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT COALESCE(json_agg(x ORDER BY x.created_at), '[]') AS \"rows!\" FROM (SELECT title, description, visibility, tags, created_at FROM public_routes WHERE author_id = $1) x",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "rows!",
+        "type_info": "Json",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "aa20e12cbf95e713848bedc8d415168b5cae0a21b5507c53d6f89d6bad33548b"
+}

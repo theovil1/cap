@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT COALESCE(json_agg(x ORDER BY x.created_at), '[]') AS \"rows!\" FROM (SELECT post_id, created_at FROM bravos WHERE user_id = $1) x",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "rows!",
+        "type_info": "Json",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "e3130c3be29b803dec9a66a44ffff47bc36141d4be728c37e648cfa6839d99ed"
+}

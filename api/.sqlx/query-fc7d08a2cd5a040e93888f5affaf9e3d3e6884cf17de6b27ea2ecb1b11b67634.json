@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT COALESCE(json_agg(x ORDER BY x.created_at), '[]') AS \"rows!\" FROM (SELECT token, sandbox, created_at FROM push_devices WHERE user_id = $1) x",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "rows!",
+        "type_info": "Json",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "fc7d08a2cd5a040e93888f5affaf9e3d3e6884cf17de6b27ea2ecb1b11b67634"
+}

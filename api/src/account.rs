@@ -137,11 +137,83 @@ async fn export(State(state): State<AppState>, AuthUser(user_id): AuthUser) -> A
     )
     .fetch_one(&state.db)
     .await?;
+    let community = community_export(&state.db, user_id).await?;
     Ok(Json(json!({
         "exported_at": OffsetDateTime::now_utc().unix_timestamp(),
         "profile": profile,
         "sessions": sessions,
         "journeys": journeys,
         "friends": friends,
+        "community": community,
     })))
+}
+
+/// What the walker did in the community: follows, posts, comments, Bravos,
+/// badges, routes published, reports and the phones getting notifications.
+async fn community_export(db: &sqlx::PgPool, user_id: Uuid) -> AppResult<Value> {
+    let posts = sqlx::query_scalar!(
+        "SELECT COALESCE(json_agg(x ORDER BY x.created_at), '[]') AS \"rows!\" FROM (SELECT kind, text, data, audience, created_at, edited_at FROM posts WHERE author_id = $1) x",
+        user_id
+    )
+    .fetch_one(db)
+    .await?;
+    let comments = sqlx::query_scalar!(
+        "SELECT COALESCE(json_agg(x ORDER BY x.created_at), '[]') AS \"rows!\" FROM (SELECT post_id, text, created_at FROM comments WHERE author_id = $1) x",
+        user_id
+    )
+    .fetch_one(db)
+    .await?;
+    let bravos = sqlx::query_scalar!(
+        "SELECT COALESCE(json_agg(x ORDER BY x.created_at), '[]') AS \"rows!\" FROM (SELECT post_id, created_at FROM bravos WHERE user_id = $1) x",
+        user_id
+    )
+    .fetch_one(db)
+    .await?;
+    let following = sqlx::query_scalar!(
+        "SELECT COALESCE(json_agg(x ORDER BY x.created_at), '[]') AS \"rows!\" FROM (SELECT u.username, f.created_at FROM follows f JOIN users u ON u.id = f.followee_id WHERE f.follower_id = $1) x",
+        user_id
+    )
+    .fetch_one(db)
+    .await?;
+    let followers = sqlx::query_scalar!(
+        "SELECT COALESCE(json_agg(x ORDER BY x.created_at), '[]') AS \"rows!\" FROM (SELECT u.username, f.created_at FROM follows f JOIN users u ON u.id = f.follower_id WHERE f.followee_id = $1) x",
+        user_id
+    )
+    .fetch_one(db)
+    .await?;
+    let badges = sqlx::query_scalar!(
+        "SELECT COALESCE(json_agg(x ORDER BY x.granted_at), '[]') AS \"rows!\" FROM (SELECT badge, tier, granted_at FROM user_badges WHERE user_id = $1) x",
+        user_id
+    )
+    .fetch_one(db)
+    .await?;
+    let published_routes = sqlx::query_scalar!(
+        "SELECT COALESCE(json_agg(x ORDER BY x.created_at), '[]') AS \"rows!\" FROM (SELECT title, description, visibility, tags, created_at FROM public_routes WHERE author_id = $1) x",
+        user_id
+    )
+    .fetch_one(db)
+    .await?;
+    let reports = sqlx::query_scalar!(
+        "SELECT COALESCE(json_agg(x ORDER BY x.created_at), '[]') AS \"rows!\" FROM (SELECT target_type, target_id, reason, created_at FROM reports WHERE reporter_id = $1) x",
+        user_id
+    )
+    .fetch_one(db)
+    .await?;
+    let push_devices = sqlx::query_scalar!(
+        "SELECT COALESCE(json_agg(x ORDER BY x.created_at), '[]') AS \"rows!\" FROM (SELECT token, sandbox, created_at FROM push_devices WHERE user_id = $1) x",
+        user_id
+    )
+    .fetch_one(db)
+    .await?;
+    Ok(json!({
+        "following": following,
+        "followers": followers,
+        "posts": posts,
+        "comments": comments,
+        "bravos": bravos,
+        "badges": badges,
+        "published_routes": published_routes,
+        "reports": reports,
+        "push_devices": push_devices,
+    }))
 }

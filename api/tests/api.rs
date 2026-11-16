@@ -820,6 +820,11 @@ async fn account_settings_photo_and_export(db: PgPool) {
     assert_eq!(export["profile"]["username"], "theo");
     assert_eq!(export["sessions"].as_array().unwrap().len(), 1);
     assert_eq!(export["journeys"].as_array().unwrap().len(), 0);
+    for part in
+        ["following", "followers", "posts", "comments", "bravos", "badges", "published_routes", "reports"]
+    {
+        assert!(export["community"][part].is_array(), "{part}");
+    }
 }
 
 #[sqlx::test(migrator = "cap_api::MIGRATOR")]
