@@ -17,6 +17,9 @@ updates:
       - dependency-name: react-native-svg
       - dependency-name: eslint
         update-types: ["version-update:semver-major"]
+      # typescript-eslint does not support TypeScript 7 yet.
+      - dependency-name: typescript
+        update-types: ["version-update:semver-major"]
   - package-ecosystem: cargo
     directory: /api
     schedule: { interval: weekly }
