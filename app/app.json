@@ -11,7 +11,9 @@
       "bundleIdentifier": "io.github.theovil1.cap",
       "supportsTablet": true,
       "infoPlist": {
-        "UISupportedInterfaceOrientations": ["UIInterfaceOrientationPortrait"],
+        "UISupportedInterfaceOrientations": [
+          "UIInterfaceOrientationPortrait"
+        ],
         "UISupportedInterfaceOrientations~ipad": [
           "UIInterfaceOrientationLandscapeLeft",
           "UIInterfaceOrientationLandscapeRight",
@@ -20,10 +22,17 @@
         ],
         "ITSAppUsesNonExemptEncryption": false,
         "NSAppleMusicUsageDescription": "Tapiroute shows and controls the music you listen to during your session.",
-        "LSApplicationQueriesSchemes": ["spotify", "deezer", "music"],
+        "LSApplicationQueriesSchemes": [
+          "spotify",
+          "deezer",
+          "music"
+        ],
         "TapirouteSpotifyClientID": "11b8343091a349438e989e5fc500ecbc",
         "NSLocationWhenInUseUsageDescription": "Tapiroute never uses your location: your routes start from the addresses you choose. The map library requires this text.",
-        "CFBundleLocalizations": ["en", "fr"]
+        "CFBundleLocalizations": [
+          "en",
+          "fr"
+        ]
       },
       "usesAppleSignIn": true
     },
@@ -63,7 +72,9 @@
         "react-native-ble-plx",
         {
           "isBackgroundEnabled": true,
-          "modes": ["central"],
+          "modes": [
+            "central"
+          ],
           "bluetoothAlwaysPermission": "Tapiroute uses Bluetooth to read speed and distance from your treadmill."
         }
       ],
@@ -71,8 +82,14 @@
         "expo-localization",
         {
           "supportedLocales": {
-            "ios": ["en", "fr"],
-            "android": ["en", "fr"]
+            "ios": [
+              "en",
+              "fr"
+            ],
+            "android": [
+              "en",
+              "fr"
+            ]
           }
         }
       ],
@@ -88,6 +105,16 @@
           "photosPermission": "Tapiroute uses your photos to set your profile picture.",
           "cameraPermission": false,
           "microphonePermission": false
+        }
+      ],
+      [
+        "expo-build-properties",
+        {
+          "ios": {
+            "extraPods": [
+              { "name": "SpotifyiOS", "podspec": "../modules/tapiroute-music/vendor/SpotifyiOS.podspec" }
+            ]
+          }
         }
       ]
     ],

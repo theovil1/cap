@@ -13,12 +13,8 @@ Pod::Spec.new do |s|
   s.dependency 'ExpoModulesCore'
   s.frameworks = 'MediaPlayer'
 
-  # Spotify's iOS SDK, as a Swift package (a binary framework).
-  spm_dependency(s,
-    url: 'https://github.com/spotify/ios-sdk.git',
-    requirement: { kind: 'exactVersion', version: '5.0.1' },
-    products: ['SpotifyiOS']
-  )
+  # Spotify's iOS SDK: see ../vendor/SpotifyiOS.podspec, added by expo-build-properties.
+  s.dependency 'SpotifyiOS', '5.0.1'
 
   s.pod_target_xcconfig = { 'DEFINES_MODULE' => 'YES' }
   s.source_files = '**/*.swift'
