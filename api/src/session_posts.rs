@@ -6,7 +6,8 @@ use axum::{
     http::StatusCode,
 };
 use serde::Deserialize;
-use serde_json::json;
+use serde_json::{Value, json};
+use sqlx::PgPool;
 use utoipa::ToSchema;
 use utoipa_axum::{router::OpenApiRouter, routes};
 use uuid::Uuid;
@@ -22,7 +23,7 @@ use crate::{
 const MAX_POINTS: usize = 120;
 
 pub fn router() -> OpenApiRouter<AppState> {
-    OpenApiRouter::new().routes(routes!(post_session))
+    OpenApiRouter::new().routes(routes!(preview_session, post_session))
 }
 
 #[derive(Deserialize, ToSchema)]
@@ -52,12 +53,38 @@ async fn post_session(
     if text.is_some_and(|t| t.chars().count() > 280) {
         return Err(AppError::bad_request("invalid_text", "280 characters at most"));
     }
+    let (data, journey) = card_data(&state.db, me, id).await?;
+    let post_id = Uuid::now_v7();
+    let inserted = sqlx::query!(
+        "INSERT INTO posts (id, author_id, kind, journey_id, data, text, session_id, audience)
+         VALUES ($1, $2, 'session', $3, $4, $5, $6, $7) ON CONFLICT DO NOTHING",
+        post_id,
+        me,
+        journey,
+        data,
+        text,
+        id,
+        body.audience
+    )
+    .execute(&state.db)
+    .await?;
+    if inserted.rows_affected() == 0 {
+        return Err(AppError::conflict("already_posted", "this session is already in the feed"));
+    }
+    let post =
+        posts(&state.db, me, &[post_id]).await?.pop().ok_or_else(|| AppError::not_found("post not found"))?;
+    Ok((StatusCode::CREATED, Json(post)))
+}
+
+/// What the card shows: the session's figures and, on the journey it counted
+/// for (a solo one first), the stretch of route it covered.
+async fn card_data(db: &PgPool, me: Uuid, id: Uuid) -> AppResult<(Value, Option<Uuid>)> {
     let session = sqlx::query!(
         "SELECT distance_m, duration_s, started_at, steps FROM sessions WHERE id = $1 AND user_id = $2",
         id,
         me
     )
-    .fetch_optional(&state.db)
+    .fetch_optional(db)
     .await?
     .ok_or_else(|| AppError::not_found("session not found"))?;
 
@@ -74,7 +101,7 @@ async fn post_session(
         id,
         session.started_at
     )
-    .fetch_optional(&state.db)
+    .fetch_optional(db)
     .await?;
 
     let mut data = json!({
@@ -103,26 +130,18 @@ async fn post_session(
         });
     }
 
-    let post_id = Uuid::now_v7();
-    let inserted = sqlx::query!(
-        "INSERT INTO posts (id, author_id, kind, journey_id, data, text, session_id, audience)
-         VALUES ($1, $2, 'session', $3, $4, $5, $6, $7) ON CONFLICT DO NOTHING",
-        post_id,
-        me,
-        journey.as_ref().map(|j| j.id),
-        data,
-        text,
-        id,
-        body.audience
-    )
-    .execute(&state.db)
-    .await?;
-    if inserted.rows_affected() == 0 {
-        return Err(AppError::conflict("already_posted", "this session is already in the feed"));
-    }
-    let post =
-        posts(&state.db, me, &[post_id]).await?.pop().ok_or_else(|| AppError::not_found("post not found"))?;
-    Ok((StatusCode::CREATED, Json(post)))
+    Ok((data, journey.map(|j| j.id)))
+}
+
+/// What posting this session would show, for the preview before posting.
+#[utoipa::path(get, path = "/sessions/{id}/post", tag = "feed", security(("bearer" = [])),
+    params(("id" = Uuid, Path)), responses((status = 200, body = Object), (status = 404, body = ErrorBody)))]
+async fn preview_session(
+    State(state): State<AppState>,
+    AuthUser(me): AuthUser,
+    Path(id): Path<Uuid>,
+) -> AppResult<Json<Value>> {
+    Ok(Json(card_data(&state.db, me, id).await?.0))
 }
 
 /// The `[lon, lat]` points of a route between two distances, ends included,

@@ -1647,6 +1647,9 @@ async fn sessions_posted_to_friends_only(db: PgPool) {
         .await
         .json();
     let url = format!("/sessions/{}/post", uploaded["id"].as_str().unwrap());
+    let preview: Value = server.get(&url).add_header("authorization", bearer(&theo)).await.json();
+    assert_eq!(preview["distance_m"], 200.0);
+    assert!(preview["journey"]["title"].is_string());
     server
         .post(&url)
         .add_header("authorization", bearer(&lilou))
