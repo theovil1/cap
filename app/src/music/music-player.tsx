@@ -3,6 +3,7 @@ import { Music as MusicIcon, Pause, Play, SkipBack, SkipForward } from 'lucide-r
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
+import Svg, { Path } from 'react-native-svg';
 
 import { fonts, useColors, useShadows } from '@/theme';
 import { TIGHT_TEXT_SCALE } from '@/tokens';
@@ -48,7 +49,31 @@ function useItems(music: Music): MenuItem[] {
   ];
 }
 
-/** The cover, with a dot of the source's colour; opens the source menu. */
+/** The source's mark on the cover: Apple Music's note, Spotify's three waves. */
+function SourceBadge({ source, border }: { source: keyof typeof SOURCE_COLOR; border: string }) {
+  return (
+    <View style={[styles.dot, { backgroundColor: SOURCE_COLOR[source], borderColor: border }]}>
+      <Svg width={10} height={10} viewBox="0 0 24 24" accessibilityElementsHidden>
+        {source === 'apple' ? (
+          <Path
+            fill="#FFFFFF"
+            d="M19 2.5v12.2a3.3 3.3 0 1 1-2-3V6.9l-7 1.5v8.8a3.3 3.3 0 1 1-2-3V5.3z"
+          />
+        ) : (
+          <Path
+            fill="none"
+            stroke="#FFFFFF"
+            strokeWidth={3.2}
+            strokeLinecap="round"
+            d="M4.5 8.5c5-1.8 10.5-1.4 15 1.2M5.5 12.8c4-1.2 8.5-.9 12.2 1.1M6.5 16.9c3-.8 6.2-.6 9 .9"
+          />
+        )}
+      </Svg>
+    </View>
+  );
+}
+
+/** The cover, with the source's mark; opens the source menu. */
 function Cover({ music, size }: { music: Music; size: number }) {
   const { t } = useTranslation();
   const colors = useColors();
@@ -77,14 +102,7 @@ function Cover({ music, size }: { music: Music; size: number }) {
             <MusicIcon size={size * 0.45} color={colors.textSecondary} />
           </View>
         )}
-        {track ? (
-          <View
-            style={[
-              styles.dot,
-              { backgroundColor: SOURCE_COLOR[track.source], borderColor: colors.surface },
-            ]}
-          />
-        ) : null}
+        {track ? <SourceBadge source={track.source} border={colors.surface} /> : null}
       </View>
     </ActionMenu>
   );
@@ -227,12 +245,14 @@ const styles = StyleSheet.create({
   cover: { overflow: 'hidden' },
   dot: {
     position: 'absolute',
-    right: -3,
-    bottom: -3,
-    width: 15,
-    height: 15,
-    borderRadius: 8,
+    right: -4,
+    bottom: -4,
+    width: 19,
+    height: 19,
+    borderRadius: 10,
     borderWidth: 2,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   title: { fontFamily: fonts.textSemiBold, fontSize: 14.5 },
   titleWide: { fontSize: 14 },
