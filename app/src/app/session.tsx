@@ -9,12 +9,21 @@ import {
   MapPin,
   PanelRightClose,
   PanelRightOpen,
+  TvMinimalPlay,
+  X,
   TrendingUp,
 } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ScrollView, StyleSheet, Text, View, type LayoutChangeEvent } from 'react-native';
+import {
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+  type LayoutChangeEvent,
+} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useAuth } from '@/api/auth';
@@ -37,6 +46,7 @@ import { MusicCard, MusicPill } from '@/music/music-player';
 import { useMusic } from '@/music/use-music';
 import { GoalTile } from '@/session/goal-tile';
 import { useDayStats } from '@/session/stats';
+import { useVideoTip } from '@/session/video-tip';
 import { getValue, pendingSessions, setValue } from '@/session/store';
 import { fonts, useColors, type Colors } from '@/theme';
 import { useWide } from '@/ui/layout';
@@ -116,6 +126,8 @@ export default function SessionScreen() {
   const endCelebration = useCallback(() => setCelebrating(false), []);
 
   const music = useMusic();
+  // iPad: how to watch a video in another app next to the session.
+  const videoTip = useVideoTip();
 
   const tiles: [ReactNode, string, string, string?][] = [
     [
@@ -386,6 +398,34 @@ export default function SessionScreen() {
         ) : null}
         {!wide && detail ? <MapKindButton /> : null}
       </View>
+      {wide && videoTip.shown ? (
+        <View
+          style={[styles.tipSpot, { top: 28 + controls + 50, right: panelHidden ? 28 : 448 }]}
+          pointerEvents="box-none"
+        >
+          <Glass style={[styles.stageChip, styles.tipChip]}>
+            <Pressable
+              onPress={() => router.push('/video-tip')}
+              accessibilityRole="button"
+              accessibilityLabel={t('videoTip.open')}
+              style={styles.tipOpen}
+            >
+              <TvMinimalPlay size={16} color={colors.accentText} strokeWidth={2.2} />
+              <Text style={[styles.stageText, { color: colors.text }]}>{t('videoTip.pill')}</Text>
+            </Pressable>
+            <View style={[styles.tipLine, { backgroundColor: colors.border }]} />
+            <Pressable
+              onPress={videoTip.hide}
+              accessibilityRole="button"
+              accessibilityLabel={t('videoTip.close')}
+              style={styles.tipClose}
+              hitSlop={6}
+            >
+              <X size={13} color={colors.textSecondary} strokeWidth={2.6} />
+            </Pressable>
+          </Glass>
+        </View>
+      ) : null}
       {!wide && stage ? (
         <Glass style={[styles.stageChip, styles.stagePhone, { top: insets.top + 72 }]}>
           <Flag size={15} color={colors.blueText} strokeWidth={2.2} />
@@ -584,6 +624,18 @@ const styles = StyleSheet.create({
   captionWide: { fontSize: 14 },
   titleTextWide: { fontSize: 16 },
   stageChipWide: { height: 40, paddingHorizontal: 14 },
+  tipSpot: { position: 'absolute', alignItems: 'flex-end' },
+  tipChip: { height: 40, paddingHorizontal: 0, gap: 0 },
+  tipOpen: {
+    height: 40,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingLeft: 14,
+    paddingRight: 10,
+  },
+  tipLine: { width: StyleSheet.hairlineWidth, height: 16 },
+  tipClose: { height: 40, width: 38, alignItems: 'center', justifyContent: 'center' },
   panelContent: { flexGrow: 1, gap: 18, paddingHorizontal: 20, paddingBottom: 22 },
   right: { textAlign: 'right' },
   panelWide: {

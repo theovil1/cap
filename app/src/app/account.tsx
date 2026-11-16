@@ -23,6 +23,7 @@ import { useAuth } from '@/api/auth';
 import { api, API_URL, ApiError } from '@/api/client';
 import { useUpdateProfile, type ProfilePatch } from '@/api/profile';
 import { musicEnabled, musicSupported, setMusicEnabled } from '@/music/use-music';
+import { setVideoTipEnabled, videoTipEnabled } from '@/session/video-tip';
 import type { UserProfile } from '@/api/types';
 import { SettingsWide } from '@/account/settings-wide';
 import { fonts, useColors } from '@/theme';
@@ -37,6 +38,7 @@ export default function AccountScreen() {
   const update = useUpdateProfile();
   const [busy, setBusy] = useState(false);
   const [music, setMusic] = useState(musicEnabled);
+  const [videoTip, setVideoTip] = useState(videoTipEnabled);
   const wide = useWide();
   if (!user) return null;
 
@@ -271,6 +273,19 @@ export default function AccountScreen() {
       />
     </Row>
   ) : null;
+  // iPad only: the session's tip about a video next to Tapiroute.
+  const videoTipRow = (
+    <Row label={t('account.videoTip')}>
+      <Toggle
+        value={videoTip}
+        onChange={(on) => {
+          setVideoTipEnabled(on);
+          setVideoTip(on);
+        }}
+        label={t('account.videoTip')}
+      />
+    </Row>
+  );
   const visibilityRow = (
     <Row
       label={t('account.visibility')}
@@ -314,6 +329,7 @@ export default function AccountScreen() {
             <Group>
               {notificationsRow}
               {musicRow}
+              {videoTipRow}
             </Group>
           ),
           privacy: (

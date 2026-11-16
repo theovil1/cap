@@ -434,6 +434,7 @@
     },
     "notifications": "Notifications",
     "musicInSession": "Music during sessions",
+    "videoTip": "Tip: video alongside",
     "visibility": "Profile visible to",
     "visibilityHint": "Who can find you by your username?",
     "visibilities": {
@@ -826,6 +827,17 @@
     "pause": "Pause",
     "next": "Next track",
     "previous": "Previous track"
+  },
+  "videoTip": {
+    "pill": "A video alongside?",
+    "open": "A video next to your session: how to",
+    "close": "Close the tip",
+    "title": "A video next to your session",
+    "lead": "iPad can show two apps side by side: your video, film or series on one side, your session on the other.",
+    "settings": "In Settings, then Multitasking & Gestures, choose Windowed Apps.",
+    "arrange": "At the top left of Tapiroute, hold the green button and move the window to the right.",
+    "video": "Open your video app (Netflix, Canal+, YouTube…) and move it to the left the same way.",
+    "narrow": "Tapiroute then switches to its narrow layout: map on top, figures below."
   },
   "feed": {
     "empty": "Your feed is empty",

@@ -139,6 +139,7 @@ function Screens() {
         <Stack.Screen name="event-live/[id]" options={{ presentation: 'fullScreenModal' }} />
         <Stack.Screen name="post/[id]" />
         <Stack.Screen name="post-session" options={{ presentation: 'modal' }} />
+        <Stack.Screen name="video-tip" options={{ presentation: 'formSheet' }} />
         <Stack.Screen name="catalog" />
         <Stack.Screen name="country" options={{ presentation: 'modal' }} />
       </Stack.Protected>

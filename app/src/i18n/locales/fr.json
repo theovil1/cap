@@ -434,6 +434,7 @@
     },
     "notifications": "Notifications",
     "musicInSession": "Musique en séance",
+    "videoTip": "Astuce « vidéo à côté »",
     "visibility": "Profil visible par",
     "visibilityHint": "Qui peut te trouver par ton pseudo ?",
     "visibilities": {
@@ -826,6 +827,17 @@
     "pause": "Pause",
     "next": "Morceau suivant",
     "previous": "Morceau précédent"
+  },
+  "videoTip": {
+    "pill": "Une vidéo à côté ?",
+    "open": "Une vidéo à côté de ta séance : comment faire",
+    "close": "Fermer l'astuce",
+    "title": "Une vidéo à côté de ta séance",
+    "lead": "L'iPad sait afficher deux apps côte à côte : ta vidéo, ton film ou ta série d'un côté, ta séance de l'autre.",
+    "settings": "Dans Réglages, puis Multitâche et gestes, choisis Fenêtres.",
+    "arrange": "En haut à gauche de Tapiroute, maintiens le bouton vert et place la fenêtre à droite.",
+    "video": "Ouvre ton app vidéo (Netflix, Canal+, YouTube…) et place-la à gauche de la même façon.",
+    "narrow": "Tapiroute passe alors dans sa version étroite : carte en haut, infos dessous."
   },
   "feed": {
     "empty": "Ton fil est vide",
