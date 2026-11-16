@@ -11,6 +11,7 @@ import {
   StyleSheet,
   Text,
   TextInput,
+  useWindowDimensions,
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -19,6 +20,7 @@ import { api, ApiError } from '@/api/client';
 import { usePostSession } from '@/api/community';
 import type { SessionPostData } from '@/api/types';
 import { SessionCardBody } from '@/community/session-card';
+import { sessionMapZoom, STREET_ZOOM } from '@/community/session-map';
 import { fonts, useColors } from '@/theme';
 import { InfoBanner } from '@/ui/pills';
 import { Segment } from '@/ui/segment';
@@ -46,8 +48,12 @@ export default function PostSessionScreen() {
 
   // The map shows the surroundings of the journey's start or end: maybe a home.
   const journey = data?.journey;
+  // Only worth saying when the map is close enough to show streets.
+  const { width } = useWindowDimensions();
   const nearEnds =
-    !!journey && (journey.from_m < NEAR_END_M || journey.route_m - journey.to_m < NEAR_END_M);
+    !!journey &&
+    (journey.from_m < NEAR_END_M || journey.route_m - journey.to_m < NEAR_END_M) &&
+    sessionMapZoom(journey.walked, journey.ahead, Math.min(width, 560) - 40) >= STREET_ZOOM;
 
   const publish = () =>
     post.mutate(

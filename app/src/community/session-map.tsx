@@ -7,6 +7,31 @@ import { useColors } from '@/theme';
 
 type Point = [number, number];
 
+/** Metres between two `[lon, lat]` points. */
+function metres(a: Point, b: Point): number {
+  const rad = Math.PI / 180;
+  const x = (b[0] - a[0]) * rad * Math.cos(((a[1] + b[1]) / 2) * rad);
+  const y = (b[1] - a[1]) * rad;
+  return Math.hypot(x, y) * 6_371_000;
+}
+
+/**
+ * What the map is framed on: the stretch walked and only the start of what
+ * comes next (40 % of the walked length), so the walked line fills the view.
+ */
+function framed(walked: Point[], ahead: Point[]): Point[] {
+  let length = 0;
+  for (let i = 1; i < walked.length; i++) length += metres(walked[i - 1], walked[i]);
+  const room = Math.max(150, length * 0.4);
+  const next: Point[] = [];
+  let run = 0;
+  for (let i = 0; i < ahead.length && run <= room; i++) {
+    if (i > 0) run += metres(ahead[i - 1], ahead[i]);
+    next.push(ahead[i]);
+  }
+  return [...walked, ...next];
+}
+
 /** Zoom that fits the points with a margin, between the region and the street. */
 function fit(points: Point[], width: number, height: number) {
   const lats = points.map((p) => p[1]);
@@ -19,6 +44,15 @@ function fit(points: Point[], width: number, height: number) {
     if (b.x - a.x <= width * 0.8 && b.y - a.y <= height * 0.75) return { lat, lon, zoom };
   }
   return { lat, lon, zoom: 9 };
+}
+
+/** From this zoom on, the map shows streets and houses. */
+export const STREET_ZOOM = 15;
+
+/** The zoom a session map of this size will use, to know whether it shows streets. */
+export function sessionMapZoom(walked: Point[], ahead: Point[], width: number, height = 180) {
+  const all = framed(walked, ahead);
+  return all.length > 1 ? fit(all, width, height).zoom : 0;
 }
 
 /**
@@ -38,7 +72,7 @@ export function SessionMap({
 }) {
   const colors = useColors();
   const [width, setWidth] = useState(0);
-  const all = [...walked, ...ahead];
+  const all = framed(walked, ahead);
   const view = all.length > 1 && width > 0 ? fit(all, width, height) : null;
   const centre = view ? worldPixel(view.lat, view.lon, view.zoom) : null;
   const toScreen = (p: Point) => {
