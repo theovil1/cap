@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { router, useLocalSearchParams } from 'expo-router';
-import { X } from 'lucide-react-native';
+import { MapPin, X } from 'lucide-react-native';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
@@ -20,10 +20,14 @@ import { usePostSession } from '@/api/community';
 import type { SessionPostData } from '@/api/types';
 import { SessionCardBody } from '@/community/session-card';
 import { fonts, useColors } from '@/theme';
+import { InfoBanner } from '@/ui/pills';
 import { Segment } from '@/ui/segment';
 import { Button, GlassButton } from '@/ui/primitives';
 
 type Audience = 'friends' | 'all';
+
+/** Within this distance of a journey's start or end, the map may show where the walker lives. */
+const NEAR_END_M = 500;
 
 /** Posting a session in the feed: its card, a word, and who sees it. */
 export default function PostSessionScreen() {
@@ -39,6 +43,11 @@ export default function PostSessionScreen() {
   const post = usePostSession();
   const [text, setText] = useState('');
   const [audience, setAudience] = useState<Audience>('friends');
+
+  // The map shows the surroundings of the journey's start or end: maybe a home.
+  const journey = data?.journey;
+  const nearEnds =
+    !!journey && (journey.from_m < NEAR_END_M || journey.route_m - journey.to_m < NEAR_END_M);
 
   const publish = () =>
     post.mutate(
@@ -78,6 +87,7 @@ export default function PostSessionScreen() {
         ) : (
           <ActivityIndicator color={colors.textSecondary} />
         )}
+        {nearEnds ? <InfoBanner icon={MapPin}>{t('sessionPost.nearEnds')}</InfoBanner> : null}
         <TextInput
           value={text}
           onChangeText={setText}

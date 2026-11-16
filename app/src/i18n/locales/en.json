@@ -801,6 +801,7 @@
     "mutual_other": "{{count}} friends in common · {{names}} and {{others}} others"
   },
   "sessionPost": {
+    "nearEnds": "The map shows the surroundings of your journey's start or end. If that is your home, keep the post for your friends.",
     "title": "Post your session",
     "action": "Post in the feed",
     "word": "A word about your session (optional)",

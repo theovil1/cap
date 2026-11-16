@@ -801,6 +801,7 @@
     "mutual_other": "{{count}} amis en commun · {{names}} et {{others}} autres"
   },
   "sessionPost": {
+    "nearEnds": "La carte montre les abords du départ ou de l'arrivée de ton trajet. Si c'est chez toi, garde la publication pour tes amis.",
     "title": "Publier ta séance",
     "action": "Publier dans le fil",
     "word": "Un mot sur ta séance (facultatif)",
