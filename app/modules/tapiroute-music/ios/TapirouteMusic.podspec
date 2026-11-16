@@ -13,7 +13,7 @@ Pod::Spec.new do |s|
   s.dependency 'ExpoModulesCore'
   s.frameworks = 'MediaPlayer'
 
-  # Spotify's iOS SDK: see ../vendor/SpotifyiOS.podspec, added by expo-build-properties.
+  # Spotify's iOS SDK: see app/vendor/SpotifyiOS.podspec, added by expo-build-properties.
   s.dependency 'SpotifyiOS', '5.0.1'
 
   s.pod_target_xcconfig = { 'DEFINES_MODULE' => 'YES' }

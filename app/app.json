@@ -112,7 +112,7 @@
         {
           "ios": {
             "extraPods": [
-              { "name": "SpotifyiOS", "podspec": "../modules/tapiroute-music/vendor/SpotifyiOS.podspec" }
+              { "name": "SpotifyiOS", "podspec": "../vendor/SpotifyiOS.podspec" }
             ]
           }
         }
