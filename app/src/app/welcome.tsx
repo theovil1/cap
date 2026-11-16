@@ -264,7 +264,8 @@ function AppleLogo({ color }: { color: string }) {
 const styles = StyleSheet.create({
   screen: { flex: 1, overflow: 'hidden' },
   flex: { flex: 1 },
-  map: { position: 'absolute', top: 0, left: 0, right: 0, height: '100%' },
+  // Explicit size: without a width, iOS draws the image at its own size (3x the screen).
+  map: { position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' },
   fade: { position: 'absolute', left: 0, right: 0, bottom: 0, height: 520 },
   content: { flexGrow: 1, paddingHorizontal: 24 },
   bottom: { justifyContent: 'flex-end' },
