@@ -7,7 +7,12 @@ import { getValue, setValue } from '@/session/store';
  * whether its Bluetooth step has been reached (iOS asks for Bluetooth only then).
  * Kept on the phone so a closed app comes back to the onboarding.
  */
-type OnboardingState = { pending: boolean; bluetooth: boolean };
+type OnboardingState = {
+  pending: boolean;
+  bluetooth: boolean;
+  /** Replayed from My account: back from the first step closes it instead of signing out. */
+  replay?: boolean;
+};
 
 const KEY = 'onboarding';
 const DONE: OnboardingState = { pending: false, bluetooth: true };
@@ -36,6 +41,11 @@ export function startOnboarding() {
 /** iOS may ask for Bluetooth now. */
 export function allowBluetooth() {
   write({ ...read(), bluetooth: true });
+}
+
+/** Any walker can go through the onboarding again from My account. */
+export function replayOnboarding() {
+  write({ pending: true, bluetooth: read().bluetooth, replay: true });
 }
 
 export function finishOnboarding() {

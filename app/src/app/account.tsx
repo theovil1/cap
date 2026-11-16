@@ -25,6 +25,7 @@ import { useUpdateProfile, type ProfilePatch } from '@/api/profile';
 import { musicEnabled, musicSupported, setMusicEnabled } from '@/music/use-music';
 import { setVideoTipEnabled, videoTipEnabled } from '@/session/video-tip';
 import { healthEnabled, healthSupported, setHealthEnabled } from '@/health/health';
+import { replayOnboarding } from '@/onboarding/state';
 import type { UserProfile } from '@/api/types';
 import { SettingsWide } from '@/account/settings-wide';
 import { fonts, useColors } from '@/theme';
@@ -311,6 +312,7 @@ export default function AccountScreen() {
       {healthRow}
     </Group>
   );
+  const replayRow = <Row label={t('account.replayOnboarding')} onPress={replayOnboarding} />;
   const visibilityRow = (
     <Row
       label={t('account.visibility')}
@@ -343,6 +345,7 @@ export default function AccountScreen() {
             <Group>
               {languageRow}
               {unitsRow}
+              {replayRow}
             </Group>
           ),
           treadmill: devicesGroup,
@@ -468,6 +471,7 @@ export default function AccountScreen() {
           {notificationsRow}
           {musicRow}
           {visibilityRow}
+          {replayRow}
         </Group>
 
         {devicesGroup}

@@ -452,7 +452,8 @@
     "deleteTitle": "Supprimer ton compte ?",
     "deleteBody": "Tes séances, trajets et amis sont effacés pour de bon. Ça ne peut pas être annulé.",
     "searchCountry": "Rechercher un pays",
-    "appleHealth": "Apple Santé"
+    "appleHealth": "Apple Santé",
+    "replayOnboarding": "Revoir la présentation"
   },
   "history": {
     "title": "Mes séances",

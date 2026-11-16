@@ -8,7 +8,7 @@ import { formatNumber } from '@/i18n/format';
 import { RECOMMENDED_GOAL, type Draft } from '@/onboarding/draft';
 import type { FrameNav } from '@/onboarding/frame';
 import type { SideKey, SideRow } from '@/onboarding/side-panel';
-import { allowBluetooth, finishOnboarding } from '@/onboarding/state';
+import { allowBluetooth, finishOnboarding, useOnboarding } from '@/onboarding/state';
 import { BluetoothStep } from '@/onboarding/steps/bluetooth';
 import { HealthStep } from '@/onboarding/steps/health';
 import { DestinationStep } from '@/onboarding/steps/destination';
@@ -43,6 +43,7 @@ export default function OnboardingScreen() {
   const { t } = useTranslation();
   const { user, signOut } = useAuth();
   const { connection } = useSession();
+  const { replay } = useOnboarding();
   const startJourney = useStartJourney();
   // Steps walked through, for "back" (skipping Bluetooth also skips the treadmill).
   const [path, setPath] = useState<number[]>([1]);
@@ -67,7 +68,9 @@ export default function OnboardingScreen() {
   const next = () => goTo(step + 1);
   const back = () => {
     if (path.length > 1) setPath((p) => p.slice(0, -1));
-    // Back from the first step leaves the new account for the welcome screen.
+    // Back from the first step leaves the new account for the welcome screen,
+    // or a replay for the app.
+    else if (replay) finishOnboarding();
     else signOut().catch(() => {});
   };
 

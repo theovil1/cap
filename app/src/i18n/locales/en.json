@@ -452,7 +452,8 @@
     "deleteTitle": "Delete your account?",
     "deleteBody": "Your sessions, journeys and friends are erased for good. This cannot be undone.",
     "searchCountry": "Search a country",
-    "appleHealth": "Apple Health"
+    "appleHealth": "Apple Health",
+    "replayOnboarding": "Replay the introduction"
   },
   "history": {
     "title": "My sessions",
