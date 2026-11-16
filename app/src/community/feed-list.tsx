@@ -28,6 +28,7 @@ import { ArrivalMedal } from '@/journey/arrival-medal';
 import { fonts, useColors } from '@/theme';
 
 import { useBadgeName } from './profile-badges';
+import { SessionCardBody } from './session-card';
 import { WalkerAvatar } from './team';
 import { BravoButton, FeedAttachment, FeedCard } from '@/ui/feed';
 import { EmptyState, useWide } from '@/ui/layout';
@@ -127,6 +128,18 @@ function Attachment({ post }: { post: FeedPost }) {
     }
     case 'note':
       return null;
+    case 'session':
+      return d.distance_m !== undefined && d.duration_s !== undefined ? (
+        <SessionCardBody
+          data={{
+            distance_m: d.distance_m,
+            duration_s: d.duration_s,
+            steps: d.steps ?? 0,
+            started_at: d.started_at ?? 0,
+            journey: d.journey,
+          }}
+        />
+      ) : null;
     case 'published':
       return (
         <Pressable

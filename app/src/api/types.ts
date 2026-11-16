@@ -141,6 +141,8 @@ export type SessionItem = {
   avg_speed_kmh: number;
   avg_incline_pct: number;
   source: 'treadmill' | 'manual';
+  /** Already posted in the feed. */
+  posted: boolean;
 };
 
 export type Friend = {
@@ -338,7 +340,24 @@ export type PublicProfile = {
 };
 
 /** `note` is a few words of the author's own, with nothing attached. */
-export type FeedKind = 'arrived' | 'stage' | 'medal' | 'published' | 'note';
+export type FeedKind = 'arrived' | 'stage' | 'medal' | 'published' | 'note' | 'session';
+
+/** What a posted session shows: its figures and its stretch of route (`[lon, lat]`). */
+export type SessionPostData = {
+  distance_m: number;
+  duration_s: number;
+  steps: number;
+  started_at: number;
+  journey?: {
+    title: string;
+    kind: 'solo' | 'race' | 'event';
+    from_m: number;
+    to_m: number;
+    route_m: number;
+    walked: [number, number][];
+    ahead: [number, number][];
+  };
+};
 
 /** A post of the feed; `data` depends on the kind. */
 export type FeedPost = {
@@ -361,7 +380,7 @@ export type FeedPost = {
     medal?: 'distance' | 'streak';
     km?: number;
     public_route_id?: string;
-  };
+  } & Partial<SessionPostData>;
   journey_id: string | null;
   text: string | null;
   /** Set once the author changed words they had already written. */

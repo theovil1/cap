@@ -799,6 +799,21 @@
     "mutual_one": "1 friend in common: {{names}}",
     "mutual_other": "{{count}} friends in common · {{names}} and {{others}} others"
   },
+  "sessionPost": {
+    "title": "Post your session",
+    "action": "Post in the feed",
+    "word": "A word about your session (optional)",
+    "audience": "Who sees it",
+    "friends": "Friends",
+    "all": "Friends and followers",
+    "publish": "Post",
+    "notNow": "Not this time",
+    "already": "This session is already in the feed.",
+    "posted": "Posted in the feed",
+    "distance": "Distance",
+    "duration": "Time",
+    "pace": "Pace"
+  },
   "feed": {
     "empty": "Your feed is empty",
     "emptyText": "Add friends or follow walkers: their arrivals, stages and medals will show here.",

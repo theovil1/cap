@@ -799,6 +799,21 @@
     "mutual_one": "1 ami en commun : {{names}}",
     "mutual_other": "{{count}} amis en commun · {{names}} et {{others}} autres"
   },
+  "sessionPost": {
+    "title": "Publier ta séance",
+    "action": "Publier dans le fil",
+    "word": "Un mot sur ta séance (facultatif)",
+    "audience": "Qui la voit",
+    "friends": "Amis",
+    "all": "Amis et abonnés",
+    "publish": "Publier",
+    "notNow": "Pas cette fois",
+    "already": "Cette séance est déjà dans le fil.",
+    "posted": "Publiée dans le fil",
+    "distance": "Distance",
+    "duration": "Durée",
+    "pace": "Allure"
+  },
   "feed": {
     "empty": "Ton fil est vide",
     "emptyText": "Ajoute des amis ou suis des marcheurs : leurs arrivées, étapes et médailles s'afficheront ici.",

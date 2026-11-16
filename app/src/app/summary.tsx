@@ -6,7 +6,7 @@ import { ScrollView, Share, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useAuth } from '@/api/auth';
-import { useActiveJourney, useJourney, useJourneys } from '@/api/queries';
+import { useActiveJourney, useJourney, useJourneys, useSessions } from '@/api/queries';
 import type { Stage } from '@/api/types';
 import {
   formatDate,
@@ -56,6 +56,7 @@ export default function SummaryScreen() {
   const summary = detail;
   const day = useDayStats();
   const { data: journeys = [] } = useJourneys();
+  const { data: synced = [] } = useSessions();
   // The races this session counted for; before the sync, the ones under way.
   const counted = session?.result?.allocations.map((a) => a.journey_id);
   const races = journeys.filter(
@@ -97,6 +98,13 @@ export default function SummaryScreen() {
     arrived && summary
       ? router.replace({ pathname: '/arrival', params: { id: summary.id } })
       : router.dismissTo(HOME);
+  // Once synced, the session can go in the feed (once).
+  const serverId = session?.result?.id || null;
+  const posted = synced.find((s) => s.id === serverId)?.posted ?? false;
+  const postInFeed =
+    serverId && !posted
+      ? () => router.push({ pathname: '/post-session', params: { id: serverId } })
+      : null;
   const share = () =>
     Share.share({
       message: t('summary.shareText', { km: formatKm(session.distanceM, 2), minutes }),
@@ -216,6 +224,9 @@ export default function SummaryScreen() {
               </Text>
             )}
           </ScrollView>
+          {postInFeed ? (
+            <Button tone="accent" title={t('sessionPost.action')} onPress={postInFeed} />
+          ) : null}
           <View style={styles.actions}>
             <Button
               tone="light"
@@ -354,7 +365,10 @@ export default function SummaryScreen() {
         </View>
       </ScrollView>
       <View style={[styles.footer, { paddingBottom: insets.bottom + 12 }]}>
-        <View style={styles.column}>
+        <View style={[styles.column, { gap: 10 }]}>
+          {postInFeed ? (
+            <Button tone="accent" title={t('sessionPost.action')} onPress={postInFeed} />
+          ) : null}
           <Button tone="dark" title={t('summary.continue')} onPress={close} />
         </View>
       </View>

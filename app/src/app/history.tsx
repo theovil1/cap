@@ -19,6 +19,9 @@ type Item = {
   durationS: number;
   manual: boolean;
   pending: boolean;
+  /** Server id, once synced. */
+  serverId?: string;
+  posted?: boolean;
 };
 
 /** Every session, newest first, with those still waiting to be sent. */
@@ -62,6 +65,8 @@ export default function HistoryScreen() {
       durationS: s.duration_s,
       manual: s.source === 'manual',
       pending: false,
+      serverId: s.id,
+      posted: s.posted,
     })),
   ].sort((a, b) => b.startedAt - a.startedAt);
 
@@ -130,6 +135,16 @@ export default function HistoryScreen() {
           full
           label={t('history.deleteOne')}
           items={[
+            ...(item.serverId && !item.posted
+              ? [
+                  {
+                    label: t('sessionPost.action'),
+                    icon: 'square.and.arrow.up' as const,
+                    onPress: () =>
+                      router.push({ pathname: '/post-session', params: { id: item.serverId } }),
+                  },
+                ]
+              : []),
             {
               label: t('history.deleteOne'),
               icon: 'trash',

@@ -11,7 +11,7 @@ const RETRIES = 4;
 const GROUND = '#7B7A6A';
 
 /** Web Mercator pixel of a point at a zoom level. */
-function worldPixel(lat: number, lon: number, zoom: number): { x: number; y: number } {
+export function worldPixel(lat: number, lon: number, zoom: number): { x: number; y: number } {
   const size = TILE * 2 ** zoom;
   const sin = Math.sin((lat * Math.PI) / 180);
   return {

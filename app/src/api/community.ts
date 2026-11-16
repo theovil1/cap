@@ -301,6 +301,26 @@ export function useBravo() {
   });
 }
 
+/** Posts one of my sessions in the feed, for friends or for followers too. */
+export function usePostSession() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      id,
+      text,
+      audience,
+    }: {
+      id: string;
+      text?: string;
+      audience: 'friends' | 'all';
+    }) => api<FeedPost>(`/sessions/${id}/post`, { method: 'POST', body: { text, audience } }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: feedKeys.feed });
+      queryClient.invalidateQueries({ queryKey: ['sessions'] });
+    },
+  });
+}
+
 /** Posts a few words of my own at the top of the feed. */
 export function useAddNote() {
   const queryClient = useQueryClient();
