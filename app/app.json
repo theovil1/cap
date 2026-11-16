@@ -10,7 +10,6 @@
     "ios": {
       "bundleIdentifier": "io.github.theovil1.cap",
       "supportsTablet": true,
-      "icon": "./assets/expo.icon",
       "infoPlist": {
         "UISupportedInterfaceOrientations": ["UIInterfaceOrientationPortrait"],
         "UISupportedInterfaceOrientations~ipad": [
@@ -50,7 +49,7 @@
         {
           "backgroundColor": "#F4F2EE",
           "image": "./assets/images/splash-icon.png",
-          "imageWidth": 76,
+          "imageWidth": 96,
           "dark": {
             "backgroundColor": "#0B0C0F"
           }
