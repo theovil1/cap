@@ -1474,7 +1474,7 @@ async fn the_team_account_is_out_of_reach(db: PgPool) {
     server
         .post("/friends")
         .add_header("authorization", bearer(&theo))
-        .json(&json!({ "username": "cap" }))
+        .json(&json!({ "username": "tapiroute" }))
         .await
         .assert_status(StatusCode::NOT_FOUND);
     let profile: Value = server
@@ -1482,7 +1482,7 @@ async fn the_team_account_is_out_of_reach(db: PgPool) {
         .add_header("authorization", bearer(&theo))
         .await
         .json();
-    assert_eq!(profile["walker"]["first_name"], "Équipe Cap");
+    assert_eq!(profile["walker"]["first_name"], "Équipe Tapiroute");
     assert_eq!(profile["badges"][0]["kind"], "team");
 }
 

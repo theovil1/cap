@@ -1,8 +1,8 @@
 {
   "expo": {
-    "name": "Cap",
+    "name": "Tapiroute",
     "slug": "cap",
-    "version": "0.1.0",
+    "version": "1.0.0",
     "orientation": "default",
     "icon": "./assets/images/icon.png",
     "scheme": "cap",
@@ -61,7 +61,7 @@
         {
           "isBackgroundEnabled": true,
           "modes": ["central"],
-          "bluetoothAlwaysPermission": "Cap uses Bluetooth to read speed and distance from your treadmill."
+          "bluetoothAlwaysPermission": "Tapiroute uses Bluetooth to read speed and distance from your treadmill."
         }
       ],
       [
@@ -82,7 +82,7 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "Cap uses your photos to set your profile picture.",
+          "photosPermission": "Tapiroute uses your photos to set your profile picture.",
           "cameraPermission": false,
           "microphonePermission": false
         }

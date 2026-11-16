@@ -216,7 +216,7 @@
     "arrived": "You reached your destination!",
     "continue": "Continue",
     "share": "Share",
-    "shareText": "I just walked {{km}} {{unit}} in {{minutes}} min with Cap.",
+    "shareText": "I just walked {{km}} {{unit}} in {{minutes}} min with Tapiroute.",
     "racePlace": "You are {{place}} of {{count}}",
     "seeRace": "See",
     "ended": "Session done",
@@ -274,7 +274,7 @@
     "inviteTitle": "Invite your friends",
     "inviteText": "Send your link: whoever opens it becomes your friend at once.",
     "share": "Share my link",
-    "shareMessage": "Join me on Cap and race me on our treadmills: {{url}}",
+    "shareMessage": "Join me on Tapiroute and race me on our treadmills: {{url}}",
     "searchPlaceholder": "Search a username",
     "noMatch": "No username starts like this.",
     "incoming": "Requests received",
@@ -324,7 +324,7 @@
     "arrivalAround": "{{place}} around {{date}}",
     "colorTitle": "App colour",
     "colors": {
-      "orange": "Cap orange",
+      "orange": "Tapiroute orange",
       "blue": "Blue",
       "green": "Green",
       "purple": "Purple",
@@ -387,7 +387,7 @@
     "notStarted": "Not started yet",
     "leader": "Leader",
     "rule": "The first to reach {{place}} wins. Positions move live.",
-    "shareText": "I am {{place}} of {{count}} in the {{title}} race on Cap.",
+    "shareText": "I am {{place}} of {{count}} in the {{title}} race on Tapiroute.",
     "fromLeader": "{{km}} km behind the leader"
   },
   "ago": {
@@ -460,8 +460,8 @@
   },
   "stride": {
     "title": "Measure your stride",
-    "explain_one": "Start the treadmill at your pace, tap Start and count {{count}} step. Cap reads the distance walked.",
-    "explain_other": "Start the treadmill at your pace, tap Start and count {{count}} steps. Cap reads the distance walked.",
+    "explain_one": "Start the treadmill at your pace, tap Start and count {{count}} step. Tapiroute reads the distance walked.",
+    "explain_other": "Start the treadmill at your pace, tap Start and count {{count}} steps. Tapiroute reads the distance walked.",
     "startTreadmill": "Start the treadmill to begin.",
     "ready": "The belt is moving. Ready?",
     "start": "Start",
@@ -510,7 +510,7 @@
     "ofTheWeek": "Route of the week",
     "arrival": "Arrival · {{place}}",
     "nearNoPlace": "Where are you?",
-    "nearNoPlaceText": "Create your first journey: Cap will look around its start.",
+    "nearNoPlaceText": "Create your first journey: Tapiroute will look around its start.",
     "noResult": "No route found",
     "noResultText": "Try another town or another word.",
     "empty": "No route published yet",
@@ -540,7 +540,7 @@
     "next": "Choose the next journey",
     "share": "Share my medal",
     "medal": "{{place}} gold medal",
-    "shareText": "I walked from {{from}} to {{to}}, {{km}} km, on my treadmill with Cap.",
+    "shareText": "I walked from {{from}} to {{to}}, {{km}} km, on my treadmill with Tapiroute.",
     "racePlace": "{{place}} in the race",
     "summary": "{{sessions}}, {{days}}.",
     "sessionsCount_one": "{{count}} session",
@@ -573,7 +573,7 @@
       "notifications": "Notifications",
       "privacy": "Privacy"
     },
-    "version": "Cap {{version}}",
+    "version": "Tapiroute {{version}}",
     "removePhoto": "Remove",
     "placeNote": "Your country and city are used for rankings and journey ideas. Never your exact position.",
     "treadmills": "Manage my treadmills"
@@ -602,27 +602,27 @@
     "steps": {
       "1": {
         "title": "Switch your treadmill on",
-        "text": "Put the phone near the treadmill and switch it on. Cap looks for it over Bluetooth.",
+        "text": "Put the phone near the treadmill and switch it on. Tapiroute looks for it over Bluetooth.",
         "short": "Switch it on"
       },
       "2": {
         "title": "Finding the signal",
-        "text": "Cap listens to treadmills that speak Bluetooth FTMS, the standard of connected treadmills.",
+        "text": "Tapiroute listens to treadmills that speak Bluetooth FTMS, the standard of connected treadmills.",
         "short": "Find the signal"
       },
       "3": {
         "title": "Reading the data",
-        "text": "Walk a few steps: Cap checks it gets the speed, the distance and the incline.",
+        "text": "Walk a few steps: Tapiroute checks it gets the speed, the distance and the incline.",
         "short": "Read the data"
       },
       "4": {
         "title": "Let's check together",
-        "text": "Set your treadmill to {{speed}} {{speedUnit}}. Cap compares with what it gets over Bluetooth.",
+        "text": "Set your treadmill to {{speed}} {{speedUnit}}. Tapiroute compares with what it gets over Bluetooth.",
         "short": "Check the speed"
       },
       "5": {
         "title": "Give it a name",
-        "text": "You will see this name in Cap instead of the Bluetooth one.",
+        "text": "You will see this name in Tapiroute instead of the Bluetooth one.",
         "short": "Give it a name"
       }
     },
@@ -646,14 +646,14 @@
     "activityStage": "Passed the {{name}} stage",
     "activityStreak_one": "{{count}} day streak",
     "activityStreak_other": "{{count}} day streak",
-    "friends_one": "{{count}} friend on Cap",
-    "friends_other": "{{count}} friends on Cap",
-    "shareText": "{{name}} on Cap: {{km}} km walked on the treadmill and {{count}} medals."
+    "friends_one": "{{count}} friend on Tapiroute",
+    "friends_other": "{{count}} friends on Tapiroute",
+    "shareText": "{{name}} on Tapiroute: {{km}} km walked on the treadmill and {{count}} medals."
   },
   "publicRoute": {
     "credit": "Photo: {{credit}}",
     "gone": "This route is no longer published.",
-    "byTeam": "Published by the Cap team",
+    "byTeam": "Published by the Tapiroute team",
     "mapSlide": "Route · {{km}} km",
     "walkers": "Walkers",
     "finished": "Finished",
@@ -675,7 +675,7 @@
     "unpublishBody": "It leaves the Explorer. Walkers on it carry on.",
     "report": "Report this route",
     "reported": "Thanks, we will have a look.",
-    "shareText": "{{title}}, {{km}} km on foot, on Cap.",
+    "shareText": "{{title}}, {{km}} km on foot, on Tapiroute.",
     "byName": "Published by {{name}}"
   },
   "publish": {
@@ -699,7 +699,7 @@
       "city": "Towns"
     },
     "photos": "Photos",
-    "photosHint": "Without photos, Cap shows the start and the arrival from the sky.",
+    "photosHint": "Without photos, Tapiroute shows the start and the arrival from the sky.",
     "kinds": {
       "start": "Start",
       "end": "Arrival",
@@ -737,7 +737,7 @@
     "organizerStays": "The organiser walks with everyone.",
     "leaveTitle": "Leave it?",
     "leave": "Leave",
-    "shareText": "{{title}}: common start on {{day}} at {{hour}}, on Cap. Sign up!",
+    "shareText": "{{title}}: common start on {{day}} at {{hour}}, on Tapiroute. Sign up!",
     "registeredLeave": "Signed up",
     "signUp": "Sign up",
     "when": "{{day}} · {{hour}}",
@@ -819,7 +819,7 @@
   },
   "badges": {
     "names": {
-      "team": "Cap team",
+      "team": "Tapiroute team",
       "certified": "Certified",
       "developer": "Developer",
       "github": "GitHub contributor",
@@ -838,18 +838,18 @@
       "3": "Patron"
     },
     "about": {
-      "team": "Part of the team building Cap.",
+      "team": "Part of the team building Tapiroute.",
       "certified": "Verified identity. For public accounts and clubs.",
       "developer": "Contributed to the code of the app or the server.",
       "github": "At least one contribution accepted on the repository.",
-      "supporter": "Supports Cap with money: Cap stays ad free thanks to supporters.",
+      "supporter": "Supports Tapiroute with money: Tapiroute stays ad free thanks to supporters.",
       "beta": "Tries what is new before everyone else.",
       "moderator": "Looks after the community and the published routes.",
       "club": "Account of a club, a gym or an association.",
       "founder": "Signed up during the beta, before the public launch.",
       "organizer": "Organised at least 3 scheduled journeys.",
       "creator": "Their public routes were walked 1,000 times.",
-      "ambassador": "Brought 10 walkers to Cap."
+      "ambassador": "Brought 10 walkers to Tapiroute."
     }
   },
   "onboarding": {
@@ -896,7 +896,7 @@
     },
     "profile": {
       "kicker": "Your profile",
-      "title": "Get to know Cap",
+      "title": "Get to know Tapiroute",
       "text": "Your height turns the treadmill km into steps.",
       "photo": "Add a photo",
       "firstName": "First name",
@@ -928,7 +928,7 @@
     "bluetooth": {
       "kicker": "Your treadmill",
       "title": "Let's connect your treadmill",
-      "text": "Cap reads your treadmill's speed and distance over Bluetooth. It never controls it.",
+      "text": "Tapiroute reads your treadmill's speed and distance over Bluetooth. It never controls it.",
       "compatible": "Works with most connected treadmills",
       "noLocation": "No location data used",
       "together": "Treadmill not recognised? We add it together",

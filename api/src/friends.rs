@@ -349,17 +349,17 @@ struct PageTexts {
 
 const FR: PageTexts = PageTexts {
     lang: "fr",
-    invites: "t'invite sur Cap",
+    invites: "t'invite sur Tapiroute",
     pitch: "Marche sur ton tapis, avance sur une vraie route et fais la course avec tes amis.",
-    open: "Ouvrir dans Cap",
+    open: "Ouvrir dans Tapiroute",
     unknown: "Ce lien d'invitation n'existe pas.",
 };
 
 const EN: PageTexts = PageTexts {
     lang: "en",
-    invites: "invites you to Cap",
+    invites: "invites you to Tapiroute",
     pitch: "Walk on your treadmill, move along a real road and race your friends.",
-    open: "Open in Cap",
+    open: "Open in Tapiroute",
     unknown: "This invite link does not exist.",
 };
 
@@ -386,7 +386,7 @@ pub async fn invite_page(
         None
     };
     let Some(name) = name else {
-        return (StatusCode::NOT_FOUND, Html(page(texts, "Cap", texts.unknown, None)));
+        return (StatusCode::NOT_FOUND, Html(page(texts, "Tapiroute", texts.unknown, None)));
     };
     let title = format!("{} {}", escape(&name), texts.invites);
     (StatusCode::OK, Html(page(texts, &title, texts.pitch, Some(&format!("cap://invite/{code}")))))

@@ -15,7 +15,7 @@ use utoipa_axum::router::OpenApiRouter;
 use utoipa_scalar::{Scalar, Servable};
 
 use crate::{
-    account, auth, badges, events, feed, friends, geo, history, journeys, leaderboards, live, privacy,
+    account, auth, badges, events, feed, friends, geo, history, journeys, leaderboards, live, pages,
     profiles, public_routes, push, races, sessions, state::AppState, users,
 };
 
@@ -90,7 +90,8 @@ pub fn router(state: AppState) -> Router {
     Router::new()
         .route("/health", get(health))
         .route("/invite/{code}", get(friends::invite_page))
-        .route("/privacy", get(privacy::privacy_page))
+        .route("/privacy", get(pages::privacy_page))
+        .route("/support", get(pages::support_page))
         .route("/live", get(live::live_socket))
         .route("/avatars/{user_id}", get(account::get_avatar))
         .route("/public-routes/{id}/photos/{kind}", get(public_routes::get_photo))
