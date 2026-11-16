@@ -19,6 +19,7 @@
           "UIInterfaceOrientationPortraitUpsideDown"
         ],
         "ITSAppUsesNonExemptEncryption": false,
+        "NSLocationWhenInUseUsageDescription": "Tapiroute never uses your location: your routes start from the addresses you choose. The map library requires this text.",
         "CFBundleLocalizations": ["en", "fr"]
       },
       "usesAppleSignIn": true

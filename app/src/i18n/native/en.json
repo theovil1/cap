@@ -1,5 +1,6 @@
 {
   "CFBundleDisplayName": "Tapiroute",
   "NSBluetoothAlwaysUsageDescription": "Tapiroute uses Bluetooth to read speed and distance from your treadmill.",
+  "NSLocationWhenInUseUsageDescription": "Tapiroute never uses your location: your routes start from the addresses you choose. The map library requires this text.",
   "NSPhotoLibraryUsageDescription": "Tapiroute uses your photos to set your profile picture."
 }
