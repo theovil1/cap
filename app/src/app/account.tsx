@@ -314,7 +314,6 @@ export default function AccountScreen() {
             <Group>
               {notificationsRow}
               {musicRow}
-              {musicRow}
             </Group>
           ),
           privacy: (
@@ -430,6 +429,7 @@ export default function AccountScreen() {
           {languageRow}
           {unitsRow}
           {notificationsRow}
+          {musicRow}
           {visibilityRow}
         </Group>
 
