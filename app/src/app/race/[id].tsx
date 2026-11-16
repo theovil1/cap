@@ -234,6 +234,22 @@ function Standings({ race, list, me }: { race: JourneyDetail; list: Racer[]; me?
   const marks = list.filter((r) => !r.me).map((r) => r.distanceM / total);
   const destination = race.end_town ?? race.end.label;
   const wide = useWide();
+  const leave = useLeaveRace();
+  // Anyone but its creator may give up a race under way, until they arrive.
+  const canLeave = race.status === 'active' && race.joined && !race.mine && !me?.arrivedAt;
+  const confirmLeave = () =>
+    Alert.alert(t('race.leaveTitle'), t('race.leaveActiveBody'), [
+      { text: t('journeys.cancel'), style: 'cancel' },
+      {
+        text: t('race.leave'),
+        style: 'destructive',
+        onPress: () =>
+          leave.mutate(race.id, {
+            onSuccess: () => router.back(),
+            onError: () => Alert.alert(t('journeys.failed')),
+          }),
+      },
+    ]);
 
   return (
     <>
@@ -398,6 +414,7 @@ function Standings({ race, list, me }: { race: JourneyDetail; list: Racer[]; me?
       <Text style={[styles.footer, wide && styles.footerWide, { color: colors.textMuted }]}>
         {t('race.rule', { place: destination })}
       </Text>
+      {canLeave ? <TextButton label={t('race.leave')} onPress={confirmLeave} danger /> : null}
     </>
   );
 }

@@ -373,6 +373,7 @@
     "decline": "Decline",
     "leave": "Leave the race",
     "leaveTitle": "Leave this race?",
+    "leaveActiveBody": "Your kilometres in this race are removed and you cannot join it again. Your other journeys do not change.",
     "yourPlace": "Your place",
     "of_one": "of {{count}}",
     "of_other": "of {{count}}",

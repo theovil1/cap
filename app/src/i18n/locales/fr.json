@@ -373,6 +373,7 @@
     "decline": "Refuser",
     "leave": "Quitter la course",
     "leaveTitle": "Quitter cette course ?",
+    "leaveActiveBody": "Tes kilomètres dans cette course sont retirés et tu ne pourras pas la rejoindre à nouveau. Tes autres trajets ne changent pas.",
     "yourPlace": "Ta position",
     "of_one": "sur {{count}}",
     "of_other": "sur {{count}}",
