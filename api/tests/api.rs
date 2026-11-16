@@ -1577,3 +1577,50 @@ async fn push_notifications_wait_in_the_outbox(db: PgPool) {
     let left: i64 = sqlx::query_scalar("SELECT count(*) FROM push_devices").fetch_one(&db).await.unwrap();
     assert_eq!(left, 0);
 }
+
+#[sqlx::test(migrator = "cap_api::MIGRATOR")]
+async fn an_apple_account_can_add_a_password(db: PgPool) {
+    let server = server(db).await;
+    let apple: Value = server
+        .post("/auth/apple")
+        .json(&json!({ "identity_token": apple_token("apple-user-9", BUNDLE_ID), "first_name": "Lilou" }))
+        .await
+        .json();
+    assert_eq!(apple["user"]["has_password"], false);
+    server
+        .put("/me/password")
+        .add_header("authorization", bearer(&apple))
+        .json(&json!({ "password": "short" }))
+        .await
+        .assert_status_bad_request();
+    server
+        .put("/me/password")
+        .add_header("authorization", bearer(&apple))
+        .json(&json!({ "password": "a long enough password" }))
+        .await
+        .assert_status(StatusCode::NO_CONTENT);
+
+    // Now the same account opens with its e-mail, on a device with another Apple ID.
+    let login = server
+        .post("/auth/login")
+        .json(&json!({ "email": "walker@privaterelay.appleid.com", "password": "a long enough password" }))
+        .await;
+    login.assert_status_ok();
+    let login: Value = login.json();
+    assert_eq!(login["user"]["id"], apple["user"]["id"]);
+    assert_eq!(login["user"]["has_password"], true);
+
+    // Changing it then needs the current one.
+    server
+        .put("/me/password")
+        .add_header("authorization", bearer(&login))
+        .json(&json!({ "password": "another long password" }))
+        .await
+        .assert_status(StatusCode::UNAUTHORIZED);
+    server
+        .put("/me/password")
+        .add_header("authorization", bearer(&login))
+        .json(&json!({ "password": "another long password", "current_password": "a long enough password" }))
+        .await
+        .assert_status(StatusCode::NO_CONTENT);
+}

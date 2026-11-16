@@ -9,7 +9,7 @@ use utoipa_axum::{router::OpenApiRouter, routes};
 use uuid::Uuid;
 
 use crate::{
-    auth::AuthUser,
+    auth::{AuthUser, password},
     error::{AppError, AppResult, ErrorBody, is_unique_violation},
     state::AppState,
 };
@@ -18,7 +18,7 @@ use crate::{
 const STRIDE_FROM_HEIGHT: f64 = 0.415;
 
 pub fn router() -> OpenApiRouter<AppState> {
-    OpenApiRouter::new().routes(routes!(get_me, update_me, delete_me))
+    OpenApiRouter::new().routes(routes!(get_me, update_me, delete_me)).routes(routes!(set_password))
 }
 
 #[derive(Serialize, ToSchema)]
@@ -43,6 +43,8 @@ pub struct UserProfile {
     /// `km` or `mi`.
     pub units: String,
     pub notifications: bool,
+    /// False for accounts made with Sign in with Apple until they set one.
+    pub has_password: bool,
     /// `everyone` (found by the start of the username) or `friends` (exact username or link only).
     pub visibility: String,
     #[serde(with = "time::serde::rfc3339")]
@@ -118,7 +120,7 @@ pub async fn fetch_profile(db: &PgPool, user_id: Uuid) -> AppResult<UserProfile>
     let row = sqlx::query!(
         "SELECT id, email, first_name, username, avatar_url, country, home_city, height_cm,
                 stride_cm, daily_step_goal, sessions_per_week, language, app_color, map_mood, units,
-                notifications, visibility, created_at
+                notifications, visibility, created_at, password_hash IS NOT NULL AS \"has_password!\"
          FROM users WHERE id = $1",
         user_id
     )
@@ -131,6 +133,7 @@ pub async fn fetch_profile(db: &PgPool, user_id: Uuid) -> AppResult<UserProfile>
     Ok(UserProfile {
         id: row.id,
         email: row.email,
+        has_password: row.has_password,
         first_name: row.first_name,
         username: row.username,
         avatar_url: row.avatar_url,
@@ -227,6 +230,45 @@ async fn update_me(
         }
         Err(e) => Err(e.into()),
     }
+}
+
+#[derive(Deserialize, ToSchema)]
+pub struct SetPassword {
+    password: String,
+    /// Needed when the account already has a password.
+    current_password: Option<String>,
+}
+
+/// Set a password, so that an account made with Apple can also sign in with its
+/// e-mail (on a device with another Apple ID), or change it.
+#[utoipa::path(put, path = "/me/password", tag = "users", security(("bearer" = [])), request_body = SetPassword,
+    responses((status = 204), (status = 400, body = ErrorBody), (status = 401, body = ErrorBody),
+              (status = 422, body = ErrorBody)))]
+async fn set_password(
+    State(state): State<AppState>,
+    AuthUser(user_id): AuthUser,
+    Json(body): Json<SetPassword>,
+) -> AppResult<StatusCode> {
+    if body.password.chars().count() < password::MIN_LENGTH {
+        return Err(AppError::bad_request("weak_password", "password must have at least 10 characters"));
+    }
+    let row = sqlx::query!("SELECT email, password_hash FROM users WHERE id = $1", user_id)
+        .fetch_one(&state.db)
+        .await?;
+    if row.email.is_none() {
+        return Err(AppError::unprocessable("email_required", "add an e-mail to the account first"));
+    }
+    if let Some(stored) = row.password_hash {
+        let current = body.current_password.as_deref().unwrap_or_default();
+        if !password::verify(current, &stored) {
+            return Err(AppError::unauthorized("wrong_password", "the current password is wrong"));
+        }
+    }
+    let hash = password::hash(&body.password)?;
+    sqlx::query!("UPDATE users SET password_hash = $2 WHERE id = $1", user_id, hash)
+        .execute(&state.db)
+        .await?;
+    Ok(StatusCode::NO_CONTENT)
 }
 
 /// Delete the current account and all its data (GDPR).

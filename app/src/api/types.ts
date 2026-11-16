@@ -20,6 +20,8 @@ export type UserProfile = {
   map_mood: 'auto' | 'day' | 'night';
   units: 'km' | 'mi';
   notifications: boolean;
+  /** False for an account made with Apple until it sets a password. */
+  has_password: boolean;
   /** `everyone`: found by the start of the username; `friends`: exact username or link only. */
   visibility: 'everyone' | 'friends';
   created_at: string;

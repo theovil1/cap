@@ -135,6 +135,58 @@ export default function AccountScreen() {
     }
   };
 
+  /** A password lets an account made with Apple sign in with its e-mail elsewhere. */
+  const setPassword = (current?: string) =>
+    Alert.prompt(
+      t(user.has_password ? 'account.passwordNew' : 'account.passwordCreate'),
+      t('account.passwordHint', { email: user.email ?? '' }),
+      [
+        { text: t('journeys.cancel'), style: 'cancel' },
+        {
+          text: t('account.save'),
+          onPress: async (password?: string) => {
+            if (!password) return;
+            setBusy(true);
+            try {
+              await api('/me/password', {
+                method: 'PUT',
+                body: { password, current_password: current },
+              });
+              setUser(await api<UserProfile>('/me'));
+              Alert.alert(t('account.passwordSaved'));
+            } catch (error) {
+              failed(error);
+            } finally {
+              setBusy(false);
+            }
+          },
+        },
+      ],
+      'secure-text',
+    );
+  const passwordRow = (
+    <Row
+      label={t(user.has_password ? 'account.passwordChange' : 'account.passwordCreate')}
+      onPress={() => {
+        if (!user.email) Alert.alert(t('errors.email_required'));
+        else if (!user.has_password) setPassword();
+        else
+          Alert.prompt(
+            t('account.passwordCurrent'),
+            undefined,
+            [
+              { text: t('journeys.cancel'), style: 'cancel' },
+              {
+                text: t('common.next'),
+                onPress: (current?: string) => current && setPassword(current),
+              },
+            ],
+            'secure-text',
+          );
+      }}
+    />
+  );
+
   const openPrivacy = () =>
     Linking.openURL(`${API_URL}/privacy?lang=${i18n.language.startsWith('en') ? 'en' : 'fr'}`);
 
@@ -240,6 +292,7 @@ export default function AccountScreen() {
           privacy: (
             <Group>
               {visibilityRow}
+              {passwordRow}
               <Row label={t('account.export')} onPress={exportData} />
               <Row label={t('account.privacyPolicy')} onPress={openPrivacy} />
             </Group>
@@ -357,6 +410,7 @@ export default function AccountScreen() {
         </Group>
 
         <Group>
+          {passwordRow}
           <Row label={t('account.export')} onPress={exportData} />
           <Row label={t('account.privacyPolicy')} onPress={openPrivacy} />
         </Group>

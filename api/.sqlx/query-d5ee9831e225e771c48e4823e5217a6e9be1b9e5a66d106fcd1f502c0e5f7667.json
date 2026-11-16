@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT id, email, first_name, username, avatar_url, country, home_city, height_cm,\n                stride_cm, daily_step_goal, sessions_per_week, language, app_color, map_mood, units,\n                notifications, visibility, created_at\n         FROM users WHERE id = $1",
+  "query": "SELECT id, email, first_name, username, avatar_url, country, home_city, height_cm,\n                stride_cm, daily_step_goal, sessions_per_week, language, app_color, map_mood, units,\n                notifications, visibility, created_at, password_hash IS NOT NULL AS \"has_password!\"\n         FROM users WHERE id = $1",
   "describe": {
     "columns": [
       {
@@ -200,6 +200,12 @@
             "name": "created_at"
           }
         }
+      },
+      {
+        "ordinal": 18,
+        "name": "has_password!",
+        "type_info": "Bool",
+        "origin": "Expression"
       }
     ],
     "parameters": {
@@ -225,8 +231,9 @@
       false,
       false,
       false,
-      false
+      false,
+      null
     ]
   },
-  "hash": "40032bf6dab24b98f14541cd67c0f2f65f14b20723e0d1e76f19a8df7bf66031"
+  "hash": "d5ee9831e225e771c48e4823e5217a6e9be1b9e5a66d106fcd1f502c0e5f7667"
 }

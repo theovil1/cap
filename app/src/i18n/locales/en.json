@@ -1,7 +1,8 @@
 {
   "common": {
     "back": "Back",
-    "close": "Close"
+    "close": "Close",
+    "next": "Next"
   },
   "nav": {
     "index": "Home",
@@ -37,6 +38,8 @@
   },
   "errors": {
     "generic": "Something went wrong. Please try again.",
+    "wrong_password": "The current password is wrong.",
+    "email_required": "First add an e-mail to your account, in Profile.",
     "network": "Cannot reach the server. Try again in a moment.",
     "invalid_credentials": "Wrong email or password.",
     "email_taken": "An account already uses this email.",
@@ -401,6 +404,12 @@
   },
   "account": {
     "title": "My account",
+    "passwordCreate": "Create a password",
+    "passwordChange": "Change the password",
+    "passwordNew": "New password",
+    "passwordCurrent": "Current password",
+    "passwordHint": "At least 10 characters. On another device, sign in with your e-mail ({{email}}) and this password.",
+    "passwordSaved": "Password saved.",
     "changePhoto": "Change photo",
     "needsUpdate": "This version of the app cannot pick a photo yet. It comes with the next update.",
     "profile": "Profile",
