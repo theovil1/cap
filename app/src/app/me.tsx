@@ -253,6 +253,7 @@ export default function MyProfileScreen() {
                           stages={detail.stages}
                           mode="overview"
                           initial={user.first_name}
+                          photo={user.avatar_url}
                           padding={{ top: 24, bottom: 24, left: 24, right: 24 }}
                           style={StyleSheet.absoluteFill}
                         />

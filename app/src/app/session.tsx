@@ -345,6 +345,7 @@ export default function SessionScreen() {
           following={following}
           onUserMove={() => setFollowing(false)}
           initial={user?.first_name}
+          photo={user?.avatar_url}
           padding={
             wide
               ? { top: insets.top + TOP_BAR_H, right: panelHidden ? 0 : 440 }

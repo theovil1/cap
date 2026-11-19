@@ -220,6 +220,7 @@ function JourneyCard({ walkingM }: { walkingM: number }) {
               stages={detail.stages}
               mode="card"
               initial={user?.first_name}
+              photo={user?.avatar_url}
               style={StyleSheet.absoluteFill}
             />
           )}

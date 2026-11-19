@@ -324,6 +324,11 @@ export function avatarTone(seed: string): { background: string; foreground: stri
   return { background, foreground: background === '#E8A317' ? '#2A1A00' : '#FFFFFF' };
 }
 
+/** Full address of an `avatar_url` (the API sends a path on its own host). */
+export function photoUri(photo: string): string {
+  return /^(https?|file):/.test(photo) ? photo : `${API_URL}${photo}`;
+}
+
 export function Avatar({
   name,
   size = 44,
@@ -365,7 +370,7 @@ export function Avatar({
   if (photo) {
     return (
       <Image
-        source={{ uri: /^(https?|file):/.test(photo) ? photo : `${API_URL}${photo}` }}
+        source={{ uri: photoUri(photo) }}
         style={box}
         contentFit="cover"
         transition={150}

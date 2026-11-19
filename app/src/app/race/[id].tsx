@@ -100,6 +100,7 @@ export default function RaceScreen() {
           mode="overview"
           rivals={rivalPawns(list)}
           initial={me?.firstName}
+          photo={me?.photo}
           padding={{ top: insets.top + 90, bottom: 60, left: 40, right: wide ? 470 : 40 }}
           style={StyleSheet.absoluteFill}
         />

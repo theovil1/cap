@@ -1,4 +1,5 @@
 import { openDatabaseSync, type SQLiteDatabase } from 'expo-sqlite';
+import { useSyncExternalStore } from 'react';
 
 import type { SessionResult } from '@/api/types';
 
@@ -14,6 +15,14 @@ export type StoredSession = FinishedSession & {
 };
 
 let db: SQLiteDatabase | null = null;
+
+// Screens that show a stored session re-read it when the sessions change (a sync).
+let version = 0;
+const listeners = new Set<() => void>();
+function changed(): void {
+  version++;
+  listeners.forEach((l) => l());
+}
 
 function database(): SQLiteDatabase {
   if (db) return db;
@@ -100,6 +109,7 @@ export function saveFinished(session: Omit<StoredSession, 'result'>): void {
     );
     database().runSync('DELETE FROM live_session');
   });
+  changed();
 }
 
 /** Stores a session added by hand; the live session, if any, keeps going. */
@@ -124,6 +134,7 @@ export function markSynced(localId: string, result: SessionResult): void {
     JSON.stringify(result),
     localId,
   );
+  changed();
 }
 
 type Row = { data: string; result: string | null };
@@ -144,6 +155,28 @@ export function getSession(localId: string): StoredSession | null {
     localId,
   );
   return row ? parse(row) : null;
+}
+
+const snapshots = new Map<string, { version: number; session: StoredSession | null }>();
+
+/** A stored session that follows its sync, e.g. for the summary's feed button. */
+export function useStoredSession(localId: string | undefined): StoredSession | null {
+  return useSyncExternalStore(
+    (listener) => {
+      listeners.add(listener);
+      return () => {
+        listeners.delete(listener);
+      };
+    },
+    () => {
+      if (!localId) return null;
+      const hit = snapshots.get(localId);
+      if (hit?.version === version) return hit.session;
+      const session = getSession(localId);
+      snapshots.set(localId, { version, session });
+      return session;
+    },
+  );
 }
 
 /** Sessions since a time, newest first: today's steps and the streak work offline. */

@@ -6,6 +6,7 @@ import {
   ViewAnnotation,
   type CameraRef,
 } from '@maplibre/maplibre-react-native';
+import { Image } from 'expo-image';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   StyleSheet,
@@ -27,7 +28,7 @@ import {
   type RoutePoint,
 } from '@/journey/route';
 import { fonts, useColors } from '@/theme';
-import { Glass } from '@/ui/primitives';
+import { Glass, photoUri } from '@/ui/primitives';
 
 import { useSmoothDistance } from '@/journey/smooth';
 
@@ -50,6 +51,8 @@ type Props = {
   mode: MapMode;
   stages?: Stage[];
   initial?: string;
+  /** My `avatar_url`: the photo replaces the initial in the pawn. */
+  photo?: string | null;
   padding?: { top?: number; bottom?: number; left?: number; right?: number };
   style?: StyleProp<ViewStyle>;
   /** In `follow` mode, false leaves the camera where the walker moved it. */
@@ -69,6 +72,7 @@ type Props = {
 export type Rival = {
   id: string;
   initial: string;
+  photo?: string | null;
   distanceM: number;
   speedMps: number;
   /** Gap to me in a glass bubble above the pawn: "+2,4 km". */
@@ -81,6 +85,7 @@ export function RouteMap({
   mode,
   stages = [],
   initial,
+  photo,
   padding,
   style,
   following = true,
@@ -207,6 +212,7 @@ export function RouteMap({
           screenH={screenH}
           padding={padding}
           initial={initial ?? ''}
+          photo={photo}
           loads={loads}
         />
       )}
@@ -286,7 +292,7 @@ export function RouteMap({
       ))}
       {camera && (
         <ViewAnnotation id="pawn" lngLat={pawn} anchor="center">
-          <Pawn initial={initial ?? ''} />
+          <Pawn initial={initial ?? ''} photo={photo} />
         </ViewAnnotation>
       )}
     </Map>
@@ -306,6 +312,7 @@ function FollowCamera({
   screenH,
   padding,
   initial,
+  photo,
   loads,
 }: {
   path: RoutePoint[];
@@ -316,6 +323,7 @@ function FollowCamera({
   screenH: number;
   padding?: Props['padding'];
   initial: string;
+  photo?: string | null;
   loads: number;
 }) {
   const shownM = useSmoothDistance(walkedM, speedMps);
@@ -366,7 +374,7 @@ function FollowCamera({
           : {})}
       />
       <ViewAnnotation id="pawn" lngLat={pawn} anchor="center">
-        <Pawn initial={initial} />
+        <Pawn initial={initial} photo={photo} />
       </ViewAnnotation>
     </>
   );
@@ -380,7 +388,7 @@ function RivalPawn({ path, rival }: { path: RoutePoint[]; rival: Rival }) {
   return (
     <>
       <ViewAnnotation id={`rival-${rival.id}`} lngLat={at} anchor="center">
-        <Pawn initial={rival.initial} rival />
+        <Pawn initial={rival.initial} photo={rival.photo} rival />
       </ViewAnnotation>
       {rival.label ? (
         <ViewAnnotation
@@ -403,7 +411,15 @@ function RivalPawn({ path, rival }: { path: RoutePoint[]; rival: Rival }) {
   );
 }
 
-function Pawn({ initial, rival = false }: { initial: string; rival?: boolean }) {
+function Pawn({
+  initial,
+  photo,
+  rival = false,
+}: {
+  initial: string;
+  photo?: string | null;
+  rival?: boolean;
+}) {
   const colors = useColors();
   const color = rival ? colors.other : colors.accent;
   return (
@@ -416,9 +432,18 @@ function Pawn({ initial, rival = false }: { initial: string; rival?: boolean }) 
           { backgroundColor: color, borderColor: colors.surface },
         ]}
       >
-        <Text style={[styles.initial, { color: rival ? colors.onOther : colors.onAccent }]}>
-          {initial.charAt(0).toUpperCase()}
-        </Text>
+        {photo ? (
+          <Image
+            source={{ uri: photoUri(photo) }}
+            style={styles.photo}
+            contentFit="cover"
+            accessibilityIgnoresInvertColors
+          />
+        ) : (
+          <Text style={[styles.initial, { color: rival ? colors.onOther : colors.onAccent }]}>
+            {initial.charAt(0).toUpperCase()}
+          </Text>
+        )}
       </View>
     </View>
   );
@@ -434,7 +459,9 @@ const styles = StyleSheet.create({
     borderWidth: 3,
     alignItems: 'center',
     justifyContent: 'center',
+    overflow: 'hidden',
   },
+  photo: { width: '100%', height: '100%' },
   initial: { fontFamily: fonts.display, fontSize: 14 },
   rivalArea: { width: 34, height: 34 },
   rivalPawn: { width: 28, height: 28, borderWidth: 2.5 },

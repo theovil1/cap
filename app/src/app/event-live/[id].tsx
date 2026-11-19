@@ -24,6 +24,7 @@ function pawns(leaders: Standing[], friends: Standing[], me: string | undefined)
     .map((s) => ({
       id: s.walker.id,
       initial: s.walker.first_name,
+      photo: s.walker.avatar_url,
       distanceM: s.distance_m,
       speedMps: (s.speed_kmh ?? 0) / 3.6,
       label: s.walker.first_name,
@@ -147,6 +148,7 @@ export default function EventLiveScreen() {
           stages={route.stage_list}
           mode="overview"
           initial={me?.walker.first_name}
+          photo={me?.walker.avatar_url}
           rivals={pawns(standings?.leaders ?? [], standings?.friends ?? [], me?.walker.id)}
           crowd={standings?.others_m ?? []}
           padding={

@@ -357,6 +357,7 @@ export default function PreviewScreen() {
           stages={route.stages}
           mode="overview"
           initial={user?.first_name}
+          photo={user?.avatar_url}
           padding={
             wide
               ? { top: insets.top + 90, bottom: 40, left: 40, right: 470 }

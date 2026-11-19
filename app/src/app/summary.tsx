@@ -22,7 +22,7 @@ import { paceMinPerKm } from '@/journey/progress';
 import { RouteMap } from '@/map/route-map';
 import { SummaryHeartTile, useSessionHeart } from '@/heart/heart-tile';
 import { useDayStats } from '@/session/stats';
-import { getSession, pendingSessions } from '@/session/store';
+import { pendingSessions, useStoredSession } from '@/session/store';
 import { fonts, useColors } from '@/theme';
 import { HOME } from '@/ui/routes';
 import { SpeedBars, SpeedChart } from '@/ui/charts';
@@ -49,7 +49,7 @@ export default function SummaryScreen() {
   const insets = useSafeAreaInsets();
   const { user } = useAuth();
   const { localId } = useLocalSearchParams<{ localId: string }>();
-  const session = localId ? getSession(localId) : null;
+  const session = useStoredSession(localId);
   const active = useActiveJourney();
   // The journey may be finished by this very session: follow the allocation, not the active one.
   const journeyId = session?.result?.allocations[0]?.journey_id ?? active.summary?.id;
@@ -135,6 +135,7 @@ export default function SummaryScreen() {
             walkedM={walkedM}
             mode="card"
             initial={user?.first_name}
+            photo={user?.avatar_url}
             padding={{ right: 440 }}
             style={StyleSheet.absoluteFill}
           />
@@ -313,6 +314,7 @@ export default function SummaryScreen() {
                   walkedM={stage.at_m}
                   mode="card"
                   initial={user?.first_name}
+                  photo={user?.avatar_url}
                   style={StyleSheet.absoluteFill}
                 />
               </View>
