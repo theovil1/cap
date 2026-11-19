@@ -8,6 +8,7 @@ import {
   useState,
   type ReactNode,
 } from 'react';
+import { AppState } from 'react-native';
 
 import i18n from '@/i18n';
 import { isNewAccount, resetOnboarding, startOnboarding } from '@/onboarding/state';
@@ -114,6 +115,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
     return () => setSignedOutHandler(null);
   }, [forget]);
+
+  // The profile may change on another device (photo, name, settings): read it
+  // again at launch and whenever the app comes back.
+  useEffect(() => {
+    if (status !== 'signedIn') return;
+    const refresh = () =>
+      api<UserProfile>('/me')
+        .then((profile) => {
+          const stored = getValue<UserProfile>(PROFILE_KEY);
+          if (JSON.stringify(stored) !== JSON.stringify(profile)) setUser(profile);
+        })
+        .catch(() => {});
+    refresh();
+    const sub = AppState.addEventListener('change', (state) => state === 'active' && refresh());
+    return () => sub.remove();
+  }, [status, setUser]);
 
   const accept = useCallback(
     async (auth: AuthResponse, fresh = false) => {
