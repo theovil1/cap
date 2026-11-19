@@ -28,13 +28,13 @@ pub fn issue_access(secret: &str, user_id: Uuid) -> anyhow::Result<String> {
         exp: (now + ACCESS_TTL).unix_timestamp(),
         iss: ISSUER.to_owned(),
     };
-    Ok(encode(&Header::default(), &claims, &EncodingKey::from_secret(secret.as_bytes()))?)
+    Ok(encode(&Header::default(), &claims, &EncodingKey::from_secret(secret.as_bytes())?)?)
 }
 
 pub fn verify_access(secret: &str, token: &str) -> Option<Uuid> {
     let mut validation = Validation::default();
     validation.set_issuer(&[ISSUER]);
-    decode::<Claims>(token, &DecodingKey::from_secret(secret.as_bytes()), &validation)
+    decode::<Claims>(token, &DecodingKey::from_secret(secret.as_bytes()).ok()?, &validation)
         .ok()
         .map(|data| data.claims.sub)
 }

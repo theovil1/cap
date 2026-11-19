@@ -1,5 +1,5 @@
 # Build stage: dependencies are compiled in their own layer for faster rebuilds.
-FROM rust:1.99.1-trixie AS build
+FROM rust:1.100.0-trixie AS build
 WORKDIR /src
 ENV SQLX_OFFLINE=true
 COPY Cargo.toml Cargo.lock ./
