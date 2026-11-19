@@ -344,11 +344,12 @@ function FollowCamera({
     latest.current = view;
   });
   useEffect(() => {
-    if (!active || loads === 0) return;
+    // Only while opening: later recentrings (button, sheet dragged) glide.
+    if (settled || !active || loads === 0) return;
     camera.current?.jumpTo({ ...latest.current, padding: NO_PADDING });
     const timer = setTimeout(() => setSettled(true), 600);
     return () => clearTimeout(timer);
-  }, [loads, active, padding?.top, padding?.bottom, padding?.right]);
+  }, [settled, loads, active, padding?.top, padding?.bottom, padding?.right]);
   return (
     <>
       <Camera
