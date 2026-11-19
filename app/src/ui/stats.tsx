@@ -160,7 +160,9 @@ export function RankRow({
       style={[
         compact ? styles.rowCompact : styles.row,
         !first && !me && !compact && { borderTopWidth: 1, borderTopColor: colors.border },
-        me && { backgroundColor: colors.accentSoft, borderRadius: radius.button },
+        // In a list the highlight runs edge to edge; compact rows stand alone, rounded.
+        me && { backgroundColor: colors.accentSoft },
+        me && compact && { borderRadius: radius.button },
       ]}
     >
       <Text

@@ -16,7 +16,7 @@ import type {
 } from '@/api/types';
 import { formatDate, formatKm, formatNumber, formatRank } from '@/i18n/format';
 import { fonts, useColors } from '@/theme';
-import { type } from '@/tokens';
+import { radius, type } from '@/tokens';
 import { MenuPill } from '@/ui/action-menu';
 import { useWide } from '@/ui/layout';
 import { Avatar, Card, Figure } from '@/ui/primitives';
@@ -237,8 +237,11 @@ export function Rankings({ height }: { height?: number } = {}) {
 
       {entries.length > 0 && (
         <Card small style={styles.list}>
-          {entries.map((entry, index) => row(entry, index === 0))}
-          {me && !entries.some((e) => e.me) ? row(me, false) : null}
+          {/* Clipped inside the card (which keeps its shadow) so a highlighted row fills it. */}
+          <View style={styles.listClip}>
+            {entries.map((entry, index) => row(entry, index === 0))}
+            {me && !entries.some((e) => e.me) ? row(me, false) : null}
+          </View>
         </Card>
       )}
     </>
@@ -361,5 +364,6 @@ const styles = StyleSheet.create({
   },
   tipText: { flex: 1, fontFamily: fonts.text, fontSize: 15, lineHeight: 21 },
   filters: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  list: { paddingVertical: 2 },
+  list: { padding: 0 },
+  listClip: { borderRadius: radius.cardSmall - 1, borderCurve: 'continuous', overflow: 'hidden' },
 });
