@@ -1,4 +1,11 @@
-import { Camera, GeoJSONSource, Layer, Map, ViewAnnotation } from '@maplibre/maplibre-react-native';
+import {
+  Camera,
+  GeoJSONSource,
+  Layer,
+  Map,
+  ViewAnnotation,
+  type CameraRef,
+} from '@maplibre/maplibre-react-native';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   StyleSheet,
@@ -35,6 +42,7 @@ export type MapMode = 'follow' | 'card' | 'overview';
 
 const FOLLOW_ZOOM = 17.6;
 const FOLLOW_PITCH = 60;
+const NO_PADDING = { top: 0, bottom: 0, left: 0, right: 0 };
 
 type Props = {
   path: RoutePoint[];
@@ -90,6 +98,8 @@ export function RouteMap({
   // Read by the map events, which may arrive before the next render.
   const gesture = useRef(false);
   const [followZoom, setFollowZoom] = useState(FOLLOW_ZOOM);
+  // Counts map loads: camera moves sent before the map is ready are lost.
+  const [loads, setLoads] = useState(0);
   // Long routes are lightened for the overview; the session keeps every point.
   const shown = useMemo(() => (mode === 'overview' ? simplify(path, 60) : path), [path, mode]);
   const { walked, left } = useMemo(() => splitAt(shown, walkedM), [shown, walkedM]);
@@ -169,6 +179,7 @@ export function RouteMap({
       touchRotate={interactive}
       touchPitch={interactive}
       doubleTapZoom={interactive}
+      onDidFinishLoadingMap={() => setLoads((n) => n + 1)}
       onRegionWillChange={(event) => {
         if (mode === 'follow' && following && event.nativeEvent.userInteraction) {
           gesture.current = true;
@@ -196,6 +207,7 @@ export function RouteMap({
           screenH={screenH}
           padding={padding}
           initial={initial ?? ''}
+          loads={loads}
         />
       )}
       <GeoJSONSource id="route" data={lines}>
@@ -294,6 +306,7 @@ function FollowCamera({
   screenH,
   padding,
   initial,
+  loads,
 }: {
   path: RoutePoint[];
   walkedM: number;
@@ -303,38 +316,48 @@ function FollowCamera({
   screenH: number;
   padding?: Props['padding'];
   initial: string;
+  loads: number;
 }) {
   const shownM = useSmoothDistance(walkedM, speedMps);
   const pawn = positionAt(path, shownM);
-  // While the screen opens (sheet measured, map loading) the camera jumps
-  // instead of gliding: a glide cut short by the next update could stay
-  // half-way, with the pawn off-centre until the belt moves.
-  const [settled, setSettled] = useState(false);
-  useEffect(() => {
-    const timer = setTimeout(() => setSettled(true), 1_500);
-    return () => clearTimeout(timer);
-  }, []);
   const heading = headingAt(path, shownM);
   const moving = speedMps > 0;
+  // No camera padding here: see followCenter.
+  const view = {
+    center: followCenter(
+      pawn,
+      { heading, zoom, pitch: FOLLOW_PITCH, height: screenH },
+      { top: padding?.top ?? 0, bottom: padding?.bottom ?? 0, right: padding?.right ?? 0 },
+    ),
+    zoom,
+    pitch: FOLLOW_PITCH,
+    bearing: heading,
+  };
+  // The map opens on the pawn, then jumps (no glide) while the screen settles:
+  // the sheet gets its height and the map finishes loading, which drops the
+  // moves sent before.
+  const camera = useRef<CameraRef>(null);
+  const [first] = useState(view);
+  const [settled, setSettled] = useState(false);
+  const latest = useRef(view);
+  useEffect(() => {
+    latest.current = view;
+  });
+  useEffect(() => {
+    if (!active || loads === 0) return;
+    camera.current?.jumpTo({ ...latest.current, padding: NO_PADDING });
+    const timer = setTimeout(() => setSettled(true), 600);
+    return () => clearTimeout(timer);
+  }, [loads, active, padding?.top, padding?.bottom, padding?.right]);
   return (
     <>
       <Camera
+        ref={camera}
+        initialViewState={first}
         {...(active
           ? {
-              // No camera padding here: see followCenter.
-              center: followCenter(
-                pawn,
-                { heading, zoom, pitch: FOLLOW_PITCH, height: screenH },
-                {
-                  top: padding?.top ?? 0,
-                  bottom: padding?.bottom ?? 0,
-                  right: padding?.right ?? 0,
-                },
-              ),
-              zoom,
-              pitch: FOLLOW_PITCH,
-              bearing: heading,
-              padding: { top: 0, bottom: 0, left: 0, right: 0 },
+              ...view,
+              padding: NO_PADDING,
               // Short steps while walking, a smooth glide when recentring.
               duration: moving ? 120 : settled ? 900 : 0,
               easing: 'linear' as const,
