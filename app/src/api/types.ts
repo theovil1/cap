@@ -92,6 +92,7 @@ export type Participant = {
   user_id: string;
   first_name: string;
   username: string;
+  avatar_url: string | null;
   me: boolean;
   joined: boolean;
   distance_m: number;

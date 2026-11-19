@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT u.id, u.first_name, u.username, p.distance_m, p.arrived_at, p.rank,\n                (p.joined_at IS NOT NULL) AS \"joined!\",\n                (SELECT max(s.ended_at) FROM sessions s WHERE s.user_id = u.id) AS last_session_at\n         FROM journey_participants p JOIN users u ON u.id = p.user_id\n         WHERE p.journey_id = $1\n         ORDER BY p.rank NULLS LAST, p.distance_m DESC, lower(u.first_name)",
+  "query": "SELECT u.id, u.first_name, u.username, u.avatar_url, p.distance_m, p.arrived_at, p.rank,\n                (p.joined_at IS NOT NULL) AS \"joined!\",\n                (SELECT max(s.ended_at) FROM sessions s WHERE s.user_id = u.id) AS last_session_at\n         FROM journey_participants p JOIN users u ON u.id = p.user_id\n         WHERE p.journey_id = $1\n         ORDER BY p.rank NULLS LAST, p.distance_m DESC, lower(u.first_name)",
   "describe": {
     "columns": [
       {
@@ -38,6 +38,17 @@
       },
       {
         "ordinal": 3,
+        "name": "avatar_url",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "users",
+            "name": "avatar_url"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
         "name": "distance_m",
         "type_info": "Float8",
         "origin": {
@@ -48,7 +59,7 @@
         }
       },
       {
-        "ordinal": 4,
+        "ordinal": 5,
         "name": "arrived_at",
         "type_info": "Timestamptz",
         "origin": {
@@ -59,7 +70,7 @@
         }
       },
       {
-        "ordinal": 5,
+        "ordinal": 6,
         "name": "rank",
         "type_info": "Int4",
         "origin": {
@@ -70,13 +81,13 @@
         }
       },
       {
-        "ordinal": 6,
+        "ordinal": 7,
         "name": "joined!",
         "type_info": "Bool",
         "origin": "Expression"
       },
       {
-        "ordinal": 7,
+        "ordinal": 8,
         "name": "last_session_at",
         "type_info": "Timestamptz",
         "origin": "Expression"
@@ -91,6 +102,7 @@
       false,
       false,
       false,
+      true,
       false,
       true,
       true,
@@ -98,5 +110,5 @@
       null
     ]
   },
-  "hash": "75f04d7c67358f0a9813ffdd2697c00021a751464c0b62ae3ecf8fe587ba989d"
+  "hash": "dc5e373d6d4e96a10b35663f90c649ac33238d9c42710bbc8aa17b0f5ce75d5d"
 }

@@ -178,7 +178,12 @@ function Waiting({ race }: { race: JourneyDetail }) {
               i > 0 && { borderTopWidth: StyleSheet.hairlineWidth, borderColor: colors.border },
             ]}
           >
-            <Avatar name={p.first_name} size={38} tone={p.me ? 'accent' : 'plain'} />
+            <Avatar
+              name={p.first_name}
+              photo={p.avatar_url}
+              size={38}
+              tone={p.me ? 'accent' : 'plain'}
+            />
             <Text style={[styles.name, { color: colors.text }]} numberOfLines={1}>
               {p.me ? t('rankings.you') : p.first_name}
             </Text>
@@ -351,6 +356,7 @@ function Standings({ race, list, me }: { race: JourneyDetail; list: Racer[]; me?
             <View>
               <Avatar
                 name={r.firstName}
+                photo={r.photo}
                 size={wide ? 46 : 44}
                 tone={r.me ? 'accent' : r.distanceM > (me?.distanceM ?? 0) ? 'other' : 'plain'}
               />

@@ -258,7 +258,7 @@ export default function SessionScreen() {
 
       {wide && walking && me ? (
         <View style={[styles.rival, { borderColor: colors.border }]}>
-          <Avatar name={walking.firstName} tone="other" size={40} />
+          <Avatar name={walking.firstName} photo={walking.photo} tone="other" size={40} />
           <View style={styles.rivalText}>
             <Text style={[styles.rivalName, { color: colors.text }]} numberOfLines={1}>
               {t('session.rivalWalking', { name: walking.firstName })}

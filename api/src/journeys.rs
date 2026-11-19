@@ -119,6 +119,7 @@ pub struct Participant {
     user_id: Uuid,
     first_name: String,
     username: String,
+    avatar_url: Option<String>,
     me: bool,
     /// False while invited to a race.
     joined: bool,
@@ -460,7 +461,7 @@ async fn participants(
     route_distance_m: f64,
 ) -> AppResult<Vec<Participant>> {
     let rows = sqlx::query!(
-        "SELECT u.id, u.first_name, u.username, p.distance_m, p.arrived_at, p.rank,
+        "SELECT u.id, u.first_name, u.username, u.avatar_url, p.distance_m, p.arrived_at, p.rank,
                 (p.joined_at IS NOT NULL) AS \"joined!\",
                 (SELECT max(s.ended_at) FROM sessions s WHERE s.user_id = u.id) AS last_session_at
          FROM journey_participants p JOIN users u ON u.id = p.user_id
@@ -479,6 +480,7 @@ async fn participants(
             user_id: r.id,
             first_name: r.first_name,
             username: r.username,
+            avatar_url: r.avatar_url,
             me: r.id == user_id,
             joined: r.joined,
             distance_m: r.distance_m,

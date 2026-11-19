@@ -64,6 +64,7 @@ export function RaceCard({ detail, myDistanceM }: { detail: JourneyDetail; myDis
             >
               <Avatar
                 name={r.firstName}
+                photo={r.photo}
                 size={PAWN}
                 ring={colors.surface}
                 tone={r.me ? 'accent' : r.distanceM > me.distanceM ? 'blue' : 'plain'}

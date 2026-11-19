@@ -6,6 +6,7 @@ const person = (id: string, distance: number, extra: Partial<Participant> = {}):
   user_id: id,
   first_name: id,
   username: id,
+  avatar_url: null,
   me: false,
   joined: true,
   distance_m: distance,

@@ -6,6 +6,7 @@ import { LIVE_FOR_MS, type RivalPosition } from './live-client';
 export type Racer = {
   userId: string;
   firstName: string;
+  photo: string | null;
   me: boolean;
   distanceM: number;
   /** Set while they walk right now. */
@@ -40,6 +41,7 @@ export function racers(
       return {
         userId: p.user_id,
         firstName: p.first_name,
+        photo: p.avatar_url ?? null,
         me: p.me,
         distanceM: Math.min(distanceM, detail.route_distance_m),
         speedKmh: live ? live.speedKmh : (p.live?.speed_kmh ?? null),
