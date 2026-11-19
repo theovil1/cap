@@ -1,5 +1,5 @@
 import { Camera, GeoJSONSource, Layer, Map, ViewAnnotation } from '@maplibre/maplibre-react-native';
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   StyleSheet,
   Text,
@@ -306,6 +306,14 @@ function FollowCamera({
 }) {
   const shownM = useSmoothDistance(walkedM, speedMps);
   const pawn = positionAt(path, shownM);
+  // While the screen opens (sheet measured, map loading) the camera jumps
+  // instead of gliding: a glide cut short by the next update could stay
+  // half-way, with the pawn off-centre until the belt moves.
+  const [settled, setSettled] = useState(false);
+  useEffect(() => {
+    const timer = setTimeout(() => setSettled(true), 1_500);
+    return () => clearTimeout(timer);
+  }, []);
   const heading = headingAt(path, shownM);
   const moving = speedMps > 0;
   return (
@@ -328,7 +336,7 @@ function FollowCamera({
               bearing: heading,
               padding: { top: 0, bottom: 0, left: 0, right: 0 },
               // Short steps while walking, a smooth glide when recentring.
-              duration: moving ? 120 : 900,
+              duration: moving ? 120 : settled ? 900 : 0,
               easing: 'linear' as const,
             }
           : {})}
